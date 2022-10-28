@@ -12,5 +12,5 @@ const courseSchema = new Schema({
   }
 }, { timestamps: true });
 
-const User = mongoose.model('Course', courseSchema););
+const User = mongoose.model('Course', courseSchema);
 module.exports = Course;
