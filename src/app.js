@@ -31,7 +31,7 @@ mongoose.connect(MongoURI)
 // CODE STARTS HERE
 
 app.get("/home", (req, res) => {
-    res.status(200).send("You have everything installed!");
+    res.status(200).send("Home Page");
   });
 
 // Routers Here
