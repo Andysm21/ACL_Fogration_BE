@@ -3,12 +3,16 @@ const Schema = mongoose.Schema;
 
 const InstructorSchema = new Schema({
     Instructor_ID: {
+    type: Number,
+    required: true,
+  },
+  Instructor_username: {
     type: String,
     required: true,
   },
   Instructor_Email: {
     type: String,
-    required: true
+    required: false,
   },
   Instructor_Password: {
     type: String,
@@ -16,36 +20,36 @@ const InstructorSchema = new Schema({
   },
   Instructor_FirstName: {
     type: String,
-    required: true
+    required: false,
   },
   Instructor_LastName: {
     type: String,
-    required: true,
+    required: false,
   },
   Instructor_Gender: {
     type: String,
-    required: true
+    required: false,
   },
   Instructor_Country: {
     type: String,
-    required: true,
+    required: false,
   },
   Instructor_Courses: {
     type: Array,
-    required: true,
+    required: false,
   },
   Instructor_Biography: {
     type: String,
-    required: true
+    required: false,
   },
   Instructor_Ratings: {
     type: Array,
-    required: true,
+    required: false,
   },
   Instructor_Reviews: {
     type: Array,
-    required: true,
-  },
+    required: false,
+  }
 }, { timestamps: true });
 
 const Instructor = mongoose.model('Instructor', InstructorSchema);

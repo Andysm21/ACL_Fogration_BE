@@ -3,12 +3,16 @@ const Schema = mongoose.Schema;
 
 const CorporateUserSchema = new Schema({
   CorporateUser_ID: {
+    type: Number,
+    required: true,
+  },
+  CorporateUser_UserName: {
     type: String,
     required: true,
   },
   CorporateUser_Email: {
     type: String,
-    required: true
+    required: false,
   },
   CorporateUser_Password: {
     type: String,
@@ -16,23 +20,23 @@ const CorporateUserSchema = new Schema({
   },
   CorporateUser_FirstName: {
     type: String,
-    required: true
+    required: false,
   },
   CorporateUser_LastName: {
     type: String,
-    required: true,
+    required: false,
   },
   CorporateUser_Gender: {
     type: String,
-    required: true
+    required: false,
   },
   CorporateUser_Country: {
     type: String,
-    required: true,
+    required: false,
   },
   CorporateUser_Corporate: {
     type: String,
-    required: true,
+    required: false,
   },
 }, { timestamps: true });
 

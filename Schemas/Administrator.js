@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 
 const AdminSchema = new Schema({
   Admin_ID: {
-    type: String,
+    type: Number,
     required: true,
   },
-  Admin_Email: {
+  Admin_Username: {
     type: String,
-    required: true
+    required: true,
   },
   Admin_Password: {
     type: String,
