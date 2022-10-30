@@ -17,4 +17,4 @@ function createCourse(p1) {
 
 
 
-module.exports={createCourse,getCourse}
+module.exports={createCourse}
