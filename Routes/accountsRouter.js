@@ -22,10 +22,17 @@ router.post('/createCorporateUser', (req,res)=>{
     res.send("Create a new corporate user.")
 })
 
+router.post('/createCourse', (req,res)=>{
+    signRouter.createCourse(req)
+    res.send("Create a new course.")
+})
+
 
 router.post('/signUp', (req,res)=>{
     signRouter.signUP(req)
     res.send("Create a new user.")
 })
+
+
 
 module.exports=router;

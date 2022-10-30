@@ -12,7 +12,7 @@ const courseSchema = new Schema({
   },
   Course_Subject: {
     type: String,
-    required: true,
+    required: false,
   },
   Course_Description: {
     type: String,
@@ -24,7 +24,7 @@ const courseSchema = new Schema({
   },
   Course_Rating: {
     type: Number,
-    required: true
+    required: false
   },
   Course_Instructor: {
     type: String,
@@ -32,19 +32,19 @@ const courseSchema = new Schema({
   },
   Course_Hours: {
     type: Number,
-    required: true
+    required: false
   },
   Course_Country: {
     type: String,
-    required: true,
+    required: false,
   },
   Course_Discount: {
     type: Number,
-    required: true
+    required: false
   },
   Course_Discount_Duration: {
     type: Number,
-    required: true,
+    required: false,
   },
   Course_Subtitle: {
     type: Array,
@@ -52,21 +52,21 @@ const courseSchema = new Schema({
   },
   Course_Trainee: {
     type: Array,
-    required: true,
+    required: false,
   },
   Course_Review: {
     type: Array,
-    required: true
+    required: false
   },
   Course_Rate: {
     type: Array,
-    required: true,
+    required: false,
   },
   Course_Exam: {
     type: Array,
-    required: true
+    required: false
   }
 }, { timestamps: true });
 
-const User = mongoose.model('Course', courseSchema);
+const Course = mongoose.model('Course', courseSchema);
 module.exports = Course;
