@@ -15,11 +15,6 @@ function createCourse(p1) {
 }
 
 
-async function getCourse() {
-   await  course.find(); //and then print the json of each of its elements
-
-}
-
 
 
 module.exports={createCourse,getCourse}
