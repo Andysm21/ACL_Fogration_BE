@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const router = require('../Routes/accountsRouter.js')
+const accountsRouter = require('../Routes/accountsRouter')
+const instructorRouter = require('../Routes/instructorRouter')
 
 //Check db connection links in README file
 const MongoURI = 'mongodb+srv://ACLFogr:Fogration2022@aclfogration.gnt7ffl.mongodb.net/?retryWrites=true&w=majority' ;
@@ -36,6 +37,6 @@ app.get("/home", (req, res) => {
 
 // Routers Here
 
-app.use('/',router)
-
+app.use('/',accountsRouter)
+app.use('/',instructorRouter)
 
