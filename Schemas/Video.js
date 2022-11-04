@@ -18,6 +18,10 @@ const VideoSchema = new Schema({
     type: String,
     required: true
   },
+  Video_Length: {
+    type: Number,
+    required: true
+  }
 }, { timestamps: true });
 
 const Video = mongoose.model('Video', VideoSchema);
