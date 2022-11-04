@@ -16,15 +16,40 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
   router.get("/SearchCourseTitle", async (req, res) => {
     const x = req.body.Instructor_ID
     const {SearchTitle}= req.body
-    console.log(await course.find({Course_Instructor: x, Course_Title:SearchTitle},'Course_Title Course_Rating Course_Hours'))
-    res.status(200).send("Searched by Titles");
+    if({SearchTitle} == ''){
+        console.log(course.find('Course_Title Course_Rating Course_Hours'));
+        res.status(200).send("Searched by Titles");
+    }
+    else if(await (await course.find({Course_Instructor: x, Course_Title:SearchTitle},'Course_Title Course_Rating Course_Hours').length == 0))
+    {  
+        res.status(200).send("Titles Not Found");
+        console.log("Titles Not Found");
+    }   
+    else{
+        console.log(await course.find({Course_Instructor: x, Course_Title:SearchTitle},'Course_Title Course_Rating Course_Hours'))
+        res.status(200).send("Searched by Titles");
+        }
+        
+    
   });
 
   router.get("/SearchCourseSubject", async (req, res) => {
     const x = req.body.Instructor_ID
     const {SearchSubject}= req.body
-    console.log(await course.find({Course_Instructor: x, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours'))
-    res.status(200).send("Searched by Subject");
+    if({SearchSubject} == ''){
+        console.log(course.find('Course_Title Course_Rating Course_Hours'));
+        res.status(200).send("Searched by Subject");
+    }
+    else if(await (await course.find({Course_Instructor: x, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours').length == 0))
+        {  
+            res.status(200).send("Subject Not Found");
+            console.log("Subject Not Found");
+        } 
+    else{
+        console.log(await course.find({Course_Instructor: x, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours'))
+        res.status(200).send("Searched by Subject");
+    }
+        
   });
 
   router.get("/filterPrice", async (req, res) => {
