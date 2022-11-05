@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const VideoSchema = new Schema({
   Video_ID: {
-    type: String,
+    type: Number,
     required: true,
   },
   Video_Link: {
@@ -11,7 +11,7 @@ const VideoSchema = new Schema({
     required: true
   },
   Video_Subtitle: {
-    type: Strig,
+    type: String,
     required: true,
   },
   Video_Description: {

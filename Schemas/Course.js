@@ -32,7 +32,7 @@ const courseSchema = new Schema({
   },
   Course_Hours: {
     type: Number,
-    required: true,
+    required: false,
   },
   Course_Country: {
     type: String,
