@@ -21,20 +21,48 @@ function createCourse(p1,id) {
 }
 
 async function getHoursAllSubtitles(coursename,res,req){
-    var x= JSON.stringify(await course.find({Course_Title:coursename},'Course_Subtitle'));
-    var y = x.split("Course_Subtitle");
-    var z = y[1].split(","); 
-    console.log(z)
-    var Response = "Subtitles and their Hours :"+ "\n";
-    // for(let i = 0; i<sub.length; i++){
-    //     var Videos= await Subtitle.find({Subtitle_Name:sub[i]},"Subtitle_Video");
-    //     var sum=0;
-    //     for(let j = 0; j <Videos.length; j++){
-    //         sum+=Videos[j].Video_Length;
-    //     }
-    //    Response+="Subtitle : "+ sub[i] + "'s hours :"+ sum+ "\n";
+    var y= await course.find({Course_Title:coursename}).select('Course_Subtitle -_id');
+    var x = (JSON.stringify(y).split(":"));
+    var z= x[1].split("}")
+    var a = z[0]
+    var array = []
+    var data =""
+    for (let i =0;i<a.length;i++){
+        if(a[i]!="[" & a[i]!='"' & a[i]!="]")
+        data+=a[i];
+    }
+    data = data.split(",")
+    console.log(data)
 
-    // }
+    var Response = "Subtitles and their Hours :"+ "\n";
+    for(let i = 0; i<data.length; i++){
+        var Videos = await Subtitle.find({Subtitle_Name:data[i]}.select('Subtitle_Video -_id'));
+        var xx = (JSON.stringify(Videos).split(":"));
+        var zz= xx[1].split("}")
+        var aa = zz[0]
+        var Dinside =""
+    for (let i =0;i<aa.length;i++){
+        if(aa[i]!="[" & aa[i]!='"' & aa[i]!="]")
+        Dinside+=aa[i];
+    }
+    Dinside = Dinside.split(",")
+        var sum=0;
+        for(let j = 0; j <Dinside.length; j++){
+            var Videoss = await Video.find({Video_ID:Dinside[i]}.select('Video_Length -_id'));
+            var xxx = (JSON.stringify(Videoss).split(":"));
+            var zzz= xxx[1].split("}")
+            var aaa = zzz[0]
+            var Dinsides =""
+        for (let i =0;i<aaa.length;i++){
+            if(aaa[i]!="[" & aaa[i]!='"' & aaa[i]!="]")
+            Dinsides+=aaa[i];
+        }
+        Dinside = Dinside.split(",")
+            sum+=Dinside[j].Video_Length;
+        }
+       Response+="Subtitle : "+ sub[i] + "'s hours :"+ sum+ "\n";
+
+    }
         return Response;
 }
 
