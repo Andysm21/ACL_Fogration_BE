@@ -3,12 +3,12 @@ const Schema = mongoose.Schema;
 
 const courseSchema = new Schema({
   Course_ID: {
-    type: String,
+    type: Number,
     required: true,
   },
   Course_Title: {
     type: String,
-    required: true
+    required: true,
   },
   Course_Subject: {
     type: String,
@@ -16,7 +16,7 @@ const courseSchema = new Schema({
   },
   Course_Description: {
     type: String,
-    required: true
+    required: true,
   },
   Course_Price: {
     type: Number,
@@ -24,7 +24,7 @@ const courseSchema = new Schema({
   },
   Course_Rating: {
     type: Number,
-    required: false
+    required: true,
   },
   Course_Instructor: {
     type: String,
@@ -32,7 +32,7 @@ const courseSchema = new Schema({
   },
   Course_Hours: {
     type: Number,
-    required: false
+    required: false,
   },
   Course_Country: {
     type: String,
@@ -40,7 +40,7 @@ const courseSchema = new Schema({
   },
   Course_Discount: {
     type: Number,
-    required: false
+    required: true,
   },
   Course_Discount_Duration: {
     type: Number,
@@ -48,7 +48,7 @@ const courseSchema = new Schema({
   },
   Course_Subtitle: {
     type: Array,
-    required: true
+    required: true,
   },
   Course_Trainee: {
     type: Array,
@@ -56,7 +56,7 @@ const courseSchema = new Schema({
   },
   Course_Review: {
     type: Array,
-    required: false
+    required: true,
   },
   Course_Rate: {
     type: Array,
@@ -64,7 +64,7 @@ const courseSchema = new Schema({
   },
   Course_Exam: {
     type: Array,
-    required: false
+    required: true,
   }
 }, { timestamps: true });
 

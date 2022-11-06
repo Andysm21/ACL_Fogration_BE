@@ -7,6 +7,13 @@ const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
 
+router.post('/changeCountry', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await user.findByIdAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
+
 router.post('/createAdmin', async (req,res)=>{
     if(req.body.Admin_username.equals(''))
         res.send("Username field should not be empty")

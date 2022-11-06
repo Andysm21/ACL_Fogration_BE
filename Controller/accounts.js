@@ -12,6 +12,7 @@ function createAdmin(p1) {
 }
 function createInstructor(p1) {
     instructor.create(p1.body)
+    
 }
 function createCorporateUser(p1) {
     corporateUser.create(p1.body)

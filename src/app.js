@@ -1,7 +1,10 @@
 const express = require("express");
 const mongoose = require('mongoose');
-const accountsRouter = require('../Routes/accountsRouter')
+const accountRouter = require('../Routes/accountsRouter.js')
+const courseRouter = require('../Routes/coursesRouter.js')
+const course = require('../Schemas/Course.js');
 const instructorRouter = require('../Routes/instructorRouter')
+
 
 //Check db connection links in README file
 const MongoURI = 'mongodb+srv://ACLFogr:Fogration2022@aclfogration.gnt7ffl.mongodb.net/?retryWrites=true&w=majority' ;
@@ -37,6 +40,8 @@ app.get("/home", (req, res) => {
 
 // Routers Here
 
-app.use('/',accountsRouter)
+app.use('/',accountRouter)
+app.use('/',courseRouter)
 app.use('/',instructorRouter)
+
 
