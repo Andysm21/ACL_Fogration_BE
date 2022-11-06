@@ -13,11 +13,11 @@ const sub = require('../Schemas/Subtitle.js');
 //to be changed later
 
 
-router.post('/createCourse', async (req,res)=>{
-    var id = await course.count().exec()+1;
-    courseRouter.createCourse(req,id)
-    res.send("Create a new course.")
-})
+// router.post('/createCourse', async (req,res)=>{
+//     var id = await course.count().exec()+1;
+//     courseRouter.createCourse(req,id)
+//     res.send("Create a new course.")
+// })
 router.get("/getCourseIndividual", async (req, res) => {
     const x = req.body.Course_Title
     console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price')))
@@ -92,9 +92,9 @@ router.get("/getCourseIndividual", async (req, res) => {
 
 
   router.get("/hoverOnCourse", async (req, res) => {
-    const CourseName = req.body.coursename;
-    var data = await course.find({Course_Name:CourseName}).select('Course_Subtitle Course_Exam Course_Hours Course_Price Course_Discount -_id')+"\n";
-    var method = await courseRouter.getHoursAllSubtitles(CourseName);
+    const Course_Title = req.body;
+    var data = await course.find({Course_Title:Course_Title}).select('Course_Subtitle Course_Exam Course_Hours Course_Price Course_Discount -_id')+"\n";
+    var method = await courseRouter.getHoursAllSubtitles(Course_Title);
     data += method
     res.send(data);
   });
