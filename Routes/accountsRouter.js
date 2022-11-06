@@ -1,6 +1,5 @@
 const signRouter = require('../Controller/accounts.js');
 const courseRouter = require('../Controller/courses.js');
-
 var bodyParser = require('body-parser');
 const mongoDb = require('mongoose')
 const user = require('../Schemas/IndividualUser.js');
@@ -9,18 +8,37 @@ const Admin = require('../Schemas/Administrator.js');
 const course = require('../Schemas/Course.js');''
 const corp = require('../Schemas/CorporateUser.js');''
 
+
 const express= require("express")
 const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
-
-router.post('/changeCountry', async (req,res)=>{
+//TO be changed later because this is a guest and i guess we will use cookies for that/////
+router.post('/changeCountryG', async (req,res)=>{
     var country = req.body.country;
     var userid = req.body.userid;
-    await user.findByIdAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
+    await user.findOneAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
     res.send("Country changed to "+ country+" Successfully");
   })
-
+///////////////////////////////////////////////////////////////////////////////////////////
+  router.post('/changeCountryI', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await inst.findOneAndUpdate({Instructor_ID:userid},{Instructor_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
+  router.post('/changeCountryCU', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await cu.findOneAndUpdate({CorporateUser_ID:userid},{CorporateUser_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
+  router.post('/changeCountryIU', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await user.findOneAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
 router.post('/createAdmin', async (req,res)=>{
         var id = await Admin.count().exec()+1;
 

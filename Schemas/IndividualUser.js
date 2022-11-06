@@ -6,31 +6,31 @@ const individualUserSchema = new Schema({
     type: Number,
     required: true,
   },
-  individualUser_UserName: {
+  IndividualUser_UserName: {
     type: String,
     required: true,
   },
-  individualUser_Email: {
+  IndividualUser_Email: {
     type: String,
     required: true
   },
-  individualUser_Password: {
+  IndividualUser_Password: {
     type: String,
     required: true,
   },
-  individualUser_FirstName: {
+  IndividualUser_FirstName: {
     type: String,
     required: true
   },
-  individualUser_LastName: {
+  IndividualUser_LastName: {
     type: String,
     required: true,
   },
-  individualUser_Gender: {
+  IndividualUser_Gender: {
     type: String,
     required: true
   },
-  individualUser_Country: {
+  IndividualUser_Country: {
     type: String,
     required: true,
   },
