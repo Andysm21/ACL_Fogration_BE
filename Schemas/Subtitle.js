@@ -2,27 +2,27 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const SubtitleSchema = new Schema({
-  Subttitle_ID: {
-    type: String,
+  Subtitle_ID: {
+    type: Number,
     required: true,
   },
-  Subttitle_Name: {
+  Subtitle_Name: {
     type: String,
     required: true
   },
-  Subttitle_Course_ID: {
+  Subtitle_Course_ID: {
     type: String,
     required: true,
   },
-  Subttitle_Video: {
+  Subtitle_Video: {
     type: Array,
     required: true
   },
-  Subttitle_Hours: {
+  Subtitle_Hours: {
     type: String,
     required: true
   },
 }, { timestamps: true });
 
-const Subttitle = mongoose.model('Subttitle', SubtitleSchema);
-module.exports = Subttitle;
+const Subtitle = mongoose.model('Subtitle', SubtitleSchema);
+module.exports = Subtitle;
