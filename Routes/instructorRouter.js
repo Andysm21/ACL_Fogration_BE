@@ -7,63 +7,65 @@ router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
 
 router.get('/viewMyCoursesInstructor', async (req,res)=>{
-    const {Course_Instructor}= req.body
-    console.log(await course.find({Course_Instructor: Course_Instructor}).select('Course_Title'))
-    res.status(200).send("Titles of Courses");
+    const x = req.body.Instructor_FirstName
+    var data ="Titles of Courses" + "\n"
+     data += await course.find({Course_Instructor: x}).select('Course_Title -_id') + "\n"
+    res.status(200).send(data);
   });
 
 
-  router.get("/SearchCourseTitle", async (req, res) => {
-    const x = req.body.Instructor_ID
-    const {SearchTitle}= req.body
-    if({SearchTitle} == ''){
-        console.log(course.find('Course_Title Course_Rating Course_Hours'));
-        res.status(200).send("Searched by Titles");
+  router.get("/SearchCourseTitleInst", async (req, res) => {
+    const Instructor_FirstName = req.body.Instructor_FirstName
+    const Course_Title= req.body.Course_Title
+    if(Course_Title == ''){
+        var data = "Searched by Titles: "+ "\n"
+       data+=course.find('Course_Title Course_Rating Course_Hours -_id');
+        res.status(200).send(data);
     }
-    else if(await (await course.find({Course_Instructor: x, Course_Title:SearchTitle},'Course_Title Course_Rating Course_Hours').length == 0))
+    else if(await course.find({Course_Instructor: Instructor_FirstName, Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours -_id').length == 0)
     {  
         res.status(200).send("Titles Not Found");
         console.log("Titles Not Found");
     }   
     else{
-        console.log(await course.find({Course_Instructor: x, Course_Title:SearchTitle},'Course_Title Course_Rating Course_Hours'))
-        res.status(200).send("Searched by Titles");
+      var data = await course.find({Course_Instructor: Instructor_FirstName, Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours -_id') + '\n'
+      res.status(200).send("Searched by Titles" + "\n"+ data);
         }
         
     
   });
 
-  router.get("/SearchCourseSubject", async (req, res) => {
-    const x = req.body.Instructor_ID
-    const {SearchSubject}= req.body
-    if({SearchSubject} == ''){
-        console.log(course.find('Course_Title Course_Rating Course_Hours'));
-        res.status(200).send("Searched by Subject");
+  router.get("/SearchCourseSubjectInst", async (req, res) => {
+    const Instructor_FirstName = req.body.Instructor_FirstName
+    const SearchSubject= req.body.SearchSubject
+    if(SearchSubject == ''){
+      var data = course.find('Course_Title Course_Rating Course_Hours -_id')
+      res.status(200).send("Searched by Subject" + "\n"+ data);
     }
-    else if(await (await course.find({Course_Instructor: x, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours').length == 0))
-        {  
+    else if(await course.find({Course_Instructor: Instructor_FirstName, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours -_id').length == 0)
+    {
             res.status(200).send("Subject Not Found");
             console.log("Subject Not Found");
         } 
     else{
-        console.log(await course.find({Course_Instructor: x, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours'))
-        res.status(200).send("Searched by Subject");
-    }
+        var data = await course.find({Course_Instructor: Instructor_FirstName, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours -_id')
+        res.status(200).send("Searched by Subject" + "\n"+ data);
+      }
         
   });
 
-  router.get("/filterPrice", async (req, res) => {
-    const x = req.body.Instructor_ID
-    const {FilterPrice}= req.body
+  router.get("/filterPriceInst", async (req, res) => {
+    const Instructor_FirstName = req.body.Instructor_FirstName
+    const FilterPrice= req.body.FilterPrice
     
-    console.log(await course.find({Course_Price: FilterPrice},'Course_Title Course_Rating Course_Hours'))
-    res.status(200).send("Filtered by Price");
+    var data= await course.find({Course_Instructor:Instructor_FirstName,Course_Price: FilterPrice},'Course_Title Course_Rating Course_Hours -_id')
+    res.status(200).send("Filtered by Price"+"\n"+ data);
   });
 
-  router.get("/filterSubject", async (req, res) => {
+  router.get("/filterSubjectInst", async (req, res) => {
     const x = req.body.Instructor_ID
     const {FilterSubject} = req.body
-    console.log(await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours'))
+    console.log(await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send("Filtered by Subject");
   });
 

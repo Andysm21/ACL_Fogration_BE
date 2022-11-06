@@ -13,6 +13,11 @@ const sub = require('../Schemas/Subtitle.js');
 //to be changed later
 
 
+// router.post('/createCourse', async (req,res)=>{
+//     var id = await course.count().exec()+1;
+//     courseRouter.createCourse(req,id)
+//     res.send("Create a new course.")
+// })
 
 router.get("/getCourseIndividual", async (req, res) => {
     const x = req.body.Course_Title
@@ -88,9 +93,9 @@ router.get("/getCourseIndividual", async (req, res) => {
 
 
   router.get("/hoverOnCourse", async (req, res) => {
-    const Course_Name = req.body.coursename;
-    var data = await course.find({Course_Title:Course_Name}).select('Course_Subtitle Course_Exam Course_Hours Course_Price Course_Discount -_id')+"\n";
-    var method = await courseRouter.getHoursAllSubtitles(Course_Name);
+    const Course_Title = req.body;
+    var data = await course.find({Course_Title:Course_Title}).select('Course_Subtitle Course_Exam Course_Hours Course_Price Course_Discount -_id')+"\n";
+    var method = await courseRouter.getHoursAllSubtitles(Course_Title);
     data += method
     res.send(data);
   });
