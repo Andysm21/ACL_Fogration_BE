@@ -26,3 +26,4 @@ const SubtitleSchema = new Schema({
 
 const Subtitle = mongoose.model('Subtitle', SubtitleSchema);
 module.exports = Subtitle;
+
