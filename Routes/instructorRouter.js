@@ -7,8 +7,8 @@ router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
 
 router.get('/viewMyCoursesInstructor', async (req,res)=>{
-    const x = req.body.Instructor_ID
-    console.log(await (await course.find({Course_Instructor: x}).select('Course_Title')))
+    const {Course_Instructor}= req.body
+    console.log(await course.find({Course_Instructor: Course_Instructor}).select('Course_Title'))
     res.status(200).send("Titles of Courses");
   });
 

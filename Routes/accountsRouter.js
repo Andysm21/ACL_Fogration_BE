@@ -1,19 +1,43 @@
 const signRouter = require('../Controller/accounts.js');
+const courseRouter = require('../Controller/courses.js');
 var bodyParser = require('body-parser');
 const mongoDb = require('mongoose')
 const user = require('../Schemas/IndividualUser.js');
+const cu = require('../Schemas/CorporateUser.js');
+const inst = require('../Schemas/Instructor.js');
+const course = require('../Schemas/Course.js');
+
+
 const express= require("express")
 const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
-
-router.post('/changeCountry', async (req,res)=>{
+//TO be changed later because this is a guest and i guess we will use cookies for that/////
+router.post('/changeCountryG', async (req,res)=>{
     var country = req.body.country;
     var userid = req.body.userid;
-    await user.findByIdAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
+    await user.findOneAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
     res.send("Country changed to "+ country+" Successfully");
   })
-
+///////////////////////////////////////////////////////////////////////////////////////////
+  router.post('/changeCountryI', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await inst.findOneAndUpdate({Instructor_ID:userid},{Instructor_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
+  router.post('/changeCountryCU', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await cu.findOneAndUpdate({CorporateUser_ID:userid},{CorporateUser_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
+  router.post('/changeCountryIU', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await user.findOneAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
 router.post('/createAdmin', async (req,res)=>{
     if(req.body.Admin_username.equals(''))
         res.send("Username field should not be empty")
@@ -61,10 +85,11 @@ router.post('/createCorporateUser', async (req,res)=>{
 })
 
 router.post('/createCourse', async (req,res)=>{
-    if(await (await (user.find({Course_Title: req.body.Course_Title}).select('Course_Title'))).length > 0)
+    if(await (await (course.find({Course_Title: req.body.Course_Title}).select('Course_Title'))).length > 0)
         res.send("Course already exists.")
     else{
-    signRouter.createCourse(req)
+    var id = await course.count().exec()+1;
+    courseRouter.createCourse(req,id)
     res.send("Create a new course.")
     }
 })

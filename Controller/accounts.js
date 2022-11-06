@@ -21,8 +21,6 @@ function signUP(p1) {
     user.create(p1.body)
 }
 
-function createCourse(p1) {
-    course.create(p1.body)
-}
 
-module.exports={signUP,createAdmin,createCorporateUser,createInstructor,createCourse}
+
+module.exports={signUP,createAdmin,createCorporateUser,createInstructor}
