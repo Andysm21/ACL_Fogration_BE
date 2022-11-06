@@ -7,6 +7,14 @@ const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
 
+
+router.post('/changeCountry', async (req,res)=>{
+    var country = req.body.country;
+    var userid = req.body.userid;
+    await user.findByIdAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
+    res.send("Country changed to "+ country+" Successfully");
+  })
+
 router.post('/createAdmin', (req,res)=>{
     signRouter.createAdmin(req)
     res.send("Create a new admin.")
