@@ -5,6 +5,8 @@ const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
+const instructor = require('../Schemas/Instructor.js');
+const instructorRouter = require('../Controller/instructor.js');
 
 router.get('/viewMyCoursesInstructor', async (req,res)=>{
     const x = req.body.Instructor_FirstName
@@ -68,5 +70,61 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
     console.log(await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send("Filtered by Subject");
   });
+
+  //view the ratings and reviews on all his/her courses (19)
+router.get("/ViewRatingAndReviews", async (req, res) => {
+  const x= req.body.Instructor_ID
+  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+  console.log(await course.find({Course_Instructor:x},'Course_Title Course_Rating Course_Review -_id'))
+  res.status(200).send(await course.find({Course_Instructor:x},'Course_Title Course_Rating Course_Review -_id'));
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+
+});
+
+//view his/her rating and reviews as an instructor(28)
+router.get("/ViewMyRatingAndReviews", async (req, res) => {
+  const x= req.body.Instructor_ID
+  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+    const method = await instructorRouter.getMyRating(x);
+    var y= await instructor.find({Instructor_ID:x},'Instructor_ID Instructor_Reviews -_id') 
+    y+= "Instructor_Rating: " + method
+    res.status(200).send(y);
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+  
+});
+
+//edit his/her mini biography or email(29)
+router.put("/editBiographyOrEmail", async (req, res) => {
+  const bio= req.body.Instructor_Biography
+  const email= req.body.Instructor_Email
+  const x= req.body.Instructor_ID  
+  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+    await instructor.update({Instructor_ID:x},{Instructor_Email:email, Instructor_Biography:bio})
+    res.status(200).send("Info updated");
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+});
+
+//change his/her password (31)
+router.put("/changePassword", async (req, res) => {
+  const pass= req.body.Instructor_Password
+  const x= req.body.Instructor_ID  
+  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+    await instructor.update({Instructor_ID:x},{Instructor_Password:pass})
+    res.status(200).send("Info updated");
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+});
+
 
 module.exports=router;
