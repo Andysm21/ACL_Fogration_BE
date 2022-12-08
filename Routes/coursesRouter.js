@@ -6,6 +6,8 @@ const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
+const question = require('../Schemas/Question.js');
+const exam = require('../Schemas/Exam.js');
 const Video = require('../Schemas/Video.js');
 const sub = require('../Schemas/Subtitle.js');
 
