@@ -5,6 +5,7 @@ const course = require('../Schemas/Course.js');
 const Video = require('../Schemas/Video.js');
 const Subtitle = require('../Schemas/Subtitle.js');
 const { response } = require("express");
+const Course = require("../Schemas/Course.js");
 
 
 function createSubtitle(p1,id){
@@ -71,7 +72,4 @@ async function getHoursAllSubtitles(coursename,res,req){
         return Response;
 }
 
-
-
-
-module.exports={createCourse,getHoursAllSubtitles,createSubtitle,createVideo}
+module.exports={createCourse,getHoursAllSubtitles,createSubtitle,createVideo};
