@@ -301,12 +301,13 @@ var x = (JSON.stringify(StudentAns).split(":"));
     var y= z[0].split("]");
     var yy= y[0].split("[");
     var FinalStudenAnswer = yy[1].split(',');
-// console.log(FinalStudenAnswer)
 var StudentAnswersArray = new Array(FinalStudenAnswer.length).fill(0)
 for (let i =0;i<FinalStudenAnswer.length;i++){
   StudentAnswersArray[i]=FinalStudenAnswer[i]
 }
 
+var FinalStudentBEGAD=new Array(FinalStudenAnswer.length).fill(0);
+var FinalModelBEGAD=new Array(FinalStudenAnswer.length).fill(0);
 
 var TotalGrade = Number(0);
 var grade =Number(0);
@@ -317,12 +318,15 @@ var z= x[1].split("'");
 //THIS IS ANSWERS EL CORRECT
 var CorrectAnswer = z[0].split('"')
 //THIS IS ANSWERS EL STUDENT
-var Answeri=StudentAnswersArray[i].split('"');
+ Answeri=StudentAnswersArray[i].split('"');
 var Question_Grade= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Grade -_id');
 var x = (JSON.stringify(Question_Grade).split(":"));
 var y = x[1].split("}")
 TotalGrade+=Number(y[0])
 //Check if correctAnswer
+FinalStudentBEGAD[i]=Answeri[1]
+FinalModelBEGAD[i]=CorrectAnswer[1]
+
 if(Answeri[1]==CorrectAnswer[1]){
 var Question_Grade= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Grade -_id');
 var x = (JSON.stringify(Question_Grade).split(":"));
@@ -332,6 +336,10 @@ grade+=Number(y[0])
 }
 var Final = (grade/TotalGrade)*100;
 await StudentTookexam.updateOne({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID},{StudentTookExam_Grades:Final})
-res.send("Done")
+
+res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final})
 })
+
+
+
 module.exports=router;
