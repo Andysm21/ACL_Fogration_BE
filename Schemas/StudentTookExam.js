@@ -15,7 +15,7 @@ const StudentTookExamSchema = new Schema({
     required: true,
   },
   StudentTookExam_Grades: {
-    type: String,
+    type: Number,
     required: true
   },
   StudentTookExam_ID: {

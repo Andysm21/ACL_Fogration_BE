@@ -12,6 +12,7 @@ const sub = require('../Schemas/Subtitle.js');
 const Instructor = require('../Schemas/Instructor.js');
 const Course = require('../Schemas/Course.js');
 const Subtitle = require('../Schemas/Subtitle.js');
+const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
 
 
@@ -280,4 +281,57 @@ res.send("done")
 
 
 
+
+router.post('/examGrades', async (req,res)=>{
+var UserID = req.body.UserID;
+var EID = req.body.EID;
+
+var question_array=await Exam.find({Exam_ID: EID}).select('Exam_Question_ID -_id');
+//console.log(question_array)
+var x = (JSON.stringify(question_array).split(":"));
+    var z= x[1].split(" ");
+    var y= z[0].split("]");
+    var yy= y[0].split("[");
+    //ARray of Question IDS
+    var FinalQuestionArray = yy[1].split(',');
+ // console.log(FinalQuestionArray)
+var StudentAns= await StudentTookexam.find({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID}).select('StudentTookExam_Answers -_id');
+var x = (JSON.stringify(StudentAns).split(":"));
+    var z= x[1].split(" ");
+    var y= z[0].split("]");
+    var yy= y[0].split("[");
+    var FinalStudenAnswer = yy[1].split(',');
+// console.log(FinalStudenAnswer)
+var StudentAnswersArray = new Array(FinalStudenAnswer.length).fill(0)
+for (let i =0;i<FinalStudenAnswer.length;i++){
+  StudentAnswersArray[i]=FinalStudenAnswer[i]
+}
+
+
+var TotalGrade = Number(0);
+var grade =Number(0);
+for(let i =0;i<FinalQuestionArray.length;i++){
+var ModelAnswerArray= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Correct_Answers -_id')
+var x = (JSON.stringify(ModelAnswerArray).split(":"));
+var z= x[1].split("'");
+//THIS IS ANSWERS EL CORRECT
+var CorrectAnswer = z[0].split('"')
+//THIS IS ANSWERS EL STUDENT
+var Answeri=StudentAnswersArray[i].split('"');
+var Question_Grade= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Grade -_id');
+var x = (JSON.stringify(Question_Grade).split(":"));
+var y = x[1].split("}")
+TotalGrade+=Number(y[0])
+//Check if correctAnswer
+if(Answeri[1]==CorrectAnswer[1]){
+var Question_Grade= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Grade -_id');
+var x = (JSON.stringify(Question_Grade).split(":"));
+var y = x[1].split("}")
+grade+=Number(y[0])
+}
+}
+var Final = (grade/TotalGrade)*100;
+await StudentTookexam.updateOne({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID},{StudentTookExam_Grades:Final})
+res.send("Done")
+})
 module.exports=router;

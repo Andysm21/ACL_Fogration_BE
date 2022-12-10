@@ -19,7 +19,7 @@ const QuestionSchema = new Schema({
     required: true
   },
   Question_Grade: {
-    type: String,
+    type: Number,
     required: true
   },
 }, { timestamps: true });
