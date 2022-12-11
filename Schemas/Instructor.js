@@ -49,6 +49,10 @@ const InstructorSchema = new Schema({
   Instructor_Reviews: {
     type: Array,
     required: false,
+  },
+  Instructor_Agreement: {
+    type: Boolean,
+    required: true,
   }
 }, { timestamps: true });
 
