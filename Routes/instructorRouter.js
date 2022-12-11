@@ -107,13 +107,16 @@ router.put("/editBiographyOrEmail", async (req, res) => {
   const bio= req.body.Instructor_Biography
   const email= req.body.Instructor_Email
   const x= req.body.Instructor_ID 
-  if(email == ""){
+  if(email == "" && bio != ""){
     await instructor.update({Instructor_ID:x},{Instructor_Biography:bio})
     res.status(200).send("Info updated");
   }
-  else if(bio == ""){
+  else if(bio == "" && email != ""){
     await instructor.update({Instructor_ID:x},{Instructor_Email:email})
     res.status(200).send("Info updated");
+  }
+  else if(email == "" && bio == ""){
+    res.status(200).send("No data to update");
   }
   else if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
     await instructor.update({Instructor_ID:x},{Instructor_Email:email, Instructor_Biography:bio})
@@ -125,7 +128,7 @@ router.put("/editBiographyOrEmail", async (req, res) => {
 });
 
 //change his/her password (31)
-router.put("/changePassword", async (req, res) => {
+router.put("/changePassword/:type", async (req, res) => {
   const pass= req.body.Instructor_Password
   const x= req.body.Instructor_ID  
   if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
@@ -144,48 +147,19 @@ router.post("/forgotPassword", async (req, res) => {
 	try {
 		//const x= req.body.Instructor_ID  
     const email = req.body.Instructor_Email
-    const exists= false
-    if((await instructor.findOne({Instructor_Email:email}))){
-      
-    
-    }
-		if (!user)
-			return res
+    if(!(await instructor.findOne({Instructor_Email:email}))){
+      return res
 				.status(409)
 				.send({ message: "User with given email does not exist!" });
-
-		let token = await Token.findOne({ userId: user._id });
-		if (!token) {
-			token = await new Token({
-				userId: user._id,
-				token: crypto.randomBytes(32).toString("hex"),
-			}).save();
-		}
-
-		const url = `${process.env.BASE_URL}password-reset/${user._id}/${token.token}/`;
+    }
+    else{
+    const url = `https://loaclhost:3000/password-reset/1/`;
 		await sendEmail(email, "Password Reset", url);
+    }
 
 		res
 			.status(200)
 			.send({ message: "Password reset link sent to your email account" });
-	} catch (error) {
-		res.status(500).send({ message: "Internal Server Error" });
-	}
-});
-
-// verify password reset link
-router.get("/:id/:token", async (req, res) => {
-	try {
-		const user = await User.findOne({ _id: req.params.id });
-		if (!user) return res.status(400).send({ message: "Invalid link" });
-
-		const token = await Token.findOne({
-			userId: user._id,
-			token: req.params.token,
-		});
-		if (!token) return res.status(400).send({ message: "Invalid link" });
-
-		res.status(200).send("Valid Url");
 	} catch (error) {
 		res.status(500).send({ message: "Internal Server Error" });
 	}
