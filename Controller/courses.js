@@ -36,7 +36,7 @@ async function getHoursAllSubtitles(coursename,res,req){
         data+=a[i];
     }
     data = data.split(",")
-
+    
     var Response = "Subtitles and their Hours :"+ "\n";
     for(let i = 0; i<data.length; i++){
         var Videos = await Subtitle.find({Subtitle_Name:data[i]}).select('Subtitle_Video -_id');
