@@ -128,17 +128,40 @@ router.put("/editBiographyOrEmail", async (req, res) => {
   }
 });
 
-//change his/her password (31)
-router.put("/changePassword/:type", async (req, res) => {
-  const pass= req.body.Instructor_Password
-  const x= req.body.Instructor_ID  
-  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
-    await instructor.update({Instructor_ID:x},{Instructor_Password:pass})
-    res.status(200).send("Password updated");
+
+//change his/her password (31/32)
+router.put("/changePassword", async (req, res) => {
+  const pass= req.body.Password
+  const x= req.body.ID  
+  const type = req.body.type
+  if(type == 1){
+    if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+      await instructor.update({Instructor_ID:x},{Instructor_Password:pass})
+      res.status(200).send("Password updated");
+    }
+    else {
+      res.status(409).send("User not found");
+    }
   }
-  else {
-    res.status(409).send("User not found");
+  if(type == 2){
+    if((await individualUser.find({IndividualUser_ID:x},'IndividualUser_ID -_id')).length != 0){
+      await individualUser.update({IndividualUser_ID:x},{individualUser_Password:pass})
+      res.status(200).send("Password updated");
+    }
+    else {
+      res.status(409).send("User not found");
+    }
   }
+  if(type == 3){
+    if((await corporateUser.find({CorporateUser_ID:x},'CorporateUser_ID -_id')).length != 0){
+      await corporateUser.update({CorporateUser_ID:x},{CorporateUser_Password:pass})
+      res.status(200).send("Password updated");
+    }
+    else {
+      res.status(409).send("User not found");
+    }
+  }
+  
 });
 
 
