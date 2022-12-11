@@ -41,6 +41,7 @@ const CorporateUserSchema = new Schema({
   isCorporate: {
     type: Boolean,
     required: false,
+    default : true,
   },
 }, { timestamps: true });
 
