@@ -11,7 +11,7 @@ const SubtitleSchema = new Schema({
     required: true
   },
   Subtitle_Course_ID: {
-    type: String,
+    type: Number,
     required: true,
   },
   Subtitle_Video: {
@@ -19,7 +19,7 @@ const SubtitleSchema = new Schema({
     required: true
   },
   Subtitle_Hours: {
-    type: String,
+    type: Number,
     required: true
   },
 }, { timestamps: true });

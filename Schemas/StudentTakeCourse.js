@@ -3,11 +3,11 @@ const Schema = mongoose.Schema;
 
 const StudentTakeCourseSchema = new Schema({
 StudentTakeCourse_StudentID: {
-    type: String,
+    type: Number,
     required: true,
   },
   StudentTakeCourse_CourseID: {
-    type: String,
+    type: Number,
     required: true
   },
   StudentTakeCourse_WatchedVideo: {
