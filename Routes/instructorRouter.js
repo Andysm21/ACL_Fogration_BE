@@ -161,21 +161,7 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
        } 
      }).exec()
      
-    // var getVideos= await subtitle.findOne({Subtitle_ID: req.body.subtitle}, 'Subtitle_Video -_id');
-    // var getVideosWithout = (JSON.stringify(getVideos).split(":"));
-    // var videos = getVideosWithout[1].split("}")
-    // var videoArray = videos[0];
-    // var array = [];
-    // var data = "";
-    // for (let i = 0;i<=videoArray.length;i++){
 
-    //     if(i === videoArray.length)
-    //       data+= id;
-    //     else if(videoArray[i]!="[" & videoArray[i] !='"' & videoArray[i]!="]" & videoArray[i]!="," & videoArray[i]!= null)
-    //       data+=videoArray[i] + ",";    
-    // }
-    // array = data.split(",")
-    // await subtitle.findOneAndUpdate({Subtitle_ID: parseInt(req.body.subtitle)}, {Subtitle_Video: array}, {new: true});
      res.send("Video Created");
   });
 
