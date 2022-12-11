@@ -13,6 +13,10 @@ const express= require("express")
 const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
+
+//Sprint 1
+
+//select their country (6)
 //TO be changed later because this is a guest and i guess we will use cookies for that/////
 router.post('/changeCountryG', async (req,res)=>{
     var country = req.body.country;
@@ -30,7 +34,7 @@ router.post('/changeCountryG', async (req,res)=>{
   router.post('/changeCountryCU', async (req,res)=>{
     var country = req.body.country;
     var userid = req.body.userid;
-    await cu.findOneAndUpdate({CorporateUser_ID:userid},{CorporateUser_Country:country})
+    await corp.findOneAndUpdate({CorporateUser_ID:userid},{CorporateUser_Country:country})
     res.send("Country changed to "+ country+" Successfully");
   })
   router.post('/changeCountryIU', async (req,res)=>{
@@ -39,6 +43,9 @@ router.post('/changeCountryG', async (req,res)=>{
     await user.findOneAndUpdate({IndividualUser_ID:userid},{IndividualUser_Country:country})
     res.send("Country changed to "+ country+" Successfully");
   })
+
+
+// 55 add another administrator with a set username and password
 router.post('/createAdmin', async (req,res)=>{
         var id = await Admin.count().exec()+1;
 
@@ -54,6 +61,7 @@ router.post('/createAdmin', async (req,res)=>{
     }
 })
 
+//56 add instructors and create their usernames and passwords
 router.post('/createInstructor',async (req,res)=>{
     var id = await inst.count().exec()+1;
 
@@ -70,6 +78,7 @@ router.post('/createInstructor',async (req,res)=>{
     }
 })
 
+//57 add corporate trainees and create their usernames and passwords
 router.post('/createCorporateUser', async (req,res)=>{
     var id = await corp.count().exec()+1;
 
@@ -87,27 +96,39 @@ router.post('/createCorporateUser', async (req,res)=>{
     
 })
 
+//23 create a new course and fill in all its details 
+//inclding title, subtitles, price and short summary about the entire course
 router.post('/createCourse', async (req,res)=>{
     var id = await course.count().exec()+1;
     if(await (await (course.find({Course_Title: req.body.Course_Title}).select('Course_Title '))).length>0)
         res.send("Course already exists.")
+    else if(req.body.Course_Title!= null && req.body.Course_Subtitle != null && req.body.Course_Price != null && req.body.Course_Description != null && req.body.Course_Subject != null && req.body.Course_Instructor != null && req.body.Course_Country != null) {
+        courseRouter.createCourse(req,id)
+        res.send("Create a new course.")
+        }
     else{
-    courseRouter.createCourse(req,id)
-    res.send("Create a new course.")
-    }
+        res.send("Please fill all required fields")
+        }
+       
 })
 
-
+// 3 sign up for an account as an individual trainee using
+// a username, email, password, first name, last name and gender
 router.post('/signUp', async (req,res)=>{
+    var id = await user.count().exec()+1;
     if(await (await (user.find({individualUser_Email: req.body.individualUser_Email}).select('individualUser_Email'))).length > 0)
         res.send("User already exists.")
     else 
         if(await (await user.find({individualUser_UserName: req.body.individualUser_UserName}).select('individualUser_UserName')).length > 0)
         res.send("Choose another username.")
-    else{
-        signRouter.signUP(req)
+    else if(req.body.individualUser_UserName!= null && req.body.individualUser_Password != null && req.body.individualUser_Email != null && req.body.individualUser_FirstName != null && req.body.individualUser_LastName != null && req.body.individualUser_Gender != null && req.body.individualUser_Country != null) {
+        signRouter.signUP(req,id)
         res.send("Create a new user.")
     }
+    else {
+        res.send("Please fill all required fields")
+    }
+
 })
 
 

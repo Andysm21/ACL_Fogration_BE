@@ -12,7 +12,7 @@ const courseSchema = new Schema({
   },
   Course_Subject: {
     type: String,
-    required: true,
+    required: false,
   },
   Course_Description: {
     type: String,
@@ -48,7 +48,7 @@ const courseSchema = new Schema({
   },
   Course_Subtitle: {
     type: Array,
-    required: false,
+    required: true,
   },
   Course_Trainee: {
     type: Array,

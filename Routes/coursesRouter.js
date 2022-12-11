@@ -21,80 +21,85 @@ const sub = require('../Schemas/Subtitle.js');
 //     res.send("Create a new course.")
 // })
 
+
+//7 view all the titles of the courses available 
+//including the total hours of the course and course rating
+//8 view the price of each course
 router.get("/getCourseIndividual", async (req, res) => {
-    const x = req.body.Course_Title
+    console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')))
+    res.status(200).send(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price-_id')));
+  });
+
+router.get("/getCourseGuest", async (req, res) => {
     console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')))
     res.status(200).send(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')));
   });
 
-  router.get("/getCourseGuest", async (req, res) => {
-    const x = req.body.Course_Title
-    console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')))
-    res.status(200).send(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')));
-  });
-
-  router.get("/getCourseCorporate", async (req, res) => {
-    const x = req.body.Course_Title
+router.get("/getCourseCorporate", async (req, res) => {
     console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours -_id')))
     res.status(200).send(await (await course.find().select('Course_Title Course_Rating Course_Hours -_id')));
   });
 
-  router.get("/getCourseInstructor", async (req, res) => {
-    const x = req.body.Course_Title
-    console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')))
-    res.status(200).send(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price -_id')));
+router.get("/getCourseInstructor", async (req, res) => {
+    console.log(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price-_id')))
+    res.status(200).send(await (await course.find().select('Course_Title Course_Rating Course_Hours Course_Price-_id')));
   });
 
-  router.get("/filterRating", async (req, res) => {
+
+//9 filter the courses based on a subject and/or rating
+router.get("/filterRating", async (req, res) => {
     const {Course_Rating}= req.body
     console.log(await course.find({Course_Rating:Course_Rating},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Rating:Course_Rating},'Course_Title Course_Rating Course_Hours -_id'));
   });
 
-  router.get("/filterSubject", async (req, res) => {
+router.get("/filterSubject", async (req, res) => {
     const {Course_Subject}= req.body
     console.log(await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours -_id'));
   });
 
-  router.get("/filterSubjectRating", async (req, res) => {
+router.get("/filterSubjectRating", async (req, res) => {
     const {Course_Subject}= req.body
     const {Course_Rating}= req.body
     console.log(await course.find({Course_Subject:Course_Subject,Course_Rating:Course_Rating},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Subject:Course_Subject,Course_Rating:Course_Rating},'Course_Title Course_Rating Course_Hours -_id' ));
   });
 
-  router.get("/filterPrice", async (req, res) => {// for all but not for Corporate
+//10 filter the courses based on price (price can be FREE)
+router.get("/filterPrice", async (req, res) => {// for all but not for Corporate
     const {Course_Price}= req.body
     console.log(await course.find({Course_Price:Course_Price},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Price:Course_Price},'Course_Title Course_Rating Course_Hours -_id'));
   });
 
-  router.get("/SearchCourseTitle", async (req, res) => {
+//11 search for a course based on course title or subject or instructor
+router.get("/SearchCourseTitle", async (req, res) => {
     const {Course_Title}= req.body
     console.log(await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours -_id'));
   });
-
-  router.get("/SearchCourseSubject", async (req, res) => {
+router.get("/SearchCourseSubject", async (req, res) => {
     const {Course_Subject}= req.body
     console.log(await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours -_id'));
   });
-
-  router.get("/SearchCourseIntrsuctor", async (req, res) => {
+router.get("/SearchCourseIntrsuctor", async (req, res) => {
     const {Course_Instructor}= req.body
     console.log(await course.find({Course_Instructor:Course_Instructor},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({Course_Instructor:Course_Instructor},'Course_Title Course_Rating Course_Hours -_id'));
   });
 
-  router.get("/viewCourses", async (req, res) => {
+router.get("/viewCourses", async (req, res) => {
     console.log(await course.find({},'Course_Title Course_Rating Course_Hours -_id'))
     res.status(200).send(await course.find({},'Course_Title Course_Rating Course_Hours -_id'));
   });
 
-
-  router.get("/hoverOnCourse", async (req, res) => {
+// 12 choose a course from the results and view (but not open) 
+//its details including course subtitles, excercises , total hours of each subtitle, 
+//total hours of the course 
+//and price (including % discount if applicable) according to the country selected
+router.get("/hoverOnCourse", async (req, res) => {
     const Course_Title = req.body;
     var data = await course.find({Course_Title:Course_Title}).select('Course_Subtitle Course_Exam Course_Hours Course_Price Course_Discount -_id')+"\n";
     var method = await courseRouter.getHoursAllSubtitles(Course_Title);
