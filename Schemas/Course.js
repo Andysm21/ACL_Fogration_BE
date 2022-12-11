@@ -62,7 +62,7 @@ const courseSchema = new Schema({
     type: Array,
     required: false,
   },
-  Course_Exam : {
+  Course_Exam: {
     type: Array,
     required: false,
     
