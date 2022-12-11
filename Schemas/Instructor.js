@@ -35,7 +35,7 @@ const InstructorSchema = new Schema({
     required: false,
   },
   Instructor_Courses: {
-    type: Array<String>(100),
+    type: Array,
     required: false,
   },
   Instructor_Biography: {
@@ -53,6 +53,7 @@ const InstructorSchema = new Schema({
   Instructor_Agreement: {
     type: Boolean,
     required: true,
+      default: false,
   }
 }, { timestamps: true });
 
