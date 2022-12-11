@@ -3,11 +3,11 @@ const Schema = mongoose.Schema;
 
 const StudentTookExamSchema = new Schema({
     StudentTookExam_Student_ID: {
-    type: String,
+    type: Number,
     required: true,
   },
   StudentTookExam_Exam_ID: {
-    type: String,
+    type: Number,
     required: true
   },
   StudentTookExam_Answers: {
@@ -19,7 +19,7 @@ const StudentTookExamSchema = new Schema({
     required: true
   },
   StudentTookExam_ID: {
-    type: String,
+    type: Number,
     required: true
   },
 }, { timestamps: true });
