@@ -8,7 +8,9 @@ const course = require('../Schemas/Course.js');
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
 const exams = require('../Controller/exams.js')
-const courseCC = require('../Controller/courses.js')
+const courseCC = require('../Controller/courses.js');
+const Video = require('../Schemas/Video.js');
+const subtitle = require('../Schemas/Subtitle.js');
 
 router.get('/viewMyCoursesInstructor', async (req,res)=>{
     const x = req.body.Instructor_FirstName
@@ -132,5 +134,28 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
     
   });
 
+  //upload a video link from YouTube under each subtitle and enter a short description of the video
+  //only remaining how to calculate its length
+  router.post("/upload_video", async (req, res) =>{
+    var id = await Video.count().exec()+1;
+    Video.create({Video_ID: id, Video_Link: req.body.link, Video_Subtitle: req.body.subtitle, Video_Description: req.body.description, Video_Length: parseInt(req.body.length)});
+
+    var getVideos= await subtitle.findOne({Subtitle_ID: req.body.subtitle}, 'Subtitle_Video -_id');
+    var getVideosWithout = (JSON.stringify(getVideos).split(":"));
+    var videos = getVideosWithout[1].split("}")
+    var videoArray = videos[0];
+    var array = [];
+    var data = "";
+    for (let i = 0;i<=videoArray.length;i++){
+
+        if(i === videoArray.length)
+          data+= id;
+        else if(videoArray[i]!="[" & videoArray[i] !='"' & videoArray[i]!="]" & videoArray[i]!="," & videoArray[i]!= null)
+          data+=videoArray[i] + ",";    
+    }
+    array = data.split(",")
+    await subtitle.findOneAndUpdate({Subtitle_ID: parseInt(req.body.subtitle)}, {Subtitle_Video: array}, {new: true});
+    res.send("Video Created");
+  });
 
 module.exports=router;
