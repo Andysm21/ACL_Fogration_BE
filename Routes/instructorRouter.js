@@ -8,7 +8,10 @@ const course = require('../Schemas/Course.js');
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
 const exams = require('../Controller/exams.js')
-const courseCC = require('../Controller/courses.js')
+const courseCC = require('../Controller/courses.js');
+const Video = require('../Schemas/Video.js');
+const subtitle = require('../Schemas/Subtitle.js');
+//const youtubekey='1081702991015-3ube06jg6k96mf2ckvcp850lv7iibq48.apps.googleusercontent.com'
 
 router.get('/viewMyCoursesInstructor', async (req,res)=>{
     const x = req.body.Instructor_FirstName
@@ -79,10 +82,13 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
     var Question_Choices = [] ;
     var Question_Name;
     var allQuestions = req.body.questions;
-    var arrayofQuestions = (JSON.stringify(allQuestions).split(","));
+    var arrayofQuestions = (JSON.stringify(allQuestions).split('"'));
+    var Test = [arrayofQuestions[1]]
+    var arrayofQuestions= Test[0].split(",");
     var arrayQuestionID = [];
     var TotalGrade = 0;
     var j = 0;
+    var Question_ID = await Question.count().exec()+1;
     if(arrayofQuestions[0] === '""'){
       res.send("Cannot Create an Exam without Questions!");
     }
@@ -91,7 +97,6 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
     }
     else {
       for (let i=0;i<arrayofQuestions.length;i+=7){
-      var Question_ID = await Question.count().exec()+1;
       Question_Name = arrayofQuestions[i];
       Question_Choices[0] = arrayofQuestions[i+1] ;
       Question_Choices[1] = arrayofQuestions[i+2] ;
@@ -101,12 +106,20 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
       Question_Grade = arrayofQuestions[i+6];
       TotalGrade += parseInt(arrayofQuestions[i+6]);
       arrayQuestionID[j++] = Question_ID;
-      exams.createQuestion(Question_ID,Question_Name,Question_Choices,Question_Correct_Answer,Question_Grade);
+     exams.createQuestion(parseInt(Question_ID),Question_Name,Question_Choices,Question_Correct_Answer,Question_Grade);
+      Question_ID ++;
       }
 
       var id = await Exam.count().exec()+1;
       exams.createExam(req, arrayQuestionID,TotalGrade,id);
       res.send("Exam Created");
+      course.updateOne({Course_ID:req.body.Course},{ 
+        $push: { 
+          Course_Exam: {
+              $each: [ id ],
+           }
+         } 
+       }).exec()
     }
    
   })
@@ -125,12 +138,36 @@ router.get('/viewMyCoursesInstructor', async (req,res)=>{
     else if(Duration.length == 0){
       res.status(200).send("Discount duration should not be empty!");
     }
+    else if(parseInt(Discount) > 100)
+    res.status(200).send("Discount should not be greater than 100!");
     else{
       const users = await course.findOneAndUpdate({Course_ID: courseID}, {Course_Discount: Discount, Course_Discount_Duration:Duration},{new: true});
-      res.status(200).send(users);
+      res.status(200).send("Discount got applied");
     }
     
   });
 
+  //upload a video link from YouTube under each subtitle and enter a short description of the video
+  //only remaining how to calculate its length
+  router.post("/upload_video", async (req, res) =>{
+    var id = await Video.count().exec()+1;
+    Video.create({Video_ID: id, Video_Link: req.body.link, Video_Subtitle: req.body.subtitle, Video_Description: req.body.description, Video_Length: parseInt(req.body.length)});
+
+    subtitle.updateOne({Subtitle_ID: parseInt(req.body.subtitle)},{ 
+      $push: { 
+        Subtitle_Video: {
+            $each: [ id ],
+         }
+       } 
+     }).exec()
+     
+
+     res.send("Video Created");
+  });
+
+
+  router.post("/ytl", async (req, res) =>{
+
+  })
 
 module.exports=router;

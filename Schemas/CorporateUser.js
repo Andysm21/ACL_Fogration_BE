@@ -38,6 +38,10 @@ const CorporateUserSchema = new Schema({
     type: String,
     required: false,
   },
+  isCorporate: {
+    type: Boolean,
+    required: false,
+  },
 }, { timestamps: true });
 
 const CorpUser = mongoose.model('CorporateUser', CorporateUserSchema);

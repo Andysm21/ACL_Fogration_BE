@@ -19,7 +19,7 @@ StudentTakeCourse_StudentID: {
     required: true
   },
   StudentTakeCourse_Progress: {
-    type: String,
+    type: Number,
     required: true
   },
 }, { timestamps: true });

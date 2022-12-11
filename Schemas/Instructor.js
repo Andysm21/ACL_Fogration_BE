@@ -53,6 +53,7 @@ const InstructorSchema = new Schema({
   Instructor_Agreement: {
     type: Boolean,
     required: true,
+      default: false,
   }
 }, { timestamps: true });
 
