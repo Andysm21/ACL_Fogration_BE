@@ -34,6 +34,11 @@ const individualUserSchema = new Schema({
     type: String,
     required: true,
   },
+    isCorporate: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 }, { timestamps: true });
 
 const IndUser = mongoose.model('IndividualUser', individualUserSchema);
