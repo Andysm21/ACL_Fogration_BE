@@ -11,7 +11,7 @@ const VideoSchema = new Schema({
     required: true
   },
   Video_Subtitle: {
-    type: Number,
+    type: String,
     required: true,
   },
   Video_Description: {
