@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const QuestionSchema = new Schema({
  Question_ID: {
-    type: String,
+    type: Number,
     required: true,
   },
   Question_Name: {
@@ -19,7 +19,7 @@ const QuestionSchema = new Schema({
     required: true
   },
   Question_Grade: {
-    type: String,
+    type: Number,
     required: true
   },
 }, { timestamps: true });

@@ -35,7 +35,7 @@ const InstructorSchema = new Schema({
     required: false,
   },
   Instructor_Courses: {
-    type: Array<String>(100),
+    type: Array,
     required: false,
   },
   Instructor_Biography: {
