@@ -6,8 +6,9 @@ router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
 const instructor = require('../Schemas/Instructor.js');
+const corporateUser = require('../Schemas/CorporateUser.js');
+const individualUser = require('../Schemas/IndividualUser.js');
 const instructorRouter = require('../Controller/instructor.js');
-const Token = require("../Schemas/token");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const Joi = require("joi");
@@ -141,17 +142,29 @@ router.put("/changePassword/:type", async (req, res) => {
 });
 
 
-
 //receive an email to change a forgotten password(32)
 router.post("/forgotPassword", async (req, res) => {
 	try {
 		//const x= req.body.Instructor_ID  
-    const email = req.body.Instructor_Email
+    const email = req.body.Email
     if(!(await instructor.findOne({Instructor_Email:email}))){
-      return res
+      if(!(await individualUser.findOne({individualUser_Email:email}))){
+        if(!(await corporateUser.findOne({CorporateUser_Email:email}))){
+          return res
 				.status(409)
 				.send({ message: "User with given email does not exist!" });
     }
+    else {
+      const url = `https://loaclhost:3000/password-reset/3/`;
+      await sendEmail(email, "Password Reset", url);
+    }
+  }
+    else{
+      const url = `https://loaclhost:3000/password-reset/2/`;
+      await sendEmail(email, "Password Reset", url);
+    }
+
+  }
     else{
     const url = `https://loaclhost:3000/password-reset/1/`;
 		await sendEmail(email, "Password Reset", url);
@@ -165,38 +178,5 @@ router.post("/forgotPassword", async (req, res) => {
 	}
 });
 
-//  set new password
-router.post("/:id/:token", async (req, res) => {
-	try {
-		const passwordSchema = Joi.object({
-			password: passwordComplexity().required().label("Password"),
-		});
-		const { error } = passwordSchema.validate(req.body);
-		if (error)
-			return res.status(400).send({ message: error.details[0].message });
-
-		const user = await User.findOne({ _id: req.params.id });
-		if (!user) return res.status(400).send({ message: "Invalid link" });
-
-		const token = await Token.findOne({
-			userId: user._id,
-			token: req.params.token,
-		});
-		if (!token) return res.status(400).send({ message: "Invalid link" });
-
-		if (!user.verified) user.verified = true;
-
-		const salt = await bcrypt.genSalt(Number(process.env.SALT));
-		const hashPassword = await bcrypt.hash(req.body.password, salt);
-
-		user.password = hashPassword;
-		await user.save();
-		await token.remove();
-
-		res.status(200).send({ message: "Password reset successfully" });
-	} catch (error) {
-		res.status(500).send({ message: "Internal Server Error" });
-	}
-});
 
 module.exports=router;
