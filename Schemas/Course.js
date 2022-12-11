@@ -12,7 +12,7 @@ const courseSchema = new Schema({
   },
   Course_Subject: {
     type: String,
-    required: false,
+    required: true,
   },
   Course_Description: {
     type: String,
@@ -24,10 +24,10 @@ const courseSchema = new Schema({
   },
   Course_Rating: {
     type: Number,
-    required: true,
+    required: false,
   },
   Course_Instructor: {
-    type: String,
+    type: Number,
     required: true,
   },
   Course_Hours: {
@@ -36,11 +36,11 @@ const courseSchema = new Schema({
   },
   Course_Country: {
     type: String,
-    required: false,
+    required: true,
   },
   Course_Discount: {
     type: Number,
-    required: true,
+    required: false,
   },
   Course_Discount_Duration: {
     type: Number,
@@ -48,7 +48,7 @@ const courseSchema = new Schema({
   },
   Course_Subtitle: {
     type: Array,
-    required: true,
+    required: false,
   },
   Course_Trainee: {
     type: Array,
@@ -56,7 +56,7 @@ const courseSchema = new Schema({
   },
   Course_Review: {
     type: Array,
-    required: true,
+    required: false,
   },
   Course_Rate: {
     type: Array,
@@ -64,7 +64,7 @@ const courseSchema = new Schema({
   },
   Course_Exam: {
     type: Array,
-    required: true,
+    required: false,
   }
 }, { timestamps: true });
 
