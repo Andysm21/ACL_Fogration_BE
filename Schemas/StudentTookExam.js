@@ -22,6 +22,10 @@ const StudentTookExamSchema = new Schema({
     type: Number,
     required: true
   },
+  StudentTookExam_Type: {
+    type: Number,
+    required: true,
+  },
 }, { timestamps: true });
 
 const StudentTookexam = mongoose.model('StudentTookexam', StudentTookExamSchema);

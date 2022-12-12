@@ -5,8 +5,8 @@ const course = require('../Schemas/Course.js');
 const Video = require('../Schemas/Video.js');
 const Subtitle = require('../Schemas/Subtitle.js');
 const { response } = require("express");
-const Course = require("../Schemas/Course.js");
-
+const StudentTookexam = require('../Schemas/StudentTookexam.js');
+const StudentTakeCourse= require('../Schemas/StudentTakeCourse.js');
 
 function createSubtitle(p1,id){
 Subtitle.create({Subtitle_ID:id,Subtitle_Name:p1.body.name,Subtitle_Course_ID:p1.body.cid,Subtitle_Video:p1.body.videos,Subtitle_Hours:p1.body.hours})
@@ -17,13 +17,22 @@ Video.create({Video_ID:id,Video_Link:p1.body.link,Video_Subtitle:p1.body.subtitl
 }
 function createCourse(p1,id) {
     course.create({Course_ID:id,Course_Title:p1.body.Course_Title,Course_Subject:p1.body.Course_Subject,Course_Description:p1.body.Course_Description
-        ,Course_Price:p1.body.Course_Price,Course_Rating:p1.body.Course_Rating,Course_Instructor:p1.body.Course_Instructor,
-        Course_Hours:p1.body.Course_Hours,Course_Country:p1.body.Course_Country,
-        Course_Discount:p1.body.Course_Discount,Course_Discount_Duration:p1.body.Course_Discount_Duration,
-        Course_Subtitle:p1.body.Course_Subtitle,Course_Trainee:p1.body.Course_Trainee,
+        ,Course_Price:p1.body.Course_Price,Course_Rating:p1.body.Course_Rating,Course_Instructor:p1.body.Course_Instructor,Course_Hours:p1.body.Course_Hours,Course_Country:p1.body.Course_Country,
+        Course_Discount:p1.body.Course_Discount,Course_Discount_Duration:p1.body.Course_Discount_Duration,Course_Subtitle:p1.body.Course_Subtitle,Course_Trainee:p1.body.Course_Trainee,
         Course_Review:p1.body.Course_Review,Course_Rate:p1.body.Course_Rate,Course_Exam:p1.body.Course_Exam})
 }
-
+function createStudentTakeExam(p1,id) {
+    StudentTookexam.create({StudentTookExam_ID:id,StudentTookExam_Student_ID:p1.body.StudentTookExam_Student_ID,
+    StudentTookExam_Exam_ID:p1.body.StudentTookExam_Exam_ID,StudentTookExam_Type:p1.body.StudentTookExam_Type })
+}
+function createStudentTakeCourse(p1) {
+    StudentTakeCourse.create({StudentTakeCourse_CourseID:p1.body.StudentTakeCourse_CourseID,
+                                StudentTakeCourse_StudentID:p1.body.StudentTakeCourse_StudentID,
+                                StudentTakeCourse_WatchedVideo:p1.body.StudentTakeCourse_WatchedVideo,
+                                StudentTakeCourse_StudentTakeExam:p1.body.StudentTakeCourse_StudentTakeExam,
+                                StudentTakeCourse_Progress:p1.body.StudentTakeCourse_Progress,
+                                StudentTakeCourse_Type:p1.body.StudentTakeCourse_Type })
+}
 async function getHoursAllSubtitles(coursename,res,req){
     var y= await course.find({Course_Title:coursename}).select('Course_Subtitle -_id');
     var x = (JSON.stringify(y).split(":"));
@@ -68,6 +77,10 @@ async function getHoursAllSubtitles(coursename,res,req){
 
     }
         return Response;
+        //
 }
 
-module.exports={createCourse,getHoursAllSubtitles,createSubtitle,createVideo};
+
+
+
+module.exports={createStudentTakeCourse,createStudentTakeExam,createCourse,getHoursAllSubtitles,createSubtitle,createVideo}
