@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const jwt = require("jsonwebtoken");
+
 
 const InstructorSchema = new Schema({
     Instructor_ID: {
@@ -55,7 +57,10 @@ const InstructorSchema = new Schema({
     required: true,
       default: false,
   }
+  
 }, { timestamps: true });
 
+
 const Instructor = mongoose.model('Instructor', InstructorSchema);
+
 module.exports = Instructor;

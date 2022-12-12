@@ -5,6 +5,11 @@ const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
+const instructor = require('../Schemas/Instructor.js');
+const corporateUser = require('../Schemas/CorporateUser.js');
+const individualUser = require('../Schemas/IndividualUser.js');
+const instructorRouter = require('../Controller/instructor.js');
+const sendEmail = require("../utils/sendEmail");
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
 const exams = require('../Controller/exams.js')
@@ -145,6 +150,130 @@ router.get("/SearchCourseSubjectInst", async (req, res) => {
     }
     
   });
+
+  //view the ratings and reviews on all his/her courses (19)
+router.get("/ViewRatingAndReviews", async (req, res) => {
+  const x= req.body.Instructor_ID
+  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+  console.log(await course.find({Course_Instructor:x},'Course_Title Course_Rate Course_Review -_id'))
+  res.status(200).send(await course.find({Course_Instructor:x},'Course_Title Course_Rate Course_Review -_id'));
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+
+});
+
+//view his/her rating and reviews as an instructor(28)
+router.get("/ViewMyRatingAndReviews", async (req, res) => {
+  const x= req.body.Instructor_ID
+  if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+    res.status(200).send(await instructor.find({Instructor_ID:x},'Instructor_ID Instructor_Ratings Instructor_Reviews -_id') );
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+  
+});
+
+//edit his/her mini biography or email(29)
+router.put("/editBiographyOrEmail", async (req, res) => {
+  const bio= req.body.Instructor_Biography
+  const email= req.body.Instructor_Email
+  const x= req.body.Instructor_ID 
+  if(email == "" && bio != ""){
+    await instructor.update({Instructor_ID:x},{Instructor_Biography:bio})
+    res.status(200).send("Info updated");
+  }
+  else if(bio == "" && email != ""){
+    await instructor.update({Instructor_ID:x},{Instructor_Email:email})
+    res.status(200).send("Info updated");
+  }
+  else if(email == "" && bio == ""){
+    res.status(200).send("No data to update");
+  }
+  else if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+    await instructor.update({Instructor_ID:x},{Instructor_Email:email, Instructor_Biography:bio})
+    res.status(200).send("Info updated");
+  }
+  else {
+    res.status(404).send("User not found");
+  }
+});
+
+
+//change his/her password (31/32)
+router.put("/changePassword", async (req, res) => {
+  const pass= req.body.Password
+  const x= req.body.ID  
+  const type = req.body.type
+  if(type == 1){
+    if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
+      await instructor.update({Instructor_ID:x},{Instructor_Password:pass})
+      res.status(200).send("Password updated");
+    }
+    else {
+      res.status(409).send("User not found");
+    }
+  }
+  if(type == 2){
+    if((await individualUser.find({IndividualUser_ID:x},'IndividualUser_ID -_id')).length != 0){
+      await individualUser.update({IndividualUser_ID:x},{individualUser_Password:pass})
+      res.status(200).send("Password updated");
+    }
+    else {
+      res.status(409).send("User not found");
+    }
+  }
+  if(type == 3){
+    if((await corporateUser.find({CorporateUser_ID:x},'CorporateUser_ID -_id')).length != 0){
+      await corporateUser.update({CorporateUser_ID:x},{CorporateUser_Password:pass})
+      res.status(200).send("Password updated");
+    }
+    else {
+      res.status(409).send("User not found");
+    }
+  }
+  
+});
+
+
+//receive an email to change a forgotten password(32)
+router.post("/forgotPassword", async (req, res) => {
+	try {
+		//const x= req.body.Instructor_ID  
+    const email = req.body.Email
+    if(!(await instructor.findOne({Instructor_Email:email}))){
+      if(!(await individualUser.findOne({individualUser_Email:email}))){
+        if(!(await corporateUser.findOne({CorporateUser_Email:email}))){
+          return res
+				.status(409)
+				.send({ message: "User with given email does not exist!" });
+    }
+    else {
+      const url = `https://loaclhost:3000/password-reset/3/`;
+      await sendEmail(email, "Password Reset", url);
+    }
+  }
+    else{
+      const url = `https://loaclhost:3000/password-reset/2/`;
+      await sendEmail(email, "Password Reset", url);
+    }
+
+  }
+    else{
+    const url = `https://loaclhost:3000/password-reset/1/`;
+		await sendEmail(email, "Password Reset", url);
+    }
+
+		res
+			.status(200)
+			.send({ message: "Password reset link sent to your email account" });
+	} catch (error) {
+		res.status(500).send({ message: "Internal Server Error" });
+	}
+});
+
 
   //upload a video link from YouTube under each subtitle and enter a short description of the video
   //only remaining how to calculate its length
