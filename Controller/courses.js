@@ -45,7 +45,6 @@ async function getHoursAllSubtitles(coursename,res,req){
         data+=a[i];
     }
     data = data.split(",")
-
     var Response = "Subtitles and their Hours :"+ "\n";
     for(let i = 0; i<data.length; i++){
         var Videos = await Subtitle.find({Subtitle_Name:data[i]}).select('Subtitle_Video -_id');
@@ -66,14 +65,13 @@ async function getHoursAllSubtitles(coursename,res,req){
             var xxx = (JSON.stringify(myVideo).split(":"));
             var zzz= xxx[1].split("}")
             var aaa = zzz[0]
-            var array = []
-            var Vids =""
-            for (let i =0;i<aaa.length;i++){
-                if(aaa[i]!="[" & aaa[i]!='"' & aaa[i]!="]")
-                Vids+=aaa[i];
-            }
-            Vids = Vids.split(",")
-            sum+=Number(Vids[0])
+
+            // for (let i =0;i<aaa.length;i++){
+            //     if(aaa[i]!="[" & aaa[i]!='"' & aaa[i]!="]")
+            //     Vids+=aaa[i];
+            // }
+
+            sum+=Number(aaa)
         }
             Response+="Subtitle : "+ data[i] + "'s hours = "+ sum + " mins "+"\n";
 

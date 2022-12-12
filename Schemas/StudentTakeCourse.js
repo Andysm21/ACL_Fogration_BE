@@ -25,6 +25,7 @@ StudentTakeCourse_StudentID: {
   StudentTakeCourse_Type: {
     type: Number,
     required: true,
+
   },
 }, { timestamps: true });
 
