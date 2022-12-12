@@ -51,12 +51,16 @@ const InstructorSchema = new Schema({
   Instructor_Reviews: {
     type: Array,
     required: false,
+  },
+  Instructor_Agreement: {
+    type: Boolean,
+    required: true,
+      default: false,
   }
   
 }, { timestamps: true });
 
 
 const Instructor = mongoose.model('Instructor', InstructorSchema);
-
 
 module.exports = Instructor;

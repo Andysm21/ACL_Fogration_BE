@@ -12,15 +12,20 @@ StudentTakeCourse_StudentID: {
   },
   StudentTakeCourse_WatchedVideo: {
     type: Array,
-    required: true,
+    required: false,
   },
   StudentTakeCourse_StudentTakeExam: {
     type: Array,
-    required: true
+    required: false
   },
   StudentTakeCourse_Progress: {
-    type: String,
-    required: true
+    type: Number,
+    required: false
+  },
+  StudentTakeCourse_Type: {
+    type: Number,
+    required: true,
+
   },
 }, { timestamps: true });
 

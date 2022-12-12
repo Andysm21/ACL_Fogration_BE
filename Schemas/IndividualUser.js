@@ -6,7 +6,7 @@ const individualUserSchema = new Schema({
     type: Number,
     required: true,
   },
-  IndividualUser_UserName: {
+  individualUser_UserName: {
     type: String,
     required: true,
   },
@@ -33,6 +33,11 @@ const individualUserSchema = new Schema({
   IndividualUser_Country: {
     type: String,
     required: true,
+  },
+    isCorporate: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 }, { timestamps: true });
 

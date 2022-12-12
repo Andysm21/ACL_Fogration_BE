@@ -15,12 +15,16 @@ const StudentTookExamSchema = new Schema({
     required: true,
   },
   StudentTookExam_Grades: {
-    type: String,
+    type: Number,
     required: true
   },
   StudentTookExam_ID: {
     type: Number,
     required: true
+  },
+  StudentTookExam_Type: {
+    type: Number,
+    required: true,
   },
 }, { timestamps: true });
 
