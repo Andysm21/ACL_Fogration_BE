@@ -100,10 +100,11 @@ router.get("/viewCourses", async (req, res) => {
 //total hours of the course 
 //and price (including % discount if applicable) according to the country selected
 router.get("/hoverOnCourse", async (req, res) => {
-    const Course_Title = req.body;
+    const Course_Title = req.body.Course_Title;
     var data = await course.find({Course_Title:Course_Title}).select('Course_Subtitle Course_Exam Course_Hours Course_Price Course_Discount -_id')+"\n";
     var method = await courseRouter.getHoursAllSubtitles(Course_Title);
     data += method
+    // console.log(data)
     res.send(data);
   });
 
