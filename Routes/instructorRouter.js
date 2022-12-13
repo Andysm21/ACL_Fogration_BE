@@ -251,18 +251,18 @@ router.post("/forgotPassword", async (req, res) => {
 				.send({ message: "User with given email does not exist!" });
     }
     else {
-      const url = `https://loaclhost:3000/password-reset/3/`;
+      const url = `http://localhost:3000/guest/corpPasswordReset/`;
       await sendEmail(email, "Password Reset", url);
     }
   }
     else{
-      const url = `https://loaclhost:3000/password-reset/2/`;
+      const url = `http://localhost:3000/guest/userPasswordReset/`;
       await sendEmail(email, "Password Reset", url);
     }
 
   }
     else{
-    const url = `https://loaclhost:3000/password-reset/1/`;
+    const url = `http://localhost:3000/guest/instructorPasswordReset/`;
 		await sendEmail(email, "Password Reset", url);
     }
 
