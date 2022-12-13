@@ -404,25 +404,234 @@ router.post("/filterPrice", async (req, res) => {// for all but not for Corporat
   });
 
 //11 search for a course based on course title or subject or instructor
-router.get("/SearchCourseTitle", async (req, res) => {
+router.post("/SearchCourseTitle", async (req, res) => {
     const {Course_Title}= req.body
-    console.log(await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours -_id'))
-    res.status(200).send(await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours -_id'));
+    var data= await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+    //console.log(data)
+    var final= []
+    for(let i =0;i<data.length;i++)
+    {
+      var test1= JSON.stringify(data[i])
+  
+        var arrayException=test1.split("[")
+        var DataAlone=test1.split(",")
+        var data1;
+  
+    //Now Doing Trainees
+    var CTT= arrayException[1].split(',')
+    CTT= Number(CTT.length)
+    //Now Doing CourseTitle
+        var CT= DataAlone[0].split(':"')
+        CT=CT[1].split('"')
+        CT=CT[0]
+    //Now Doing Country
+    //console.log(DataAlone)
+        var CC= DataAlone[5].split(':"')
+        CC=CC[1].split('"')
+        CC=CC[0]
+    //Course Instructor ID and Name JSON FILE
+        test1=test1.split('"Course_Instructor":');
+        test1=test1[1].split(",");
+        var InstId=Number(test1[0])
+        var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+    //Now Doing Course_Price
+    var CP= DataAlone[1].split(':')
+    CP=CP[1].split("'")
+    CP=CP[0]
+    //Now DOing Course_Rating
+    var CR= DataAlone[2].split(':')
+    CR=CR[1].split("'")
+    CR=CR[0]
+    //Now DOing Course_Hours
+    var CH= DataAlone[4].split(':')
+    CH=CH[1].split("'")
+    CH=CH[0]
+     data1 = {
+          "Course_Title": CT,
+          "Course_Price": CP,
+          "Course_Rating": CR,
+          "Course_Instructor": X,
+          "Course_Hours": CH,
+          "Course_Country": CC,
+          "Course_Trainee": CTT
+      }
+    }
+    final.push(data1)
+    console.log(final)
+    res.status(200).send(final);
   });
-router.get("/SearchCourseSubject", async (req, res) => {
+router.post("/SearchCourseSubject", async (req, res) => {
     const {Course_Subject}= req.body
-    console.log(await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours -_id'))
-    res.status(200).send(await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours -_id'));
+    var data= await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+
+    var final= []
+    for(let i =0;i<data.length;i++)
+    {
+      var test1= JSON.stringify(data[i])
+  
+        var arrayException=test1.split("[")
+        var DataAlone=test1.split(",")
+        var data1;
+  
+    //Now Doing Trainees
+    var CTT= arrayException[1].split(',')
+    CTT= Number(CTT.length)
+    //Now Doing CourseTitle
+        var CT= DataAlone[0].split(':"')
+        CT=CT[1].split('"')
+        CT=CT[0]
+    //Now Doing Country
+    //console.log(DataAlone)
+        var CC= DataAlone[5].split(':"')
+        CC=CC[1].split('"')
+        CC=CC[0]
+    //Course Instructor ID and Name JSON FILE
+        test1=test1.split('"Course_Instructor":');
+        test1=test1[1].split(",");
+        var InstId=Number(test1[0])
+        var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+    //Now Doing Course_Price
+    var CP= DataAlone[1].split(':')
+    CP=CP[1].split("'")
+    CP=CP[0]
+    //Now DOing Course_Rating
+    var CR= DataAlone[2].split(':')
+    CR=CR[1].split("'")
+    CR=CR[0]
+    //Now DOing Course_Hours
+    var CH= DataAlone[4].split(':')
+    CH=CH[1].split("'")
+    CH=CH[0]
+     data1 = {
+          "Course_Title": CT,
+          "Course_Price": CP,
+          "Course_Rating": CR,
+          "Course_Instructor": X,
+          "Course_Hours": CH,
+          "Course_Country": CC,
+          "Course_Trainee": CTT
+      }
+  
+    }
+    final.push(data1)
+    console.log(final)
+    res.status(200).send(final);
   });
-router.get("/SearchCourseIntrsuctor", async (req, res) => {
+router.post("/SearchCourseIntrsuctor", async (req, res) => {
     const {Course_Instructor}= req.body
-    console.log(await course.find({Course_Instructor:Course_Instructor},'Course_Title Course_Rating Course_Hours -_id'))
-    res.status(200).send(await course.find({Course_Instructor:Course_Instructor},'Course_Title Course_Rating Course_Hours -_id'));
+
+    var data= await course.find({Course_Instructor:Course_Instructor},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+
+    var final= []
+    for(let i =0;i<data.length;i++)
+    {
+      var test1= JSON.stringify(data[i])
+  
+        var arrayException=test1.split("[")
+        var DataAlone=test1.split(",")
+        var data1;
+  
+    //Now Doing Trainees
+    var CTT= arrayException[1].split(',')
+    CTT= Number(CTT.length)
+    //Now Doing CourseTitle
+        var CT= DataAlone[0].split(':"')
+        CT=CT[1].split('"')
+        CT=CT[0]
+    //Now Doing Country
+    //console.log(DataAlone)
+        var CC= DataAlone[5].split(':"')
+        CC=CC[1].split('"')
+        CC=CC[0]
+    //Course Instructor ID and Name JSON FILE
+        test1=test1.split('"Course_Instructor":');
+        test1=test1[1].split(",");
+        var InstId=Number(test1[0])
+        var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+    //Now Doing Course_Price
+    var CP= DataAlone[1].split(':')
+    CP=CP[1].split("'")
+    CP=CP[0]
+    //Now DOing Course_Rating
+    var CR= DataAlone[2].split(':')
+    CR=CR[1].split("'")
+    CR=CR[0]
+    //Now DOing Course_Hours
+    var CH= DataAlone[4].split(':')
+    CH=CH[1].split("'")
+    CH=CH[0]
+     data1 = {
+          "Course_Title": CT,
+          "Course_Price": CP,
+          "Course_Rating": CR,
+          "Course_Instructor": X,
+          "Course_Hours": CH,
+          "Course_Country": CC,
+          "Course_Trainee": CTT
+      }
+  
+    }
+    final.push(data1)
+    console.log(final)
+    res.status(200).send(final);
   });
 
 router.get("/viewCourses", async (req, res) => {
-    console.log(await course.find({},'Course_Title Course_Rating Course_Hours -_id'))
-    res.status(200).send(await course.find({},'Course_Title Course_Rating Course_Hours -_id'));
+
+    var data= await course.find({},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+
+    var final= []
+    for(let i =0;i<data.length;i++)
+    {
+      var test1= JSON.stringify(data[i])
+  
+        var arrayException=test1.split("[")
+        var DataAlone=test1.split(",")
+        var data1;
+  
+    //Now Doing Trainees
+    var CTT= arrayException[1].split(',')
+    CTT= Number(CTT.length)
+    //Now Doing CourseTitle
+        var CT= DataAlone[0].split(':"')
+        CT=CT[1].split('"')
+        CT=CT[0]
+    //Now Doing Country
+    //console.log(DataAlone)
+        var CC= DataAlone[5].split(':"')
+        CC=CC[1].split('"')
+        CC=CC[0]
+    //Course Instructor ID and Name JSON FILE
+        test1=test1.split('"Course_Instructor":');
+        test1=test1[1].split(",");
+        var InstId=Number(test1[0])
+        var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+    //Now Doing Course_Price
+    var CP= DataAlone[1].split(':')
+    CP=CP[1].split("'")
+    CP=CP[0]
+    //Now DOing Course_Rating
+    var CR= DataAlone[2].split(':')
+    CR=CR[1].split("'")
+    CR=CR[0]
+    //Now DOing Course_Hours
+    var CH= DataAlone[4].split(':')
+    CH=CH[1].split("'")
+    CH=CH[0]
+     data1 = {
+          "Course_Title": CT,
+          "Course_Price": CP,
+          "Course_Rating": CR,
+          "Course_Instructor": X,
+          "Course_Hours": CH,
+          "Course_Country": CC,
+          "Course_Trainee": CTT
+      }
+  
+    }
+    final.push(data1)
+    console.log(final)
+    res.status(200).send(final);
   });
 
 // 12 choose a course from the results and view (but not open) 
