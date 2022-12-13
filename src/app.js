@@ -12,6 +12,7 @@ const MongoURI = 'mongodb+srv://ACLFogr:Fogration2022@aclfogration.gnt7ffl.mongo
 
 //App variables
 const app = express();
+app.use(cors());
 const port = process.env.PORT || "8000";
 //const user = require('./Models/User');
 app.use(cors())
