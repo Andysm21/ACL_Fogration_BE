@@ -4,6 +4,7 @@ const accountRouter = require('../Routes/accountsRouter.js')
 const courseRouter = require('../Routes/coursesRouter.js')
 const course = require('../Schemas/Course.js');
 const instructorRouter = require('../Routes/instructorRouter')
+
 var cors = require('cors');
 //mongoose.set('strictQuery', true);
 
