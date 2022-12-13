@@ -89,9 +89,9 @@ router.get("/viewCourses", async (req, res) => {
   });
 
 
-router.get("/viewCourse/:id", async (req, res) => {
-  const courses = await course.find({Course_ID: parseInt(req.params.id)},'-_id');
-  console.log(courses);
+router.post("/viewCourse", async (req, res) => {
+  const courses = await course.find({Course_ID: parseInt(req.body.id)},'-_id');
+  //console.log(courses);
   var {Course_Subtitle} = courses[0];
   var subtitle = []
   var videos = []
@@ -159,8 +159,8 @@ router.get("/viewCourse/:id", async (req, res) => {
     ExamObj[i] = exam;
   }
   
-  var instructor = await Instructor.find({Instructor_ID: courses[0].Course_Instructor},'-_id');
-  instructor = instructor[0];
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor},'-_id');
+  //instructor = instructor[0];
 
   //console.log(instructor);
   const Course = {
@@ -170,22 +170,24 @@ router.get("/viewCourse/:id", async (req, res) => {
     Course_Description: courses[0].Course_Description,
     Course_Price: courses[0].Course_Price,
     Course_Rating: courses[0].Course_Rating,
-    Course_Instructor: {
-      Instructor_ID: instructor.Instructor_ID,
-      Instructor_FirstName: instructor.Instructor_FirstName,
-      Instructor_LastName: instructor.Instructor_LastName
-    },
+    Course_Instructor: instructor,
+    // {
+    //   Instructor_ID: instructor.Instructor_ID,
+    //   Instructor_FirstName: instructor.Instructor_FirstName,
+    //   Instructor_LastName: instructor.Instructor_LastName
+    // },
     Course_Hours: courses[0].Course_Hours,
     Course_Country: courses[0].Course_Country,
     Course_Discount: courses[0].Course_Discount,
     Course_Discount_Duration: courses[0].Course_Discount_Duration,
     Course_Subtitle: subtitle,
-    Course_Trainee: courses[0].Course_Trainee,
+    Course_Trainee: courses[0].Course_Trainee.length,
     Course_Review: courses[0].Course_Review,
     Course_Rate: courses[0].Course_Rate,
     Course_Exam: ExamObj
   };
-  
+  //console.log(Course.Course_ID);
+  //console.log(courses[0].Course_Trainee.length);
   res.send(Course);
 })
 // 12 choose a course from the results and view (but not open) 
