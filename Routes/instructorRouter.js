@@ -16,6 +16,7 @@ const exams = require('../Controller/exams.js')
 const courseCC = require('../Controller/courses.js');
 const Video = require('../Schemas/Video.js');
 const subtitle = require('../Schemas/Subtitle.js');
+const Instructor = require('../Schemas/Instructor.js');
 //const youtubekey='1081702991015-3ube06jg6k96mf2ckvcp850lv7iibq48.apps.googleusercontent.com'
 
 
@@ -77,6 +78,7 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
 
 });
 
+//not yet front
 //20 search for a course given by him/her based on course title or subject or instructor
 router.get("/SearchCourseTitleInst", async (req, res) => {
   const Instructor_id = req.body.Instructor_ID
@@ -194,7 +196,8 @@ router.get("/SearchCourseTitleInst", async (req, res) => {
     res.send(final);
   }
  });
-
+ 
+//not yet front
 router.get("/SearchCourseSubjectInst", async (req, res) => {
 const Instructor_id = req.body.Instructor_ID
   const SearchSubject= req.body.Course_Subject
@@ -313,12 +316,140 @@ const Instructor_id = req.body.Instructor_ID
 });
 
 
+//DONEEE
 //19 filter the courses given by him/her based on a subject or price
-router.get("/filterPriceInst", async (req, res) => {
+router.post("/filterPriceInst", async (req, res) => {
   const Instructor_id = req.body.Instructor_ID
   const FilterPriceLower= req.body.FilterPrice1
   const FilterPriceHigher= req.body.FilterPrice2
   var data= await course.find({Course_Instructor:Instructor_id},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+  //console.log(data)
+  var final= []
+  for(let i =0;i<data.length;i++)
+  {
+    var test1= JSON.stringify(data[i])
+
+      var arrayException=test1.split("[")
+      var DataAlone=test1.split(",")
+      var data1;
+
+  //Now Doing Trainees
+  var CTT= arrayException[1].split(',')
+  CTT= Number(CTT.length)
+  //Now Doing CourseTitle
+      var CT= DataAlone[0].split(':"')
+      CT=CT[1].split('"')
+      CT=CT[0]
+  //Now Doing Country
+  //console.log(DataAlone)
+      var CC= DataAlone[5].split(':"')
+      CC=CC[1].split('"')
+      CC=CC[0]
+  //Course Instructor ID and Name JSON FILE
+      test1=test1.split('"Course_Instructor":');
+      test1=test1[1].split(",");
+      var InstId=Number(test1[0])
+      var X = await instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+  //Now Doing Course_Price
+  var CP= DataAlone[1].split(':')
+  CP=CP[1].split("'")
+  CP=CP[0]
+  //Now DOing Course_Rating
+  var CR= DataAlone[2].split(':')
+  CR=CR[1].split("'")
+  CR=CR[0]
+  //Now DOing Course_Hours
+  var CH= DataAlone[4].split(':')
+  CH=CH[1].split("'")
+  CH=CH[0]
+   data1 = {
+        "Course_Title": CT,
+        "Course_Price": CP,
+        "Course_Rating": CR,
+        "Course_Instructor": X,
+        "Course_Hours": CH,
+        "Course_Country": CC,
+        "Course_Trainee": CTT
+    }
+
+    if(Number(FilterPriceLower)<=Number(CP )){
+      if(Number(CP)<=Number(FilterPriceHigher)){
+        console.log(CP)
+        console.log(FilterPriceLower)
+        console.log(FilterPriceHigher)
+        final.push(data1)
+      }
+    }
+  }
+  console.log(final)
+  res.status(200).send(final);
+});
+
+//DONEEE
+router.post("/filterSubjectInst", async (req, res) => {
+  const x = req.body.Instructor_ID
+  const {FilterSubject} = req.body
+  var data=await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+  
+  var final= []
+  for(let i =0;i<data.length;i++)
+  {
+    var test1= JSON.stringify(data[i])
+
+      var arrayException=test1.split("[")
+      var DataAlone=test1.split(",")
+      var data1;
+
+  //Now Doing Trainees
+  var CTT= arrayException[1].split(',')
+  CTT= Number(CTT.length)
+  //Now Doing CourseTitle
+      var CT= DataAlone[0].split(':"')
+      CT=CT[1].split('"')
+      CT=CT[0]
+  //Now Doing Country
+  console.log(DataAlone)
+      var CC= DataAlone[5].split(':"')
+      CC=CC[1].split('"')
+      CC=CC[0]
+  //Course Instructor ID and Name JSON FILE
+      test1=test1.split('"Course_Instructor":');
+      test1=test1[1].split(",");
+      var InstId=Number(test1[0])
+      var X = await instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+  //Now Doing Course_Price
+  var CP= DataAlone[1].split(':')
+  CP=CP[1].split("'")
+  CP=CP[0]
+  //Now DOing Course_Rating
+  var CR= DataAlone[2].split(':')
+  CR=CR[1].split("'")
+  CR=CR[0]
+  //Now DOing Course_Hours
+  var CH= DataAlone[4].split(':')
+  CH=CH[1].split("'")
+  CH=CH[0]
+   data1 = {
+        "Course_Title": CT,
+        "Course_Price": CP,
+        "Course_Rating": CR,
+        "Course_Instructor": X,
+        "Course_Hours": CH,
+        "Course_Country": CC,
+        "Course_Trainee": CTT
+    }
+    final.push(data1)
+  }
+  res.status(200).send(final);
+});
+
+//DONEEE
+router.post("/filterPriceAndSubjectInst", async (req, res) => {
+  const Instructor_id = req.body.Instructor_ID
+  const FilterPriceLower= req.body.FilterPrice1
+  const FilterPriceHigher= req.body.FilterPrice2
+  const {FilterSubject} = req.body
+  var data= await course.find({Course_Instructor:Instructor_id,Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
   console.log(data)
   var final= []
   for(let i =0;i<data.length;i++)
@@ -380,63 +511,11 @@ router.get("/filterPriceInst", async (req, res) => {
   res.status(200).send(final);
 });
 
-router.get("/filterSubjectInst", async (req, res) => {
-  const x = req.body.Instructor_ID
-  const {FilterSubject} = req.body
-  var data=await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
-  
-  var final= []
-  for(let i =0;i<data.length;i++)
-  {
-    var test1= JSON.stringify(data[i])
 
-      var arrayException=test1.split("[")
-      var DataAlone=test1.split(",")
-      var data1;
-
-  //Now Doing Trainees
-  var CTT= arrayException[1].split(',')
-  CTT= Number(CTT.length)
-  //Now Doing CourseTitle
-      var CT= DataAlone[0].split(':"')
-      CT=CT[1].split('"')
-      CT=CT[0]
-  //Now Doing Country
-  console.log(DataAlone)
-      var CC= DataAlone[5].split(':"')
-      CC=CC[1].split('"')
-      CC=CC[0]
-  //Course Instructor ID and Name JSON FILE
-      test1=test1.split('"Course_Instructor":');
-      test1=test1[1].split(",");
-      var InstId=Number(test1[0])
-      var X = await instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
-  //Now Doing Course_Price
-  var CP= DataAlone[1].split(':')
-  CP=CP[1].split("'")
-  CP=CP[0]
-  //Now DOing Course_Rating
-  var CR= DataAlone[2].split(':')
-  CR=CR[1].split("'")
-  CR=CR[0]
-  //Now DOing Course_Hours
-  var CH= DataAlone[4].split(':')
-  CH=CH[1].split("'")
-  CH=CH[0]
-   data1 = {
-        "Course_Title": CT,
-        "Course_Price": CP,
-        "Course_Rating": CR,
-        "Course_Instructor": X,
-        "Course_Hours": CH,
-        "Course_Country": CC,
-        "Course_Trainee": CTT
-    }
-    final.push(data1)
-  }
-  res.status(200).send(final);
-});
-
+router.post("/instructorProfile", async (req,res)=>{
+  var Inst_ID= req.body.Instructor_ID
+  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography -_id'))
+})
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //create a multiple choice exam with 4 choices per question
 router.post("/createExam", async (req, res) =>{
@@ -560,7 +639,7 @@ router.put("/editBiographyOrEmail", async (req, res) => {
 
 
 //change his/her password (31/32)
-router.put("/changePassword", async (req, res) => {
+router.post("/changePassword", async (req, res) => {
   const pass= req.body.Password
   const x= req.body.ID  
   const type = req.body.type
