@@ -15,7 +15,7 @@ const app = express();
 app.use(cors());
 const port = process.env.PORT || "8000";
 //const user = require('./Models/User');
-
+app.use(cors())
 
 
 // configurations

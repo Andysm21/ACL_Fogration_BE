@@ -88,7 +88,7 @@ router.get("/viewCourses", async (req, res) => {
     res.status(200).send(await course.find({},'Course_Title Course_Rating Course_Hours -_id'));
   });
 
-
+//Salma's Single Course Method
 router.post("/viewCourse", async (req, res) => {
   const courses = await course.find({Course_ID: parseInt(req.body.id)},'-_id');
   //console.log(courses);
@@ -190,6 +190,122 @@ router.post("/viewCourse", async (req, res) => {
   //console.log(courses[0].Course_Trainee.length);
   res.send(Course);
 })
+
+//DONE 3ANDY All Courses For Guest/Individual/Instructor by Andrew
+router.get("/viewCoursesALL", async (req, res) => {
+    
+  var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+  var final= []
+
+
+  for(let i =0;i<data.length;i++)
+  {
+    var test1= JSON.stringify(data[i])
+  
+      var arrayException=test1.split("[")
+      var DataAlone=test1.split(",")
+      var data1;
+  //Now Doing Trainees
+  var CTT= arrayException[1].split(',')
+  CTT= Number(CTT.length)
+  //Now Doing CourseTitle
+      var CT= DataAlone[0].split(':"')
+      CT=CT[1].split('"')
+      CT=CT[0]
+  //Now Doing Country
+  console.log(DataAlone)
+      var CC= DataAlone[5].split(':"')
+      CC=CC[1].split('"')
+      CC=CC[0]
+  //Course Instructor ID and Name JSON FILE
+      test1=test1.split('"Course_Instructor":');
+      test1=test1[1].split(",");
+      var InstId=Number(test1[0])
+      var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+  //Now Doing Course_Price
+  var CP= DataAlone[1].split(':')
+  CP=CP[1].split("'")
+  CP=CP[0]
+  //Now DOing Course_Rating
+  var CR= DataAlone[2].split(':')
+  CR=CR[1].split("'")
+  CR=CR[0]
+  //Now DOing Course_Hours
+  var CH= DataAlone[4].split(':')
+  CH=CH[1].split("'")
+  CH=CH[0]
+   data1 = {
+        "Course_Title": CT,
+        "Course_Price": CP,
+        "Course_Rating": CR,
+        "Course_Instructor": X,
+        "Course_Hours": CH,
+        "Course_Country": CC,
+        "Course_Trainee": CTT
+    }
+    final.push(data1)
+  }
+  console.log(final)
+  res.send(final)
+  });
+
+
+  router.get("/viewCoursesCorporate", async (req, res) => {
+    
+    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+    var final= []
+  
+  
+    for(let i =0;i<data.length;i++)
+    {
+      var test1= JSON.stringify(data[i])
+    
+        var arrayException=test1.split("[")
+        var DataAlone=test1.split(",")
+        var data1;
+    //Now Doing Trainees
+    var CTT= arrayException[1].split(',')
+    CTT= Number(CTT.length)
+    //Now Doing CourseTitle
+        var CT= DataAlone[0].split(':"')
+        CT=CT[1].split('"')
+        CT=CT[0]
+    //Now Doing Country
+    console.log(DataAlone)
+        var CC= DataAlone[5].split(':"')
+        CC=CC[1].split('"')
+        CC=CC[0]
+    //Course Instructor ID and Name JSON FILE
+        test1=test1.split('"Course_Instructor":');
+        test1=test1[1].split(",");
+        var InstId=Number(test1[0])
+        var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+    //Now Doing Course_Price
+    var CP= DataAlone[1].split(':')
+    CP=CP[1].split("'")
+    CP=CP[0]
+    //Now DOing Course_Rating
+    var CR= DataAlone[2].split(':')
+    CR=CR[1].split("'")
+    CR=CR[0]
+    //Now DOing Course_Hours
+    var CH= DataAlone[4].split(':')
+    CH=CH[1].split("'")
+    CH=CH[0]
+     data1 = {
+          "Course_Title": CT,
+          "Course_Rating": CR,
+          "Course_Instructor": X,
+          "Course_Hours": CH,
+          "Course_Country": CC,
+          "Course_Trainee": CTT
+      }
+      final.push(data1)
+    }
+    console.log(final)
+    res.send(final)
+    });
+  
 // 12 choose a course from the results and view (but not open) 
 //its details including course subtitles, excercises , total hours of each subtitle, 
 //total hours of the course 
