@@ -159,7 +159,7 @@ router.post("/viewCourse", async (req, res) => {
     ExamObj[i] = exam;
   }
   
-  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor},'-_id');
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('Instructor_ID Instructor_FirstName -_id');
   //instructor = instructor[0];
 
   //console.log(instructor);

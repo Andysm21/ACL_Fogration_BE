@@ -65,16 +65,18 @@ router.post('/createAdmin', async (req,res)=>{
 router.post('/createInstructor',async (req,res)=>{
     var id = await inst.count().exec()+1;
 
-    if(req.body.Instructor_username=="")
-        res.send("Username field should not be empty")
-    else if(req.body.Instructor_Password=="")
-        res.send("Password field should not be empty")
+    if(req.body.Instructor_username=="") //Username field should not be empty
+        res.send("1")
+    else if(req.body.Instructor_Password=="") //Password field should not be empty
+        res.send("2")
     else 
         if(await (await inst.find({Instructor_username: req.body.Instructor_username}).select('Instructor_username')).length > 0)
-        res.send("Choose another username.")
+        //Choose another username.
+        res.send("3")
     else{
         signRouter.createInstructor(req,id)
-        res.send("Create a new Instructor.")
+        //Create a new Instructor.
+        res.send("4")
     }
 })
 
