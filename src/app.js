@@ -4,7 +4,9 @@ const accountRouter = require('../Routes/accountsRouter.js')
 const courseRouter = require('../Routes/coursesRouter.js')
 const course = require('../Schemas/Course.js');
 const instructorRouter = require('../Routes/instructorRouter')
-var cors = require('cors')
+
+var cors = require('cors');
+//mongoose.set('strictQuery', true);
 
 //Check db connection links in README file
 const MongoURI = 'mongodb+srv://ACLFogr:Fogration2022@aclfogration.gnt7ffl.mongodb.net/?retryWrites=true&w=majority' ;
@@ -12,6 +14,7 @@ const MongoURI = 'mongodb+srv://ACLFogr:Fogration2022@aclfogration.gnt7ffl.mongo
 
 //App variables
 const app = express();
+app.use(cors());
 const port = process.env.PORT || "8000";
 //const user = require('./Models/User');
 app.use(cors())

@@ -637,6 +637,40 @@ router.put("/editBiographyOrEmail", async (req, res) => {
   }
 });
 
+router.put("/editProfile", async (req, res) => {
+ const id = req.body.Instructor_ID
+ const bio= req.body.Instructor_Biography
+ const email= req.body.Instructor_Email
+ const username = req.body.Instructor_username
+ const firstName = req.body.Instructor_FirstName
+ const lastname = req.body.Instructor_LastName
+ const gender = req.body.Instructor_Gender
+ const country = req.body.Instructor_Country
+ const checkUN = await instructor.findOne({Instructor_username: username},'Instructor_ID -_id');
+ const checkEM = await instructor.findOne({Instructor_Email: email},'Instructor_ID -_id');
+
+// console.log(checkEM);
+console.log(id);
+console.log(checkUN.Instructor_ID);
+
+
+  if(username == '') //username cannot be empty
+    res.send("1");
+  else if(checkUN != null && checkUN.Instructor_ID != id){ //username already in use
+    res.send("2");
+  }
+  else if(checkEM != null && checkEM.Instructor_ID != id){ //email already in use
+    res.send("3");
+  }
+  else{
+    const x = await instructor.update({Instructor_ID: id},{Instructor_Email:email, Instructor_Biography:bio , Instructor_username: username,
+      Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country},{new: true})
+    res.send("4")
+  }
+
+
+  
+});
 
 //change his/her password (31/32)
 router.post("/changePassword", async (req, res) => {
@@ -687,18 +721,18 @@ router.post("/forgotPassword", async (req, res) => {
 				.send({ message: "User with given email does not exist!" });
     }
     else {
-      const url = `https://loaclhost:3000/password-reset/3/`;
+      const url = `http://localhost:3000/guest/corpPasswordReset/`;
       await sendEmail(email, "Password Reset", url);
     }
   }
     else{
-      const url = `https://loaclhost:3000/password-reset/2/`;
+      const url = `http://localhost:3000/guest/userPasswordReset/`;
       await sendEmail(email, "Password Reset", url);
     }
 
   }
     else{
-    const url = `https://loaclhost:3000/password-reset/1/`;
+    const url = `http://localhost:3000/guest/instructorPasswordReset/`;
 		await sendEmail(email, "Password Reset", url);
     }
 
