@@ -272,27 +272,28 @@ router.post("/filterSubjectRating", async (req, res) => {
   });
   router.get("/viewCoursesALL", async (req, res) => {
     
-    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
     var final= []
-  
+    // var JustID= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
   
     for(let i =0;i<data.length;i++)
     {
       var test1= JSON.stringify(data[i])
-    
+      
         var arrayException=test1.split("[")
         var DataAlone=test1.split(",")
         var data1;
     //Now Doing Trainees
+    console.log(DataAlone)
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
-        var CT= DataAlone[0].split(':"')
+        var CT= DataAlone[1].split(':"')
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
     console.log(DataAlone)
-        var CC= DataAlone[5].split(':"')
+        var CC= DataAlone[6].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
     //Course Instructor ID and Name JSON FILE
@@ -301,18 +302,24 @@ router.post("/filterSubjectRating", async (req, res) => {
         var InstId=Number(test1[0])
         var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
     //Now Doing Course_Price
-    var CP= DataAlone[1].split(':')
+    var CP= DataAlone[2].split(':')
     CP=CP[1].split("'")
     CP=CP[0]
     //Now DOing Course_Rating
-    var CR= DataAlone[2].split(':')
+    var CR= DataAlone[3].split(':')
     CR=CR[1].split("'")
     CR=CR[0]
     //Now DOing Course_Hours
-    var CH= DataAlone[4].split(':')
+    var CH= DataAlone[5].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
+        //Now DOing ID
+        var CI= DataAlone[0].split(':')
+        CI=CI[1].split("'")
+        CI=CI[0]
+    console.log(DataAlone)
      data1 = {
+          "Course_ID": CI,
           "Course_Title": CT,
           "Course_Price": CP,
           "Course_Rating": CR,
@@ -323,7 +330,6 @@ router.post("/filterSubjectRating", async (req, res) => {
       }
       final.push(data1)
     }
-    console.log(final)
     res.send(final)
     });
   
@@ -625,8 +631,13 @@ router.get("/viewCourses", async (req, res) => {
   });
 
 //Salma's Single Course Method
-router.post("/viewCourse", async (req, res) => {
-  const courses = await course.find({Course_ID: parseInt(req.body.id)},'-_id');
+router.post("/viewCourse/:id", async (req, res) => {
+  console.log(req.params.id)
+
+  const ID= req.params.id
+  // var test =ID.split(":")
+  // console.log(test)
+  const courses = await course.find({Course_ID: Number(ID)},'-_id');
   //console.log(courses);
   var {Course_Subtitle} = courses[0];
   var subtitle = []
@@ -695,11 +706,12 @@ router.post("/viewCourse", async (req, res) => {
     ExamObj[i] = exam;
   }
   
-  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('Instructor_ID Instructor_FirstName -_id');
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  //.select('Instructor_ID Instructor_FirstName -_id');
   //instructor = instructor[0];
 
   //console.log(instructor);
-  const Course = {
+  const CourseT = {
     Course_ID: courses[0].Course_ID,
     Course_Title: courses[0].Course_Title,
     Course_Subject: courses[0].Course_Subject,
@@ -724,66 +736,74 @@ router.post("/viewCourse", async (req, res) => {
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
-  res.send(Course);
+  res.send(CourseT);
+  console.log("HI")
+
 })
 
 //DONE 3ANDY All Courses For Guest/Individual/Instructor by Andrew
-router.get("/viewCoursesALL", async (req, res) => {
+// router.get("/viewCoursesALL", async (req, res) => {
     
-  var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
-  var final= []
+//   var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
+//   var final= []
 
 
-  for(let i =0;i<data.length;i++)
-  {
-    var test1= JSON.stringify(data[i])
+//   for(let i =0;i<data.length;i++)
+//   {
+//     var test1= JSON.stringify(data[i])
   
-      var arrayException=test1.split("[")
-      var DataAlone=test1.split(",")
-      var data1;
-  //Now Doing Trainees
-  var CTT= arrayException[1].split(',')
-  CTT= Number(CTT.length)
-  //Now Doing CourseTitle
-      var CT= DataAlone[0].split(':"')
-      CT=CT[1].split('"')
-      CT=CT[0]
-  //Now Doing Country
-  console.log(DataAlone)
-      var CC= DataAlone[5].split(':"')
-      CC=CC[1].split('"')
-      CC=CC[0]
-  //Course Instructor ID and Name JSON FILE
-      test1=test1.split('"Course_Instructor":');
-      test1=test1[1].split(",");
-      var InstId=Number(test1[0])
-      var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
-  //Now Doing Course_Price
-  var CP= DataAlone[1].split(':')
-  CP=CP[1].split("'")
-  CP=CP[0]
-  //Now DOing Course_Rating
-  var CR= DataAlone[2].split(':')
-  CR=CR[1].split("'")
-  CR=CR[0]
-  //Now DOing Course_Hours
-  var CH= DataAlone[4].split(':')
-  CH=CH[1].split("'")
-  CH=CH[0]
-   data1 = {
-        "Course_Title": CT,
-        "Course_Price": CP,
-        "Course_Rating": CR,
-        "Course_Instructor": X,
-        "Course_Hours": CH,
-        "Course_Country": CC,
-        "Course_Trainee": CTT
-    }
-    final.push(data1)
-  }
-  console.log(final)
-  res.send(final)
-  });
+//       var arrayException=test1.split("[")
+//       var DataAlone=test1.split(",")
+//       var data1;
+//   //Now Doing Trainees
+//   var CTT= arrayException[1].split(',')
+//   CTT= Number(CTT.length)
+//   //Now Doing CourseTitle
+//       var CT= DataAlone[0].split(':"')
+//       CT=CT[1].split('"')
+//       CT=CT[0]
+//   //Now Doing Country
+//   console.log(DataAlone)
+//       var CC= DataAlone[5].split(':"')
+//       CC=CC[1].split('"')
+//       CC=CC[0]
+//   //Course Instructor ID and Name JSON FILE
+//       test1=test1.split('"Course_Instructor":');
+//       test1=test1[1].split(",");
+//       var InstId=Number(test1[0])
+//       var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
+//   //Now Doing Course_Price
+//   var CP= DataAlone[1].split(':')
+//   CP=CP[1].split("'")
+//   CP=CP[0]
+//   //Now DOing Course_Rating
+//   var CR= DataAlone[2].split(':')
+//   CR=CR[1].split("'")
+//   CR=CR[0]
+//   //Now DOing Course_Hours
+//   var CH= DataAlone[4].split(':')
+//   CH=CH[1].split("'")
+//   CH=CH[0]
+//   console.log(DataAlone)
+//     //Now DOing Course_Hours
+//     var CI= DataAlone[].split(':')
+//     CI=CI[1].split("'")
+//     CI=CI[0]
+//    data1 = {
+//         "Course_ID" :
+//         "Course_Title": CT,
+//         "Course_Price": CP,
+//         "Course_Rating": CR,
+//         "Course_Instructor": X,
+//         "Course_Hours": CH,
+//         "Course_Country": CC,
+//         "Course_Trainee": CTT
+//     }
+//     final.push(data1)
+//   }
+
+//   res.send(final)
+//   });
 
 
   router.get("/viewCoursesCorporate", async (req, res) => {
