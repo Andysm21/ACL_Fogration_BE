@@ -50,14 +50,14 @@ router.post('/createAdmin', async (req,res)=>{
         var id = await Admin.count().exec()+1;
 
     if(req.body.Admin_Username=="")
-        res.send("Username field should not be empty")
+        res.send("1")
     else if(req.body.Admin_Password=="")
-        res.send("Password field should not be empty")
+        res.send("2")
     else if(await (await Admin.find({Admin_Username: req.body.Admin_Username}).select('Admin_Username')).length > 0)
-        res.send("Choose another username.")
+        res.send("3")
     else{
         signRouter.createAdmin(req,id)
-        res.send("Create a new admin.")
+        res.send("4")
     }
 })
 
@@ -85,15 +85,15 @@ router.post('/createCorporateUser', async (req,res)=>{
     var id = await corp.count().exec()+1;
 
     if(req.body.CorporateUser_UserName=="")
-        res.send("Username field should not be empty")
+        res.send("1")
     else if(req.body.CorporateUser_Password=="")
-        res.send("Password field should not be empty")
+        res.send("2")
     else 
         if(await (await corp.find({CorporateUser_UserName: req.body.CorporateUser_UserName}).select('CorporateUser_UserName')).length > 0)
-        res.send("Choose another username.")
+        res.send("3")
     else{
         signRouter.createCorporateUser(req,id)
-        res.send("Create a new corporate user.")
+        res.send("4")
     }
     
 })
