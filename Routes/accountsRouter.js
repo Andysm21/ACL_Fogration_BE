@@ -92,8 +92,14 @@ router.post('/createCorporateUser', async (req,res)=>{
         if(await (await corp.find({CorporateUser_UserName: req.body.CorporateUser_UserName}).select('CorporateUser_UserName')).length > 0)
         res.send("3")
     else{
+        if(await (await user.find({individualUser_UserName: req.body.CorporateUser_UserName}).select('individual_Username')).length > 0)
+        {
+            res.send("3")
+        }
+        else{
         signRouter.createCorporateUser(req,id)
         res.send("4")
+    }
     }
     
 })
@@ -104,7 +110,7 @@ router.post('/createCourse', async (req,res)=>{
     var id = await course.count().exec()+1;
     if(await (await (course.find({Course_Title: req.body.Course_Title}).select('Course_Title '))).length>0)
         res.send("Course already exists.")
-    else if(req.body.Course_Title!= null && req.body.Course_Subtitle != null && req.body.Course_Price != null && req.body.Course_Description != null && req.body.Course_Subject != null && req.body.Course_Instructor != null && req.body.Course_Country != null) {
+    else if(req.body.Course_Title!= null || req.body.Course_Subtitle != null || req.body.Course_Price != null || req.body.Course_Description != null || req.body.Course_Subject != null || req.body.Course_Instructor != null || req.body.Course_Country != null) {
         courseRouter.createCourse(req,id)
         res.send("Create a new course.")
         }
@@ -118,21 +124,78 @@ router.post('/createCourse', async (req,res)=>{
 // a username, email, password, first name, last name and gender
 router.post('/signUp', async (req,res)=>{
     var id = await user.count().exec()+1;
+    console.log(req.body)
     if(await (await (user.find({individualUser_Email: req.body.individualUser_Email}).select('individualUser_Email'))).length > 0)
-        res.send("User already exists.")
+        res.send("1")
     else 
         if(await (await user.find({individualUser_UserName: req.body.individualUser_UserName}).select('individualUser_UserName')).length > 0)
-        res.send("Choose another username.")
-    else if(req.body.individualUser_UserName!= null && req.body.individualUser_Password != null && req.body.individualUser_Email != null && req.body.individualUser_FirstName != null && req.body.individualUser_LastName != null && req.body.individualUser_Gender != null && req.body.individualUser_Country != null) {
-        signRouter.signUP(req,id)
-        res.send("Create a new user.")
+        res.send("2")
+        else{
+            if(await (await corp.find({CorporateUser_UserName: req.body.individualUser_UserName}).select('CorporateUser_UserName')).length > 0)
+                res.send("3")
+        
+    else if(req.body.individualUser_UserName == "" || req.body.individualUser_Password == "" || req.body.individualUser_Email == "" || req.body.individualUser_FirstName == "" || req.body.individualUser_LastName == "" || req.body.individualUser_Gender == "" || req.body.individualUser_Country == "") {
+       res.send("5")
     }
     else {
-        res.send("Please fill all required fields")
+         signRouter.signUP(req,id)
+        res.send("4")
     }
+}
 
 })
+//same login page or not ?? I SAY NOT ~Andrew
+router.post('/login', async (req,res)=>{
+    var username = req.body.Uname;
+    var password = req.body.Pass;
+    //adming
 
+        if(await (await (Admin.find({Admin_Username: username, Admin_Password: password}).select('Admin_Username -_id'))).length>0){
+        res.send("1")
+        console.log("Admin Login")
+    }
+    else{
+        if(await (await (inst.find({Instructor_username: username, Instructor_Password: password}).select('Instructor_username -_id'))).length>0){// Instructor
+            res.send("2")
+            console.log("Inst Login")
 
+        }
+        else {
+            if(await (await (user.find({individualUser_UserName: username, individualUser_Password: password}).select('individualUser_UserName -_id'))).length>0){ // Trainees
+                res.send("3")      
+                console.log("Ind Login")
+
+        }
+        else{
+            if(await (await (corp.find({CorporateUser_UserName: username, CorporateUser_Password: password}).select("CorporateUser_Username -_id"))).length>0){
+                res.send("4")    
+                console.log("Corp Login")
+
+            }
+            else{
+                res.send("5")
+                console.log("NO")
+            }
+
+    }
+}
+  }
+})
+
+router.post('/isCorp', async (req,res)=>{
+    var username = req.body.Username;
+    var password = req.body.Password;
+    //adming
+
+            if(await user.findOne({individualUser_UserName: username, individualUser_Password: password}).select('individualUser_UserName -_id')>0){ // Trainees
+                res.send("0")      
+            
+        }
+        else{
+            if(await corp.findOne({CorporateUser_UserName: username, CorporateUser_Password: password}).select("CorporateUser_Username -_id")>0){
+                res.send("1")    
+            }
+  }
+})
 
 module.exports=router;
