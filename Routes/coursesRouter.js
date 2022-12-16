@@ -807,7 +807,7 @@ router.post("/viewCourse/:id", async (req, res) => {
 
 
   router.get("/viewCoursesCorporate", async (req, res) => {
-    
+    const x = req.body.User_ID
     var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
     var final= []
   

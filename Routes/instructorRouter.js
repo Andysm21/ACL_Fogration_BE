@@ -636,7 +636,7 @@ router.put("/editBiographyOrEmail", async (req, res) => {
     res.status(404).send("User not found");
   }
 });
-
+//First and last names ,bio and country and gender
 router.put("/editProfile", async (req, res) => {
  const id = req.body.Instructor_ID
  const bio= req.body.Instructor_Biography
@@ -646,12 +646,12 @@ router.put("/editProfile", async (req, res) => {
  const lastname = req.body.Instructor_LastName
  const gender = req.body.Instructor_Gender
  const country = req.body.Instructor_Country
- const checkUN = await instructor.findOne({Instructor_username: username},'Instructor_ID -_id');
+ const checkUN = await instructor.findOne({Instructor_username:username},'Instructor_ID -_id');
  const checkEM = await instructor.findOne({Instructor_Email: email},'Instructor_ID -_id');
-
+console.log(req.body)
 // console.log(checkEM);
 console.log(id);
-console.log(checkUN.Instructor_ID);
+// console.log(checkUN);
 
 
   if(username == '') //username cannot be empty
@@ -663,15 +663,32 @@ console.log(checkUN.Instructor_ID);
     res.send("3");
   }
   else{
-    const x = await instructor.update({Instructor_ID: id},{Instructor_Email:email, Instructor_Biography:bio , Instructor_username: username,
-      Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country},{new: true})
+    const x = await instructor.updateOne({Instructor_ID: id},{Instructor_Biography:bio ,
+      Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country})
     res.send("4")
   }
-
-
-  
 });
+//Username and Email
+router.put("/editProfileUserEmail", async (req, res) => {
+  const id = req.body.Instructor_ID
+  const email= req.body.Instructor_Email
+  const username = req.body.Instructor_username
+  const checkUN = await instructor.findOne({Instructor_username: username},'Instructor_ID -_id');
+  const checkEM = await instructor.findOne({Instructor_Email: email},'Instructor_ID -_id');
+   if(username == '') //username cannot be empty
+     res.send("1");
+   else if(checkUN != null && checkUN.Instructor_ID != id){ //username already in use
+     res.send("2");
+   }
+   else if(checkEM != null && checkEM.Instructor_ID != id){ //email already in use
+     res.send("3");
+   }
+   else{
+    const x = await instructor.updateOne({Instructor_ID: id},{Instructor_username: username, Instructor_Email: email});
+     res.send("4")
+   }
 
+ });
 //change his/her password (31/32)
 router.post("/changePassword", async (req, res) => {
   const pass= req.body.Password
@@ -679,7 +696,7 @@ router.post("/changePassword", async (req, res) => {
   const type = req.body.type
   if(type == 1){
     if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){
-      await instructor.update({Instructor_ID:x},{Instructor_Password:pass})
+      await instructor.updateOne({Instructor_ID:x},{Instructor_Password:pass})
       res.status(200).send("Password updated");
     }
     else {
@@ -688,7 +705,7 @@ router.post("/changePassword", async (req, res) => {
   }
   if(type == 2){
     if((await individualUser.find({IndividualUser_ID:x},'IndividualUser_ID -_id')).length != 0){
-      await individualUser.update({IndividualUser_ID:x},{individualUser_Password:pass})
+      await individualUser.updateOne({IndividualUser_ID:x},{individualUser_Password:pass})
       res.status(200).send("Password updated");
     }
     else {
@@ -697,13 +714,14 @@ router.post("/changePassword", async (req, res) => {
   }
   if(type == 3){
     if((await corporateUser.find({CorporateUser_ID:x},'CorporateUser_ID -_id')).length != 0){
-      await corporateUser.update({CorporateUser_ID:x},{CorporateUser_Password:pass})
+      await corporateUser.updateOne({CorporateUser_ID:x},{CorporateUser_Password:pass})
       res.status(200).send("Password updated");
     }
     else {
       res.status(409).send("User not found");
     }
   }
+  console.log("hi")
   
 });
 
