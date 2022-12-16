@@ -6,7 +6,12 @@ const user = require('../Schemas/IndividualUser.js');
 const inst = require('../Schemas/Instructor.js');
 const Admin = require('../Schemas/Administrator.js');
 const course = require('../Schemas/Course.js');''
-const corp = require('../Schemas/CorporateUser.js');''
+const Subtitle = require('../Schemas/Subtitle.js');
+const Video = require('../Schemas/Video.js');
+const Question = require('../Schemas/Question.js');
+const corp = require('../Schemas/CorporateUser.js');
+const Exam = require('../Schemas/Exam.js');
+const StudentTakeCourse = require('../Schemas/StudentTakeCourse');
 
 
 const express= require("express")
@@ -150,31 +155,52 @@ router.post('/login', async (req,res)=>{
     var password = req.body.Pass;
     //adming
 
-        if(await (await (Admin.find({Admin_Username: username, Admin_Password: password}).select('Admin_Username -_id'))).length>0){
-        res.send("1")
+        if(await (await (Admin.find({Admin_Username: username, Admin_Password: password}).select('Admin_ID -_id'))).length>0){
+            var test = await Admin.findOne({Admin_Username: username, Admin_Password: password}).select('Admin_ID -_id');
+            test = JSON.stringify(test)
+            test = test.split(":")
+             test = test[1].split('}')
+            console.log(test[0])
+            res.send("1"+":"+test[0])
         console.log("Admin Login")
     }
     else{
-        if(await (await (inst.find({Instructor_username: username, Instructor_Password: password}).select('Instructor_username -_id'))).length>0){// Instructor
-            res.send("2")
+        if(await (await (inst.find({Instructor_username: username, Instructor_Password: password}).select('Instructor_ID -_id'))).length>0){// Instructor
+            var test =await (inst.findOne({Instructor_username: username, Instructor_Password: password}).select('Instructor_ID -_id'));
+            test = JSON.stringify(test)
+            test = test.split(":")
+            test = test[1].split('}')
+            console.log(test[0])
+            res.send("2"+":"+test[0])
             console.log("Inst Login")
 
         }
         else {
-            if(await (await (user.find({individualUser_UserName: username, individualUser_Password: password}).select('individualUser_UserName -_id'))).length>0){ // Trainees
-                res.send("3")      
+            if(await (await (user.find({individualUser_UserName: username, individualUser_Password: password}).select('IndividualUser_ID -_id'))).length>0){ // Trainees
+                var test =await user.findOne({individualUser_UserName: username, individualUser_Password: password}).select('IndividualUser_ID -_id')
+                test = JSON.stringify(test)
+                console.log(test)
+                test = test.split(":")
+                test = test[1].split('}')
+                console.log(test[0])
+                res.send("3"+":"+test[0])
                 console.log("Ind Login")
 
         }
         else{
-            if(await (await (corp.find({CorporateUser_UserName: username, CorporateUser_Password: password}).select("CorporateUser_Username -_id"))).length>0){
-                res.send("4")    
+            if(await (await (corp.find({CorporateUser_UserName: username, CorporateUser_Password: password}).select("CorporateUser_ID -_id"))).length>0){
+                var test =await corp.findOne({CorporateUser_UserName: username, CorporateUser_Password: password}).select('CorporateUser_ID -_id')
+                test = JSON.stringify(test)
+                test = test.split(":")
+                test = test[1].split('}')
+                console.log(test[0])
+                res.send("4"+":"+test[0])
                 console.log("Corp Login")
 
             }
             else{
                 res.send("5")
-                console.log("NO")
+                console.log("Wrong Login")
             }
 
     }
@@ -182,20 +208,375 @@ router.post('/login', async (req,res)=>{
   }
 })
 
-router.post('/isCorp', async (req,res)=>{
-    var username = req.body.Username;
-    var password = req.body.Password;
-    //adming
+// STOPPED HERE Trying TO GET COURSES FOR THIS Student
+router.post("/corporateProfile", async (req,res)=>{
+    var User_ID= req.body.User_ID
+    var data = await corp.findOne({CorporateUser_ID:User_ID}).select('CorporateUser_ID CorporateUser_UserName CorporateUser_Password CorporateUser_Email CorporateUser_FirstName CorporateUser_LastName CorporateUser_Gender CorporateUser_Country CorporateUser_Corporate CorporateUser_isCorporate -_id');
+    data = JSON.stringify(data)
+    data = data.split("{")
+    data = data[1].split("}")
+    data = data[0].split(",")
+    // console.log(data)
 
-            if(await user.findOne({individualUser_UserName: username, individualUser_Password: password}).select('individualUser_UserName -_id')>0){ // Trainees
-                res.send("0")      
-            
-        }
-        else{
-            if(await corp.findOne({CorporateUser_UserName: username, CorporateUser_Password: password}).select("CorporateUser_Username -_id")>0){
-                res.send("1")    
-            }
+    //ID
+    var id=data[0].split(":")
+    id= Number(id[1])
+    //UserName
+    var Uname=data[1].split(":")
+    Uname= Uname[1].split('"')
+    Uname=Uname[1]
+    //Passowrd
+    var Pass=data[2].split(":")
+    Pass= Pass[1].split('"')
+    Pass=Pass[1]
+    //isCorporate
+    var isCorporate=data[3].split(":")
+    isCorporate= isCorporate[1].split('"')
+    isCorporate=isCorporate[0]
+    //FirstName
+    var FName=data[4].split(":")
+    FName= FName[1].split('"')
+    FName=FName[1]
+    //LastName
+    var LName=data[5].split(":")
+    LName= LName[1].split('"')
+    LName=LName[1]
+    //Email
+    var Email=data[6].split(":")
+    Email= Email[1].split('"')
+    Email=Email[1]
+    //Gender
+    var Gender=data[7].split(":")
+    Gender= Gender[1].split('"')
+    Gender=Gender[1]
+    //COuntry
+    var Country=data[8].split(":")
+    Country= Country[1].split('"')
+    Country=Country[1]
+
+    //Corporate
+    var Corp=data[9].split(":")
+    Corp= Corp[1].split('"')
+    Corp=Corp[1]
+ 
+
+
+var courses = await StudentTakeCourse.find({StudentTakeCourse_StudentID:id , StudentTakeCourse_Type: 2}).select('StudentTakeCourse_CourseID -_id').exec()
+var CourseIDS=[];
+courses = JSON.stringify(courses).split(',')
+ for (let i = 0; i < courses.length; i++){
+    var x = courses[i].split(":")
+    x=x[1].split("}")
+    CourseIDS.push(Number(x[0]))
+ }
+var ArrayofCourses=[]
+//SALMA'S CODE TO GET everything about the course
+  // var test =ID.split(":")
+  // console.log(test)
+  for(let i =0;i<CourseIDS.length;i++){
+  const courses = await course.find({Course_ID: CourseIDS[i]},'-_id');
+  //console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
   }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  for(let i = 0; i < exams.length; i++){
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await inst.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  //.select('Instructor_ID Instructor_FirstName -_id');
+  //instructor = instructor[0];
+
+  //console.log(instructor);
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+    // {
+    //   Instructor_ID: instructor.Instructor_ID,
+    //   Instructor_FirstName: instructor.Instructor_FirstName,
+    //   Instructor_LastName: instructor.Instructor_LastName
+    // },
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj
+  };
+
+  ArrayofCourses.push(CourseT)
+}
+///////////////////
+var person = {
+  User_ID: id,
+  User_UserName : Uname,
+  User_FirstName: FName,
+  User_LastName: LName,
+  User_Email: Email,
+  User_Password:Pass,
+  User_Country: Country,
+  User_Gender: Gender,
+  User_Courses: ArrayofCourses,
+  User_Corporate: Corp,
+  User_isCorporate: isCorporate,
+}
+    //res.send(courses)
+    //res.send(await corp.findOne({CorporateUser_ID:User_ID}).select('CorporateUser_ID CorporateUser_UserName CorporateUser_Password CorporateUser_Email CorporateUser_FirstName CorporateUser_LastName CorporateUser_Gender CorporateUser_Counrty CorporateUser_Corporate -_id'))
+    res.send(person)
 })
+
+
+router.post("/individualProfile", async (req,res)=>{
+    var User_ID= req.body.User_ID
+    var data = await user.findOne({IndividualUser_ID:User_ID}).select('IndividualUser_ID individualUser_UserName individualUser_Password individualUser_Email individualUser_FirstName individualUser_LastName individualUser_Gender IndividualUser_Country  isCorporate -_id');
+    data = JSON.stringify(data).split(",")
+    console.log(data)
+
+    //ID
+    var id=data[0].split(":")
+    id= Number(id[1])
+    //UserName
+    var Uname=data[1].split(":")
+    Uname= Uname[1].split('"')
+    Uname=Uname[1]
+    //Email
+    var Email=data[2].split(":")
+    Email= Email[1].split('"')
+    Email=Email[1]
+    //Passowrd
+    var Pass=data[3].split(":")
+    Pass= Pass[1].split('"')
+    Pass=Pass[1]
+    //FirstName
+    var FName=data[4].split(":")
+    FName= FName[1].split('"')
+    FName=FName[1]
+    //LastName
+    var LName=data[5].split(":")
+    LName= LName[1].split('"')
+    LName=LName[1]
+
+    //Gender
+    var Gender=data[6].split(":")
+    Gender= Gender[1].split('"')
+    Gender=Gender[1]
+    //COuntry
+    var Country=data[7].split(":")
+    Country= Country[1].split('"')
+    Country=Country[1]
+    //isCorporate
+    var isCorporate=data[8].split(":")
+    isCorporate= isCorporate[1].split('"')
+    isCorporate=isCorporate[0]
+ 
+
+
+var courses = await StudentTakeCourse.find({StudentTakeCourse_StudentID:id , StudentTakeCourse_Type: 1}).select('StudentTakeCourse_CourseID -_id').exec()
+var CourseIDS=[];
+courses = JSON.stringify(courses).split(',')
+
+if(courses==['[]']){
+for (let i = 0; i < courses.length; i++){
+    var x = courses[i].split(":")
+    x=x[1].split("}")
+    CourseIDS.push(Number(x[0]))
+ }
+var ArrayofCourses=[]
+//SALMA'S CODE TO GET everything about the course
+  // var test =ID.split(":")
+  // console.log(test)
+  for(let i =0;i<CourseIDS.length;i++){
+  const courses = await course.find({Course_ID: CourseIDS[i]},'-_id');
+  //console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
+  }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  for(let i = 0; i < exams.length; i++){
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await inst.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  //.select('Instructor_ID Instructor_FirstName -_id');
+  //instructor = instructor[0];
+
+  //console.log(instructor);
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+    // {
+    //   Instructor_ID: instructor.Instructor_ID,
+    //   Instructor_FirstName: instructor.Instructor_FirstName,
+    //   Instructor_LastName: instructor.Instructor_LastName
+    // },
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj
+  };
+  
+  ArrayofCourses.push(CourseT)
+}
+}
+else{
+    ArrayofCourses=[]
+}
+///////////////////
+var person = {
+  User_ID: id,
+  User_UserName : Uname,
+  User_FirstName: FName,
+  User_LastName: LName,
+  User_Email: Email,
+  User_Password:Pass,
+  User_Country: Country,
+  User_Gender: Gender,
+  User_Courses: ArrayofCourses,
+  User_Corporate: "",
+  User_isCorporate: isCorporate,
+}
+    //res.send(courses)
+    //res.send(await corp.findOne({CorporateUser_ID:User_ID}).select('CorporateUser_ID CorporateUser_UserName CorporateUser_Password CorporateUser_Email CorporateUser_FirstName CorporateUser_LastName CorporateUser_Gender CorporateUser_Counrty CorporateUser_Corporate -_id'))
+    res.send(person)
+})
+
+
 
 module.exports=router;
