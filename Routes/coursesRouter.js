@@ -632,7 +632,7 @@ router.get("/viewCourses", async (req, res) => {
 
 //Salma's Single Course Method
 router.post("/viewCourse/:id", async (req, res) => {
-  console.log(req.params.id)
+  console.log(req.params)
 
   const ID= req.params.id
   // var test =ID.split(":")
@@ -1194,5 +1194,252 @@ res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final})
 })
 
 
+router.post('/myCoursesCorp', async (req,res)=>{
+  var id = req.body.ID;
+  var STC = await StudentTakeCourse.findOne({StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:2}).select('StudentTakeCourse_CourseID -_id') 
+console.log("H")
+console.log(STC)
+
+  STC= JSON.stringify(STC).split(',');
+  //console.log("HI")
+  var ArrayOfCIDS=[];
+  var ArrayOfCourses=[];
+  for(let i=0; i<STC.length; i++)
+{
+var x = STC[i].split(':')
+console.log(x)
+x=x[1].split('}')
+// console.log(x[0])
+ArrayOfCIDS.push(Number(x[0]))
+}
+// console.log(ArrayOfCIDS)
+for (let i=0; i<ArrayOfCIDS.length; i++){
+  const courses = await course.find({Course_ID: Number(ArrayOfCIDS[i])},'-_id');
+  //console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
+  }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  for(let i = 0; i < exams.length; i++){
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  //.select('Instructor_ID Instructor_FirstName -_id');
+  //instructor = instructor[0];
+
+  //console.log(instructor);
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+    // {
+    //   Instructor_ID: instructor.Instructor_ID,
+    //   Instructor_FirstName: instructor.Instructor_FirstName,
+    //   Instructor_LastName: instructor.Instructor_LastName
+    // },
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj
+  };
+  //console.log(Course.Course_ID);
+  //console.log(courses[0].Course_Trainee.length);
+ArrayOfCourses.push(CourseT)
+
+}
+
+res.send(ArrayOfCourses)
+})
+
+router.post('/myCoursesInd', async (req,res)=>{
+  var id = req.body.ID;
+  var STC = await StudentTakeCourse.find({StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1}).select('StudentTakeCourse_CourseID -_id') 
+  STC= JSON.stringify(STC).split(',');
+  console.log(STC)
+  var ArrayOfCIDS=[];
+  var ArrayOfCourses=[];
+  for(let i=0; i<STC.length; i++)
+{
+var x = STC[i].split(':')
+x=x[1].split('}')
+console.log(x[0])
+ArrayOfCIDS.push(Number(x[0]))
+}
+
+for (let i=0; i<ArrayOfCIDS.length; i++){
+  const courses = await course.find({Course_ID: Number(ArrayOfCIDS[i])},'-_id');
+  //console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
+  }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  for(let i = 0; i < exams.length; i++){
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  //.select('Instructor_ID Instructor_FirstName -_id');
+  //instructor = instructor[0];
+
+  //console.log(instructor);
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+    // {
+    //   Instructor_ID: instructor.Instructor_ID,
+    //   Instructor_FirstName: instructor.Instructor_FirstName,
+    //   Instructor_LastName: instructor.Instructor_LastName
+    // },
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj
+  };
+  //console.log(Course.Course_ID);
+  //console.log(courses[0].Course_Trainee.length);
+ArrayOfCourses.push(CourseT)
+
+}
+
+res.send(ArrayOfCourses)
+})
 
 module.exports=router;
