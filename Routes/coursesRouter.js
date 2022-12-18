@@ -317,7 +317,7 @@ router.post("/filterSubjectRating", async (req, res) => {
         var CI= DataAlone[0].split(':')
         CI=CI[1].split("'")
         CI=CI[0]
-    console.log(DataAlone)
+    // console.log(DataAlone)
      data1 = {
           "Course_ID": CI,
           "Course_Title": CT,
