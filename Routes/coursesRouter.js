@@ -808,9 +808,8 @@ router.post("/viewCourse/:id", async (req, res) => {
 
   router.get("/viewCoursesCorporate", async (req, res) => {
     const x = req.body.User_ID
-    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
     var final= []
-  
   
     for(let i =0;i<data.length;i++)
     {
@@ -819,16 +818,18 @@ router.post("/viewCourse/:id", async (req, res) => {
         var arrayException=test1.split("[")
         var DataAlone=test1.split(",")
         var data1;
+        console.log("Henaaa")
+        console.log(DataAlone)
     //Now Doing Trainees
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
-        var CT= DataAlone[0].split(':"')
+        var CT= DataAlone[1].split(':"')
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
     console.log(DataAlone)
-        var CC= DataAlone[5].split(':"')
+        var CC= DataAlone[6].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
     //Course Instructor ID and Name JSON FILE
@@ -837,18 +838,23 @@ router.post("/viewCourse/:id", async (req, res) => {
         var InstId=Number(test1[0])
         var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
     //Now Doing Course_Price
-    var CP= DataAlone[1].split(':')
+    var CP= DataAlone[2].split(':')
     CP=CP[1].split("'")
     CP=CP[0]
     //Now DOing Course_Rating
-    var CR= DataAlone[2].split(':')
+    var CR= DataAlone[3].split(':')
     CR=CR[1].split("'")
     CR=CR[0]
     //Now DOing Course_Hours
-    var CH= DataAlone[4].split(':')
+    var CH= DataAlone[5].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
+// Now doing COurse ID
+        var CI= DataAlone[0].split(':')
+        CI=CI[1].split("'")
+        CI=CI[0]
      data1 = {
+          "Course_ID": Number(CI),
           "Course_Title": CT,
           "Course_Rating": CR,
           "Course_Instructor": X,
@@ -1197,11 +1203,8 @@ res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final})
 router.post('/myCoursesCorp', async (req,res)=>{
   var id = req.body.ID;
   var STC = await StudentTakeCourse.findOne({StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:2}).select('StudentTakeCourse_CourseID -_id') 
-console.log("H")
-console.log(STC)
 
   STC= JSON.stringify(STC).split(',');
-  //console.log("HI")
   var ArrayOfCIDS=[];
   var ArrayOfCourses=[];
   for(let i=0; i<STC.length; i++)
