@@ -592,7 +592,7 @@ router.put("/course_promotion", async (req, res) =>{
   
 });
 
-  //view the ratings and reviews on all his/her courses (19)
+//view the ratings and reviews on all his/her courses (19)
 router.get("/ViewRatingAndReviews", async (req, res) => {
   const x= req.body.Instructor_ID
   if((await instructor.find({Instructor_ID:x},'Instructor_ID -_id')).length != 0){

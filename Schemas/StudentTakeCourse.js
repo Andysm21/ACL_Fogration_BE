@@ -1,3 +1,4 @@
+const { date } = require('joi');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -25,7 +26,14 @@ StudentTakeCourse_StudentID: {
   StudentTakeCourse_Type: {
     type: Number,
     required: true,
-
+  },
+  StudentTakeCourse_Money_Left: {
+    type: Number,
+    required: true,
+  },
+  StudentTakeCourse_Installments_Left: {
+    type: Array,
+    required: true,
   },
 }, { timestamps: true });
 

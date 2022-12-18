@@ -39,6 +39,11 @@ const individualUserSchema = new Schema({
     required: false,
     default: false,
   },
+  individualUser_Wallet:{
+    type:Number,
+    required: false,
+    default: 0,
+  }
 }, { timestamps: true });
 
 const IndUser = mongoose.model('IndividualUser', individualUserSchema);

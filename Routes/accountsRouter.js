@@ -12,12 +12,14 @@ const Question = require('../Schemas/Question.js');
 const corp = require('../Schemas/CorporateUser.js');
 const Exam = require('../Schemas/Exam.js');
 const StudentTakeCourse = require('../Schemas/StudentTakeCourse');
-
-
+const sendCertificate = require("../utils/sendCertificate");
+const PDFDocument = require('pdfkit');
+const fs =require('fs');
 const express= require("express")
 const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
+
 
 //Sprint 1
 
@@ -577,6 +579,60 @@ var person = {
     res.send(person)
 })
 
+//////////Sprint 3
 
+//41 receive a certificate as a PDF after completing the course via email
+router.post('/sendCertificate', async (req,res)=>{
+  var email;
+  var id = req.body.ID
+  if(req.body.type==1){
+    await (await user.find({IndividualUser_ID:id})).map((co) => {
+      email=co.individualUser_Email})
+  }
+  else{
+    await (await corp.find({CorporateUser_ID:id})).map((co) => {
+      email=co.CorporateUser_Email})
+  }
+    await sendCertificate(email, "Congratulations!!", 'Certificate of completion');
+    res.send('done')
+  
+})
+
+//42 download the certificate as a PDF from the website
+router.get('/downloadCertificate', async (req,res)=>{
+  
+    res.download('../Uploads/trial.pdf')
+  
+})
+
+//44 download the notes as a PDF
+router.get('/downloadNotes', async (req,res)=>{
+  const doc = new PDFDocument;
+  doc.pipe(fs.createWriteStream('../Uploads/Notes.pdf'));
+  doc.fontSize(18).text(req.body.notes, 100, 100);
+
+  doc.end();
+  res.download('../Uploads/Notes.pdf')
+
+})
+
+//51 view the amount available in their wallet from refunded courses
+router.get('/viewWallet', async (req,res)=>{
+  var id  = req.body.ID
+  res.send(await user.find({IndividualUser_ID:id},'individualUser_Wallet -_id'))
+})
+
+//54 refund an amount to a trainee to their wallet
+router.get('/refundWallet', async (req,res)=>{
+  var id  = req.body.ID
+  var amount = Number(req.body.amount)
+  await (await user.find({IndividualUser_ID:id})).map((user) => {
+    amount +=Number(user.individualUser_Wallet)
+  })
+  await user.update({IndividualUser_ID:id},{individualUser_Wallet:amount})
+  res.send('done')
+})
+
+////////////end Sprint 3
 
 module.exports=router;

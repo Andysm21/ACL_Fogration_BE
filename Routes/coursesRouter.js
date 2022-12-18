@@ -8,7 +8,6 @@ router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
 const StudentTookexam = require('../Schemas/StudentTookexam.js');
 const StudentTakeCourse = require('../Schemas/StudentTakeCourse.js');
-
 const Video = require('../Schemas/Video.js');
 const sub = require('../Schemas/Subtitle.js');
 const Instructor = require('../Schemas/Instructor.js');
@@ -16,6 +15,9 @@ const Course = require('../Schemas/Course.js');
 const Subtitle = require('../Schemas/Subtitle.js');
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
+const user = require('../Schemas/IndividualUser.js');
+
+const { array } = require('joi');
 
 //to be changed later
 
@@ -635,6 +637,10 @@ router.post("/viewCourse/:id", async (req, res) => {
   console.log(req.params)
 
   const ID= req.params.id
+  var views = await course.find({Course_ID: Number(ID)}).select('Course_Views -_id');
+  var viewsNum= JSON.stringify(views).split(":")
+  var viewsFinal= viewsNum[1].split("}")
+  await course.update({Course_ID: Number(ID)},{Course_Views : (Number(viewsFinal[0]) +1)})
   // var test =ID.split(":")
   // console.log(test)
   const courses = await course.find({Course_ID: Number(ID)},'-_id');
@@ -732,7 +738,9 @@ router.post("/viewCourse/:id", async (req, res) => {
     Course_Trainee: courses[0].Course_Trainee.length,
     Course_Review: courses[0].Course_Review,
     Course_Rate: courses[0].Course_Rate,
-    Course_Exam: ExamObj
+    Course_Exam: ExamObj,
+    Course_Video_Preview: courses[0].Course_Video_Preview,
+    Course_Views: courses[0].Course_Views
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
@@ -1099,12 +1107,55 @@ router.post('/createStudentTakeExam', async (req,res)=>{
 res.send("done")
 })
 
-router.post('/enrollInCourse', async (req,res)=>{
+//Andrew's
+/*router.post('/enrollInCourse', async (req,res)=>{
   var id = await StudentTakeCourse.count().exec()+1;
 
   courseRouter.createStudentTakeCourse(req,id)
 
 res.send("done")
+})*/
+
+//Nour's enroll+pay first installment
+router.post('/enrollInCourse', async (req,res)=>{
+  var coursePrice;
+  var courseDiscount;
+  var dueDates=[];
+  if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
+    StudentTakeCourse_StudentID:req.body.StudentTakeCourse_StudentID,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
+      res.send("student already enrolled in this course")
+    }
+  else{
+    await (await course.find({Course_ID:req.body.StudentTakeCourse_CourseID})).map((co)=>{
+      coursePrice=co.Course_Price
+      courseDiscount =co.Course_Discount
+    })
+    const today =new Date()
+    var date;
+    var month = today.getMonth(today)+1;
+    var year = today.getFullYear(today);
+    var day = today.getDay(today);
+    month ++;
+    while(dueDates.length<6){
+      if(month <=12){
+        date = new Date (year,month,day)
+        dueDates.push(date)
+        month ++;
+      }
+      else{
+        year ++;
+        date = new Date(year,1,day)
+        dueDates.push(date)
+        month = 2;
+      }
+    }
+    //console.log(dueDates)
+    coursePrice=coursePrice -(coursePrice*courseDiscount/100)
+    //console.log(coursePrice)
+    courseRouter.createStudentTakeCourse(req,coursePrice,dueDates)
+    res.send("done")
+  }
+
 })
 
 router.post('/examGrades', async (req,res)=>{
@@ -1441,5 +1492,229 @@ ArrayOfCourses.push(CourseT)
 
 res.send(ArrayOfCourses)
 })
+
+//Sprint 3
+// 14 view the most viewed/ most popular courses
+router.post('/mostViewedCourses', async (req,res)=>{
+  var maxViews=0;
+  await (await course.find()).map((co) => {
+  if (co.Course_Views>= maxViews){
+    maxViews= co.Course_Views
+  }})
+
+  //get courseIDs
+  var ArrayOfCIDS=[];
+  var count = 0;
+  while(maxViews>=0 && count<5){
+    await (await course.find()).map((co) => {
+      if (co.Course_Views == maxViews){
+        ArrayOfCIDS.push(co.Course_ID)
+        count++;
+     }})
+    maxViews--;
+   
+  }
+  console.log(ArrayOfCIDS)
+  var ArrayOfCourses=[];
+ 
+for (let i=0; i<ArrayOfCIDS.length; i++){
+  const courses = await course.find({Course_ID: Number(ArrayOfCIDS[i])},'-_id');
+  //console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
+  }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  for(let i = 0; i < exams.length; i++){
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+   
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj,
+    Course_Views: courses[0].Course_Views
+  };
+  
+ArrayOfCourses.push(CourseT)
+}
+res.send(ArrayOfCourses)
+})
+
+
+//22 view the amount of money owed per month
+/*router.post('/moneyOwedPerMonthPerCourse', async (req,res)=>{
+  var id = req.body.ID;
+  var ArrayOfInstallments=[];
+  const today = new Date();
+  var type = req.body.type;
+  await (await StudentTakeCourse.find({StudentTakeCourse_StudentID:id, StudentTakeCourse_Type: 1})).map((co) => {
+    if (co.StudentTakeCourse_Money_Left> 0){
+      var installmentAmount = co.StudentTakeCourse_Money_Left/co.StudentTakeCourse_Installments_Left.length
+      for(var i =0; co.StudentTakeCourse_Installments_Left.length>0;i++){
+        const installment ={
+          Course:co.StudentTakeCourse_CourseID,
+          Date: co.StudentTakeCourse_Installments_Left[i],
+          MoneyOwed:installmentAmount
+        }
+        ArrayOfInstallments.push(installment)
+      }
+    }})
+    console.log(ArrayOfInstallments)
+
+    res.send(ArrayOfInstallments)
+  
+
+})
+
+router.post('/moneyOwedPerMonthTotal', async (req,res)=>{
+
+    res.send('ok')
+  
+
+})*/
+
+
+//16 pay for a course
+/*router.post('/payInstallment', async (req,res)=>{
+  var id = req.body.ID;
+  var courseID= req.body.courseID
+  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map((co) => {
+    if (co.StudentTakeCourse_Money_Left> 0){
+      var installmentAmount = co.StudentTakeCourse_Money_Left/co.StudentTakeCourse_Installments_Left.length
+      co.StudentTakeCourse_Installments_Left.pop()
+      co.StudentTakeCourse_Money_Left= co.StudentTakeCourse_Money_Left-installmentAmount
+    }
+  })
+res.send("done")
+
+})*/
+//16 pay for a course
+router.post('/payCourse', async (req,res)=>{
+  var id = req.body.ID;
+  var courseID= req.body.courseID
+  var update = false;
+  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map((co) => {
+    if (co.StudentTakeCourse_Money_Left> 0){
+      update = true;
+    }})
+    if(update){
+      await StudentTakeCourse.update({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1},{StudentTakeCourse_Money_Left:0, StudentTakeCourse_Installments_Left:[]})
+      res.send("done")
+    }
+    else{
+      res.send('course fully paid')
+    }
+
+})
+
+//45 request a refund only if less than 50% of the course has been attended
+router.post('/requestRefund', async (req,res)=>{
+  var id = req.body.ID;
+  var courseID= req.body.courseID
+  var refundable= false;
+  var amount;
+  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map(async (co) => {
+    if (co.StudentTakeCourse_Progress<50){
+      refundable = true;
+      if(co.StudentTakeCourse_Installments_Left.length > 0){
+      amount =(co.StudentTakeCourse_Money_Left/co.StudentTakeCourse_Installments_Left.length)*6
+      }
+      else{
+        await (await course.find({Course_ID:courseID})).map((course) => {
+          amount=course.Course_Price
+      })
+      }
+    }
+  })
+  if(refundable){
+    await (await user.find({IndividualUser_ID:id})).map((user) => {
+      wallet = user.individualUser_Wallet + amount/2
+  })
+  await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
+  await StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
+  res.send("done")
+}
+else{
+  res.send('More than 50% of course is completed, refund is not possible')
+}
+
+})
+
+
 
 module.exports=router;
