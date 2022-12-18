@@ -398,7 +398,7 @@ router.post("/individualProfile", async (req,res)=>{
     var User_ID= req.body.User_ID
     var data = await user.findOne({IndividualUser_ID:User_ID}).select('IndividualUser_ID individualUser_UserName individualUser_Password individualUser_Email individualUser_FirstName individualUser_LastName individualUser_Gender IndividualUser_Country  isCorporate -_id');
     data = JSON.stringify(data).split(",")
-    console.log(data)
+    // console.log(data)
 
     //ID
     var id=data[0].split(":")
