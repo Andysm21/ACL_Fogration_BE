@@ -82,7 +82,6 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
    res.send(final);
 
 });
-
 //not yet front
 //20 search for a course given by him/her based on course title or subject or instructor
 router.get("/SearchCourseTitleInst", async (req, res) => {
@@ -519,7 +518,7 @@ router.post("/filterPriceAndSubjectInst", async (req, res) => {
 
 router.post("/instructorProfile", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
-  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography -_id'))
+  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews -_id'))
 })
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //create a multiple choice exam with 4 choices per question
@@ -568,7 +567,6 @@ router.post("/createExam", async (req, res) =>{
   }
  
 })
-
 
 
 //define a promotion for the course (% discount) and for how long
@@ -792,119 +790,3 @@ router.post("/forgotPassword", async (req, res) => {
   })
 
 module.exports=router;
-
-
-///user
-
-//First and last names ,bio and country and gender
-router.put("/editProfileUserC", async (req, res) => {
-  const id = req.body.ID
-  const email= req.body.Email
-  const username = req.body.username
-  const firstName = req.body.FirstName
-  const lastname = req.body.LastName
-  const gender = req.body.Gender
-  const country = req.body.Country
-  const checkUN = await corporateUser.findOne({CorporateUser_UserName:username},'CorporateUser_ID -_id');
-  const checkEM = await corporateUser.findOne({CorporateUser_Email: email},'CorporateUser_ID -_id');
- console.log(req.body)
-//  console.log(CheckE);
- // console.log(checkUN);
-//  var CheckID= JSON.stringify(checkEM).split(":")
-//  CheckID=CheckID[1].split("}")
-//  console.log(id)
-//  console.log("a7a")
-//  console.log(checkEM);
-//  console.log(email)
-  //  if(username == '') //username cannot be empty
-  //    res.send("1");
-  //  else if(checkUN != null && checkUN.CorporateUser_ID != id){ //username already in use
-  //    res.send("2");
-  //  }
-  //  else if(checkEM != null && CheckID[0]!= id){ //email already in use
-  //    res.send("3");
-  //  }
-  //  else{
-     await corporateUser.updateOne({CorporateUser_ID: id},{
-      CorporateUser_FirstName: firstName, CorporateUser_LastName: lastname, CorporateUser_Gender: gender, CorporateUser_Country: country})
-     res.send("4")
-  //  }
- });
-
- router.put("/editProfileUserInd", async (req, res) => {
-  const id = req.body.ID
-  const email= req.body.Email
-  const username = req.body.username
-  const firstName = req.body.FirstName
-  const lastname = req.body.LastName
-  const gender = req.body.Gender
-  const country = req.body.Country
-  const checkUN = await individualUser.findOne({individualUser_UserName:username},'IndividualUser_ID -_id');
-  const checkEM = await individualUser.findOne({individualUser_Email: email},'IndividualUser_ID -_id');
-//  console.log(req.body)
- // console.log(checkEM);
-//  console.log(id);
- // console.log(checkUN);
-//  var CheckID= JSON.stringify(checkEM).split(":")
-//  CheckID=CheckID[1].split("}")
- 
-//    if(username == '') //username cannot be empty
-//      res.send("1");
-//    else if(checkUN != null && checkUN.IndividualUser_ID  != id){ //username already in use
-//      res.send("2");
-//    }
-//    else if(checkEM != null && checkEM.IndividualUser_ID  != id){ //email already in use
-
-//      res.send("3");
-//    }
-//    else{
-     const x = await individualUser.updateOne({IndividualUser_ID : id},{
-      individualUser_FirstName: firstName, individualUser_LastName: lastname, individualUser_Gender: gender, IndividualUserCorporateUser_Country: country})
-     res.send("4")
-  //  }
- });
-
- //Username and Email
- router.put("/editProfileEmailUserC", async (req, res) => {
-   const id = req.body.ID
-   const email= req.body.Email
-   const username = req.body.username
-   const checkUN = await corporateUser.findOne({CorporateUser_UserName: username},'CorporateUser_ID -_id');
-   const checkEM = await corporateUser.findOne({CorporateUser_Email: email},'CorporateUser_ID -_id');
-    if(username == '') //username cannot be empty
-      res.send("1");
-    else if(checkUN != null && checkUN.CorporateUser_ID != id){ //username already in use
-      res.send("2");
-    }
-    else if(checkEM != null && checkEM.CorporateUser_ID != id){ //email already in use
-      res.send("3");
-    }
-    else{
-      console.log(username)
-     const x = await corporateUser.updateOne({CorporateUser_ID: id},{CorporateUser_UserName: username, CorporateUser_Email: email});
-      res.send("4")
-    }
- 
-  });
-
-  
- router.put("/editProfileEmailUserInd", async (req, res) => {
-  const id = req.body.ID
-  const email= req.body.Email
-  const username = req.body.username
-  const checkUN = await individualUser.findOne({individualUser_UserName: username},'IndividualUser_ID -_id');
-  const checkEM = await individualUser.findOne({individualUser_Email: email},'IndividualUser_ID -_id');
-   if(username == '') //username cannot be empty
-     res.send("1");
-   else if(checkUN != null && checkUN.IndividualUser_ID != id){ //username already in use
-     res.send("2");
-   }
-   else if(checkEM != null && checkEM.IndividualUser_ID != id){ //email already in use
-     res.send("3");
-   }
-   else{
-    const x = await individualUser.updateOne({IndividualUser_ID: id},{individualUser_UserName: username, individualUser_Email: email});
-     res.send("4")
-   }
-
- });

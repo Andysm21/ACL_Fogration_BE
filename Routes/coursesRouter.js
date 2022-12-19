@@ -333,7 +333,6 @@ router.post("/filterSubjectRating", async (req, res) => {
     res.send(final)
     });
   
-
 //10 filter the courses based on price (price can be FREE)
 router.post("/filterPrice", async (req, res) => {// for all but not for Corporate
     const FilterPriceLower= req.body.FilterPrice1
@@ -571,7 +570,6 @@ router.post("/SearchCourseIntrsuctor", async (req, res) => {
     console.log(final)
     res.status(200).send(final);
   });
-
 
 router.post("/searchmycourses", async(req,res) =>{
   const searched = req.body.searchR;
@@ -855,7 +853,6 @@ router.post("/viewCourse/:id", async (req, res) => {
 //   res.send(final)
 //   });
 
-
   router.get("/viewCoursesCorporate", async (req, res) => {
     const x = req.body.User_ID
     var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
@@ -918,6 +915,23 @@ router.post("/viewCourse/:id", async (req, res) => {
     res.send(final)
     });
   
+
+  router.post("/getCourseAverage", async(req, res) =>{
+    const {id} = req.body;
+    var {Course_Rate} = await course.findOne({Course_ID: id}, 'Course_Rate -_id');
+    console.log(Course_Rate);
+    //var {Course_Rate} = 0;
+    var sum = 0;
+    for(let i = 0; i < Course_Rate.length; i++)
+    {
+      sum += Course_Rate[i];
+    }
+
+    console.log(sum/Course_Rate.length);
+    res.send("" + sum/Course_Rate.length);
+    
+    //(sum/Course_Rate.length);
+  });
 // 12 choose a course from the results and view (but not open) 
 //its details including course subtitles, excercises , total hours of each subtitle, 
 //total hours of the course 
