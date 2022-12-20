@@ -789,4 +789,12 @@ router.post("/forgotPassword", async (req, res) => {
 
   })
 
+  router.put("/agreementContract",async (req, res) =>{
+      const {id} = req.body;
+      const {Instructor_Agreement} = req.body;
+      await instructor.updateOne({Instructor_ID:id},{Instructor_Agreement:Instructor_Agreement});
+      res.send("Done");
+  })
+
+
 module.exports=router;
