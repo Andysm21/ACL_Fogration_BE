@@ -7,6 +7,8 @@ const Subtitle = require('../Schemas/Subtitle.js');
 const { response } = require("express");
 const StudentTookexam = require('../Schemas/StudentTookexam.js');
 const StudentTakeCourse= require('../Schemas/StudentTakeCourse.js');
+const Problem= require('../Schemas/Problem.js');
+const CorpRequest= require('../Schemas/CorpRequest.js');
 
 function createSubtitle(p1,id){
 Subtitle.create({Subtitle_ID:id,Subtitle_Name:p1.body.name,Subtitle_Course_ID:p1.body.cid,Subtitle_Video:p1.body.videos,Subtitle_Hours:p1.body.hours})
@@ -25,16 +27,14 @@ function createStudentTakeExam(p1,id) {
     StudentTookexam.create({StudentTookExam_ID:id,StudentTookExam_Student_ID:p1.body.StudentTookExam_Student_ID,
     StudentTookExam_Exam_ID:p1.body.StudentTookExam_Exam_ID,StudentTookExam_Type:p1.body.StudentTookExam_Type })
 }
-function createStudentTakeCourse(p1,coursePrice,due) {
+function createStudentTakeCourse(p1,coursePrice) {
     StudentTakeCourse.create({StudentTakeCourse_CourseID:p1.body.StudentTakeCourse_CourseID,
                                 StudentTakeCourse_StudentID:p1.body.StudentTakeCourse_StudentID,
                                 StudentTakeCourse_WatchedVideo:p1.body.StudentTakeCourse_WatchedVideo,
                                 StudentTakeCourse_StudentTakeExam:p1.body.StudentTakeCourse_StudentTakeExam,
-                                StudentTakeCourse_Progress:p1.body.StudentTakeCourse_Progress,
+                                StudentTakeCourse_Progress:0,
                                 StudentTakeCourse_Type:p1.body.StudentTakeCourse_Type
-                              ,StudentTakeCourse_Money_Left:coursePrice,
-                              StudentTakeCourse_Installments_Left:due
-
+                              ,StudentTakeCourse_Money_Paid:coursePrice
                              })
 }
 async function getHoursAllSubtitles(coursename,res,req){
@@ -85,7 +85,23 @@ async function getHoursAllSubtitles(coursename,res,req){
 }
 
 
+//// sprint 3
+function createProblem(p1,id){
+    Problem.create({Problem_ID:id,User_ID:p1.User_ID,User_Type:p1.User_Type,Problem_Type:p1.Problem_Type,Course_ID:p1.Course_ID,Problem_Status:'Unseen'})
+ }
+function createRequest(p1,id){
+    CorpRequest.create({User_ID:p1.User_ID,Course_ID:p1.Course_ID})
+}
+    
 
 
-
-module.exports={createStudentTakeCourse,createStudentTakeExam,createCourse,getHoursAllSubtitles,createSubtitle,createVideo}
+module.exports={
+    createStudentTakeCourse,
+    createStudentTakeExam,
+    createCourse,
+    getHoursAllSubtitles,
+    createSubtitle,
+    createVideo,
+    createProblem,
+    createRequest
+}

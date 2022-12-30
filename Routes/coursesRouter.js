@@ -16,6 +16,8 @@ const Subtitle = require('../Schemas/Subtitle.js');
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
 const user = require('../Schemas/IndividualUser.js');
+const Problem= require('../Schemas/Problem.js');
+const CorpRequest= require('../Schemas/CorpRequest.js');
 
 const { array } = require('joi');
 
@@ -1116,48 +1118,6 @@ res.send("done")
 res.send("done")
 })*/
 
-//Nour's enroll+pay first installment
-router.post('/enrollInCourse', async (req,res)=>{
-  var coursePrice;
-  var courseDiscount;
-  var dueDates=[];
-  if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
-    StudentTakeCourse_StudentID:req.body.StudentTakeCourse_StudentID,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
-      res.send("student already enrolled in this course")
-    }
-  else{
-    await (await course.find({Course_ID:req.body.StudentTakeCourse_CourseID})).map((co)=>{
-      coursePrice=co.Course_Price
-      courseDiscount =co.Course_Discount
-    })
-    const today =new Date()
-    var date;
-    var month = today.getMonth(today)+1;
-    var year = today.getFullYear(today);
-    var day = today.getDay(today);
-    month ++;
-    while(dueDates.length<6){
-      if(month <=12){
-        date = new Date (year,month,day)
-        dueDates.push(date)
-        month ++;
-      }
-      else{
-        year ++;
-        date = new Date(year,1,day)
-        dueDates.push(date)
-        month = 2;
-      }
-    }
-    //console.log(dueDates)
-    coursePrice=coursePrice -(coursePrice*courseDiscount/100)
-    //console.log(coursePrice)
-    courseRouter.createStudentTakeCourse(req,coursePrice,dueDates)
-    res.send("done")
-  }
-
-})
-
 router.post('/examGrades', async (req,res)=>{
 var UserID =Number(req.body.UserID) ;
 var EID = Number(req.body.EID);
@@ -1494,6 +1454,30 @@ res.send(ArrayOfCourses)
 })
 
 //Sprint 3
+
+
+//Nour's enroll+pay first installment
+//16 pay for a course
+router.post('/enrollAndPayCourse', async (req,res)=>{
+  var coursePrice;
+  var courseDiscount;
+  
+  if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
+    StudentTakeCourse_StudentID:req.body.StudentTakeCourse_StudentID,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
+      res.send("student already enrolled in this course")
+    }
+  else{
+    await (await course.find({Course_ID:req.body.StudentTakeCourse_CourseID})).map((co)=>{
+      coursePrice=co.Course_Price
+      courseDiscount =co.Course_Discount
+    })
+    coursePrice=coursePrice -(coursePrice*courseDiscount/100)
+    courseRouter.createStudentTakeCourse(req,coursePrice)
+    res.send("done")
+  }
+
+})
+
 // 14 view the most viewed/ most popular courses
 router.post('/mostViewedCourses', async (req,res)=>{
   var maxViews=0;
@@ -1615,73 +1599,6 @@ ArrayOfCourses.push(CourseT)
 res.send(ArrayOfCourses)
 })
 
-
-//22 view the amount of money owed per month
-/*router.post('/moneyOwedPerMonthPerCourse', async (req,res)=>{
-  var id = req.body.ID;
-  var ArrayOfInstallments=[];
-  const today = new Date();
-  var type = req.body.type;
-  await (await StudentTakeCourse.find({StudentTakeCourse_StudentID:id, StudentTakeCourse_Type: 1})).map((co) => {
-    if (co.StudentTakeCourse_Money_Left> 0){
-      var installmentAmount = co.StudentTakeCourse_Money_Left/co.StudentTakeCourse_Installments_Left.length
-      for(var i =0; co.StudentTakeCourse_Installments_Left.length>0;i++){
-        const installment ={
-          Course:co.StudentTakeCourse_CourseID,
-          Date: co.StudentTakeCourse_Installments_Left[i],
-          MoneyOwed:installmentAmount
-        }
-        ArrayOfInstallments.push(installment)
-      }
-    }})
-    console.log(ArrayOfInstallments)
-
-    res.send(ArrayOfInstallments)
-  
-
-})
-
-router.post('/moneyOwedPerMonthTotal', async (req,res)=>{
-
-    res.send('ok')
-  
-
-})*/
-
-
-//16 pay for a course
-/*router.post('/payInstallment', async (req,res)=>{
-  var id = req.body.ID;
-  var courseID= req.body.courseID
-  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map((co) => {
-    if (co.StudentTakeCourse_Money_Left> 0){
-      var installmentAmount = co.StudentTakeCourse_Money_Left/co.StudentTakeCourse_Installments_Left.length
-      co.StudentTakeCourse_Installments_Left.pop()
-      co.StudentTakeCourse_Money_Left= co.StudentTakeCourse_Money_Left-installmentAmount
-    }
-  })
-res.send("done")
-
-})*/
-//16 pay for a course
-router.post('/payCourse', async (req,res)=>{
-  var id = req.body.ID;
-  var courseID= req.body.courseID
-  var update = false;
-  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map((co) => {
-    if (co.StudentTakeCourse_Money_Left> 0){
-      update = true;
-    }})
-    if(update){
-      await StudentTakeCourse.update({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1},{StudentTakeCourse_Money_Left:0, StudentTakeCourse_Installments_Left:[]})
-      res.send("done")
-    }
-    else{
-      res.send('course fully paid')
-    }
-
-})
-
 //45 request a refund only if less than 50% of the course has been attended
 router.post('/requestRefund', async (req,res)=>{
   var id = req.body.ID;
@@ -1691,30 +1608,63 @@ router.post('/requestRefund', async (req,res)=>{
   await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map(async (co) => {
     if (co.StudentTakeCourse_Progress<50){
       refundable = true;
-      if(co.StudentTakeCourse_Installments_Left.length > 0){
-      amount =(co.StudentTakeCourse_Money_Left/co.StudentTakeCourse_Installments_Left.length)*6
-      }
-      else{
-        await (await course.find({Course_ID:courseID})).map((course) => {
-          amount=course.Course_Price
-      })
-      }
+      amount =co.StudentTakeCourse_Money_Paid
     }
-  })
+    })
+
   if(refundable){
     await (await user.find({IndividualUser_ID:id})).map((user) => {
-      wallet = user.individualUser_Wallet + amount/2
+    wallet = user.individualUser_Wallet + amount/2
   })
-  await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
-  await StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
-  res.send("done")
-}
-else{
-  res.send('More than 50% of course is completed, refund is not possible')
-}
-
+    await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
+     StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
+   res.send("done")
+  }
+  else{
+   res.send('More than 50% of course is completed, refund is not possible')
+  }
 })
 
+//47 report a problem with a course. The problem can be "technical", "financial" or "other"
+router.post('/reportProblem', async (req,res)=>{
+  var id = await Problem.count().exec()+1;
+  courseRouter.createProblem(req.body, id)
+  res.send('Problem reported');
+ 
+})
+
+//48 see all previously repoted problems and their statuses
+router.get('/viewMyProblems', async (req,res)=>{
+  var userId = req.body.User_ID;
+  var userType = req.body.User_Type;
+  res.send(await Problem.find({User_ID:userId,User_Type:userType}));
+ 
+})
+
+//50 request access to a specific course they do not have access to
+router.post('/requestAccess', async (req,res)=>{
+  courseRouter.createRequest(req.body)
+  res.send('Access Requested');
+ 
+})
+
+//52 view reported problems - should automaticalled be marked as "unseen"
+router.get('/viewReportedProblems', async (req,res)=>{
+  res.send(await Problem.find());
+})
+  
+//53 mark reported problems as "resolved" or "pending"
+router.put('/markProblem', async (req,res)=>{
+  await Problem.update({Problem_ID:req.body.Problem_ID},{Problem_Status:req.body.Problem_Status})
+  res.send('Problem marked');
+})
+
+//58 view course requests from corporate trainees
+router.get('/courseRequests', async (req,res)=>{
+  res.send(await CorpRequest.find());
+})
+
+////////end sprint 3
 
 
 module.exports=router;

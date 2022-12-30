@@ -27,12 +27,8 @@ StudentTakeCourse_StudentID: {
     type: Number,
     required: true,
   },
-  StudentTakeCourse_Money_Left: {
+  StudentTakeCourse_Money_Paid: {
     type: Number,
-    required: true,
-  },
-  StudentTakeCourse_Installments_Left: {
-    type: Array,
     required: true,
   },
 }, { timestamps: true });
