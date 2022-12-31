@@ -789,6 +789,13 @@ router.post("/forgotPassword", async (req, res) => {
 
   })
 
+  router.post("/InstContractStatus",async (req, res) =>{
+    const {id} = req.body;
+    const {Instructor_Agreement} = req.body;
+   var x= await instructor.findOne({Instructor_ID:id}).select('Instructor_Agreement -_id').exec();
+   console.log(x);
+    res.send(x);
+})
   router.put("/agreementContract",async (req, res) =>{
       const {id} = req.body;
       const {Instructor_Agreement} = req.body;
