@@ -8,7 +8,6 @@ router.use(bodyParser.json());
 const course = require('../Schemas/Course.js');
 const StudentTookexam = require('../Schemas/StudentTookexam.js');
 const StudentTakeCourse = require('../Schemas/StudentTakeCourse.js');
-
 const Video = require('../Schemas/Video.js');
 const sub = require('../Schemas/Subtitle.js');
 const Instructor = require('../Schemas/Instructor.js');
@@ -16,6 +15,11 @@ const Course = require('../Schemas/Course.js');
 const Subtitle = require('../Schemas/Subtitle.js');
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
+const user = require('../Schemas/IndividualUser.js');
+const Problem= require('../Schemas/Problem.js');
+const CorpRequest= require('../Schemas/CorpRequest.js');
+
+const { array } = require('joi');
 
 //to be changed later
 
@@ -333,6 +337,7 @@ router.post("/filterSubjectRating", async (req, res) => {
     res.send(final)
     });
   
+
 //10 filter the courses based on price (price can be FREE)
 router.post("/filterPrice", async (req, res) => {// for all but not for Corporate
     const FilterPriceLower= req.body.FilterPrice1
@@ -459,6 +464,7 @@ router.post("/SearchCourseTitle", async (req, res) => {
 router.post("/SearchCourseSubject", async (req, res) => {
     const {Course_Subject}= req.body
     var data= await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+
     var final= []
     for(let i =0;i<data.length;i++)
     {
@@ -570,56 +576,6 @@ router.post("/SearchCourseIntrsuctor", async (req, res) => {
     console.log(final)
     res.status(200).send(final);
   });
-
-router.post("/searchmycourses", async(req,res) =>{
-  const searched = req.body.searchR;
-  const {id} = req.body;
-  const title = await course.find({Course_Title:searched, Course_Instructor: id},'Course_ID -_id');
-  const subject = await course.find({Course_Subject:searched, Course_Instructor: id},'Course_ID -_id');
-  var final = [];
-
-  console.log(title.length);
-  console.log(subject.length);
-  if(title.length != 0) {
-    res.send(await courseRouter.SearchCourseTitle(searched));
-  }
-  else if (subject.length != 0){
-    res.send(await courseRouter.SearchCourseSubject(searched));
-  }
-  else 
-    res.send("");
-  
-
-});
-
-router.post("/search", async(req,res) =>{
-  const searched = req.body.searchR;
-  //const {id} = req.body.id;
-  const title = await course.find({Course_Title:searched},'Course_ID -_id');
-  const subject = await course.find({Course_Subject:searched},'Course_ID -_id');
-  var final = [];
-  const instructor = await Instructor.find({Instructor_FirstName:searched},'Instructor_ID -_id');
-
-  console.log(title.length);
-  console.log(subject.length);
-  
-  if(title.length != 0) {
-    res.send(await courseRouter.SearchCourseTitle(searched));
-     }
-    else if (subject.length != 0){
-    res.send(await courseRouter.SearchCourseSubject(searched));
-    }
-  else if (instructor.length != 0){
-    const {Instructor_ID} = instructor[0]
-   // console.log(Instructor_ID);
-    res.send(await courseRouter.SearchCourseIntrsuctor(Instructor_ID));
-    }
-  else 
-    res.send("");
-  
-
-});
-
 router.get("/viewCourses", async (req, res) => {
 
     var data= await course.find({},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
@@ -683,6 +639,10 @@ router.post("/viewCourse/:id", async (req, res) => {
   console.log(req.params)
 
   const ID= req.params.id
+  var views = await course.find({Course_ID: Number(ID)}).select('Course_Views -_id');
+  var viewsNum= JSON.stringify(views).split(":")
+  var viewsFinal= viewsNum[1].split("}")
+  await course.update({Course_ID: Number(ID)},{Course_Views : (Number(viewsFinal[0]) +1)})
   // var test =ID.split(":")
   // console.log(test)
   const courses = await course.find({Course_ID: Number(ID)},'-_id');
@@ -780,7 +740,9 @@ router.post("/viewCourse/:id", async (req, res) => {
     Course_Trainee: courses[0].Course_Trainee.length,
     Course_Review: courses[0].Course_Review,
     Course_Rate: courses[0].Course_Rate,
-    Course_Exam: ExamObj
+    Course_Exam: ExamObj,
+    Course_Video_Preview: courses[0].Course_Video_Preview,
+    Course_Views: courses[0].Course_Views
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
@@ -853,10 +815,12 @@ router.post("/viewCourse/:id", async (req, res) => {
 //   res.send(final)
 //   });
 
+
   router.get("/viewCoursesCorporate", async (req, res) => {
     const x = req.body.User_ID
-    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
+    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
     var final= []
+  
   
     for(let i =0;i<data.length;i++)
     {
@@ -865,18 +829,16 @@ router.post("/viewCourse/:id", async (req, res) => {
         var arrayException=test1.split("[")
         var DataAlone=test1.split(",")
         var data1;
-        console.log("Henaaa")
-        console.log(DataAlone)
     //Now Doing Trainees
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
-        var CT= DataAlone[1].split(':"')
+        var CT= DataAlone[0].split(':"')
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
     console.log(DataAlone)
-        var CC= DataAlone[6].split(':"')
+        var CC= DataAlone[5].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
     //Course Instructor ID and Name JSON FILE
@@ -885,23 +847,18 @@ router.post("/viewCourse/:id", async (req, res) => {
         var InstId=Number(test1[0])
         var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
     //Now Doing Course_Price
-    var CP= DataAlone[2].split(':')
+    var CP= DataAlone[1].split(':')
     CP=CP[1].split("'")
     CP=CP[0]
     //Now DOing Course_Rating
-    var CR= DataAlone[3].split(':')
+    var CR= DataAlone[2].split(':')
     CR=CR[1].split("'")
     CR=CR[0]
     //Now DOing Course_Hours
-    var CH= DataAlone[5].split(':')
+    var CH= DataAlone[4].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
-// Now doing COurse ID
-        var CI= DataAlone[0].split(':')
-        CI=CI[1].split("'")
-        CI=CI[0]
      data1 = {
-          "Course_ID": Number(CI),
           "Course_Title": CT,
           "Course_Rating": CR,
           "Course_Instructor": X,
@@ -915,23 +872,6 @@ router.post("/viewCourse/:id", async (req, res) => {
     res.send(final)
     });
   
-
-  router.post("/getCourseAverage", async(req, res) =>{
-    const {id} = req.body;
-    var {Course_Rate} = await course.findOne({Course_ID: id}, 'Course_Rate -_id');
-    console.log(Course_Rate);
-    //var {Course_Rate} = 0;
-    var sum = 0;
-    for(let i = 0; i < Course_Rate.length; i++)
-    {
-      sum += Course_Rate[i];
-    }
-
-    console.log(sum/Course_Rate.length);
-    res.send("" + sum/Course_Rate.length);
-    
-    //(sum/Course_Rate.length);
-  });
 // 12 choose a course from the results and view (but not open) 
 //its details including course subtitles, excercises , total hours of each subtitle, 
 //total hours of the course 
@@ -1169,13 +1109,14 @@ router.post('/createStudentTakeExam', async (req,res)=>{
 res.send("done")
 })
 
-router.post('/enrollInCourse', async (req,res)=>{
+//Andrew's
+/*router.post('/enrollInCourse', async (req,res)=>{
   var id = await StudentTakeCourse.count().exec()+1;
 
   courseRouter.createStudentTakeCourse(req,id)
 
 res.send("done")
-})
+})*/
 
 router.post('/examGrades', async (req,res)=>{
 var UserID =Number(req.body.UserID) ;
@@ -1267,8 +1208,11 @@ res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final})
 router.post('/myCoursesCorp', async (req,res)=>{
   var id = req.body.ID;
   var STC = await StudentTakeCourse.findOne({StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:2}).select('StudentTakeCourse_CourseID -_id') 
+console.log("H")
+console.log(STC)
 
   STC= JSON.stringify(STC).split(',');
+  //console.log("HI")
   var ArrayOfCIDS=[];
   var ArrayOfCourses=[];
   for(let i=0; i<STC.length; i++)
@@ -1508,5 +1452,219 @@ ArrayOfCourses.push(CourseT)
 
 res.send(ArrayOfCourses)
 })
+
+//Sprint 3
+
+
+//Nour's enroll+pay first installment
+//16 pay for a course
+router.post('/enrollAndPayCourse', async (req,res)=>{
+  var coursePrice;
+  var courseDiscount;
+  
+  if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
+    StudentTakeCourse_StudentID:req.body.StudentTakeCourse_StudentID,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
+      res.send("student already enrolled in this course")
+    }
+  else{
+    await (await course.find({Course_ID:req.body.StudentTakeCourse_CourseID})).map((co)=>{
+      coursePrice=co.Course_Price
+      courseDiscount =co.Course_Discount
+    })
+    coursePrice=coursePrice -(coursePrice*courseDiscount/100)
+    courseRouter.createStudentTakeCourse(req,coursePrice)
+    res.send("done")
+  }
+
+})
+
+// 14 view the most viewed/ most popular courses
+router.post('/mostViewedCourses', async (req,res)=>{
+  var maxViews=0;
+  await (await course.find()).map((co) => {
+  if (co.Course_Views>= maxViews){
+    maxViews= co.Course_Views
+  }})
+
+  //get courseIDs
+  var ArrayOfCIDS=[];
+  var count = 0;
+  while(maxViews>=0 && count<5){
+    await (await course.find()).map((co) => {
+      if (co.Course_Views == maxViews){
+        ArrayOfCIDS.push(co.Course_ID)
+        count++;
+     }})
+    maxViews--;
+   
+  }
+  console.log(ArrayOfCIDS)
+  var ArrayOfCourses=[];
+ 
+for (let i=0; i<ArrayOfCIDS.length; i++){
+  const courses = await course.find({Course_ID: Number(ArrayOfCIDS[i])},'-_id');
+  //console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
+  }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  for(let i = 0; i < exams.length; i++){
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+   
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj,
+    Course_Views: courses[0].Course_Views
+  };
+  
+ArrayOfCourses.push(CourseT)
+}
+res.send(ArrayOfCourses)
+})
+
+//45 request a refund only if less than 50% of the course has been attended
+router.post('/requestRefund', async (req,res)=>{
+  var id = req.body.ID;
+  var courseID= req.body.courseID
+  var refundable= false;
+  var amount;
+  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map(async (co) => {
+    if (co.StudentTakeCourse_Progress<50){
+      refundable = true;
+      amount =co.StudentTakeCourse_Money_Paid
+    }
+    })
+
+  if(refundable){
+    await (await user.find({IndividualUser_ID:id})).map((user) => {
+    wallet = user.individualUser_Wallet + amount/2
+  })
+    await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
+     StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
+   res.send("done")
+  }
+  else{
+   res.send('More than 50% of course is completed, refund is not possible')
+  }
+})
+
+//47 report a problem with a course. The problem can be "technical", "financial" or "other"
+router.post('/reportProblem', async (req,res)=>{
+  var id = await Problem.count().exec()+1;
+  courseRouter.createProblem(req.body, id)
+  res.send('Problem reported');
+ 
+})
+
+//48 see all previously repoted problems and their statuses
+router.get('/viewMyProblems', async (req,res)=>{
+  var userId = req.body.User_ID;
+  var userType = req.body.User_Type;
+  res.send(await Problem.find({User_ID:userId,User_Type:userType}));
+ 
+})
+
+//50 request access to a specific course they do not have access to
+router.post('/requestAccess', async (req,res)=>{
+  courseRouter.createRequest(req.body)
+  res.send('Access Requested');
+ 
+})
+
+//52 view reported problems - should automaticalled be marked as "unseen"
+router.get('/viewReportedProblems', async (req,res)=>{
+  res.send(await Problem.find());
+})
+  
+//53 mark reported problems as "resolved" or "pending"
+router.put('/markProblem', async (req,res)=>{
+  await Problem.update({Problem_ID:req.body.Problem_ID},{Problem_Status:req.body.Problem_Status})
+  res.send('Problem marked');
+})
+
+//58 view course requests from corporate trainees
+router.get('/courseRequests', async (req,res)=>{
+  res.send(await CorpRequest.find());
+})
+
+////////end sprint 3
+
 
 module.exports=router;
