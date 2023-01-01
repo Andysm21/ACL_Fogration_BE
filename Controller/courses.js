@@ -275,6 +275,6 @@ function createRequest(p1,id){
     createSubtitle,
     createVideo,
     createProblem,
-    createRequest
+    createRequest,
      SearchCourseTitle,SearchCourseSubject, SearchCourseIntrsuctor
 }
