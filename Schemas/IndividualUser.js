@@ -34,7 +34,7 @@ const individualUserSchema = new Schema({
     type: String,
     required: true,
   },
-    isCorporate: {
+  isCorporate: {
     type: Boolean,
     required: false,
     default: false,

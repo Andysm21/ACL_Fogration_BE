@@ -26,6 +26,10 @@ const ProblemsSchema = new Schema({
     type: String,
     required: true
   },
+  Problem_Description: {
+    type: String,
+    required: false
+  },
 }, { timestamps: true });
 
 const Problem = mongoose.model('Problem', ProblemsSchema);
