@@ -82,7 +82,6 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
    res.send(final);
 
 });
-
 //not yet front
 //20 search for a course given by him/her based on course title or subject or instructor
 router.get("/SearchCourseTitleInst", async (req, res) => {
@@ -519,7 +518,7 @@ router.post("/filterPriceAndSubjectInst", async (req, res) => {
 
 router.post("/instructorProfile", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
-  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography -_id'))
+  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews -_id'))
 })
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //create a multiple choice exam with 4 choices per question
@@ -568,7 +567,6 @@ router.post("/createExam", async (req, res) =>{
   }
  
 })
-
 
 
 //define a promotion for the course (% discount) and for how long
@@ -790,5 +788,20 @@ router.post("/forgotPassword", async (req, res) => {
   router.post("/ytl", async (req, res) =>{
 
   })
+
+  router.post("/InstContractStatus",async (req, res) =>{
+    const {id} = req.body;
+    const {Instructor_Agreement} = req.body;
+   var x= await instructor.findOne({Instructor_ID:id}).select('Instructor_Agreement -_id').exec();
+   console.log(x);
+    res.send(x);
+})
+  router.put("/agreementContract",async (req, res) =>{
+      const {id} = req.body;
+      const {Instructor_Agreement} = req.body;
+      await instructor.updateOne({Instructor_ID:id},{Instructor_Agreement:Instructor_Agreement});
+      res.send("Done");
+  })
+
 
 module.exports=router;
