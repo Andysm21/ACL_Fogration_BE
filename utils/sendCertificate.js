@@ -19,8 +19,8 @@ module.exports = async (email, subject, text) => {
 			subject: subject,
 			text: text,
 			attachments:{
-				__filename:'trial.pdf',
-				path:'../Uploads/trial.pdf'
+				__filename:'Certificate.pdf',
+				path:'../Uploads/Certificate.pdf'
 			}
 		});
 		console.log("email sent successfully");

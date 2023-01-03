@@ -6,8 +6,8 @@ const ProblemsSchema = new Schema({
     type: Number,
     required: true,
   },
-  User_ID: {
-    type: Number,
+  User_userName: {
+    type: String,
     required: true
   },
   User_Type: {
@@ -18,8 +18,8 @@ const ProblemsSchema = new Schema({
     type: String,
     required: true
   },
-  Course_ID: {
-    type: Number,
+  Course_Title: {
+    type: String,
     required: true
   },
   Problem_Status: {

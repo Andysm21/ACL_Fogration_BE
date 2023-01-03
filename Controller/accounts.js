@@ -23,7 +23,7 @@ function createCorporateUser(p1,id) {
     ,CorporateUser_Email:p1.body.CorporateUser_Email,CorporateUser_FirstName:p1.body.CorporateUser_FirstName,CorporateUser_LastName:p1.body.CorporateUser_LastName,CorporateUser_Gender:p1.body.CorporateUser_Gender,CorporateUser_Country:p1.body.CorporateUser_Country,CorporateUser_Corporate:p1.body.CorporateUser_Corporate})
 }
 function signUP(p1,id) {
-    user.create({IndividualUser_ID:id,individualUser_UserName:p1.body.individualUser_UserName,individualUser_Password:p1.body.individualUser_Password,individualUser_Email:p1.body.individualUser_Email,individualUser_FirstName:p1.body.individualUser_FirstName,individualUser_LastName:p1.body.individualUser_LastName,individualUser_Gender:p1.body.individualUser_Gender,IndividualUser_Country:p1.body.individualUser_Country})
+    user.create({IndividualUser_ID:id,individualUser_UserName:p1.body.individualUser_UserName,individualUser_Password:p1.body.individualUser_Password,individualUser_Email:p1.body.individualUser_Email,individualUser_FirstName:p1.body.individualUser_FirstName,individualUser_LastName:p1.body.individualUser_LastName,individualUser_Gender:p1.body.individualUser_Gender,IndividualUser_Country:p1.body.individualUser_Country,individualUser_Wallet:0})
 }
 
 

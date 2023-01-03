@@ -258,8 +258,8 @@ async function SearchCourseIntrsuctor (instructors) {
   };
 
   //// sprint 3
-function createProblem(p1,id){
-    Problem.create({Problem_ID:id,User_ID:p1.User_ID,User_Type:p1.User_Type,Problem_Type:p1.Problem_Type,Course_ID:p1.Course_ID,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description})
+function createProblem(p1,username,courseTitle,id){
+    Problem.create({Problem_ID:id,User_userName:username,User_Type:p1.User_Type,Problem_Type:p1.Problem_Type,Course_Title:courseTitle,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description})
  }
 function createRequest(p1,id){
     CorpRequest.create({User_ID:p1.User_ID,Course_ID:p1.Course_ID})

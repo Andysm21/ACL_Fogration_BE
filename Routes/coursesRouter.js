@@ -16,8 +16,10 @@ const Subtitle = require('../Schemas/Subtitle.js');
 const Question = require('../Schemas/Question.js');
 const Exam = require('../Schemas/Exam.js');
 const user = require('../Schemas/IndividualUser.js');
+const corp = require('../Schemas/CorporateUser.js');
 const Problem= require('../Schemas/Problem.js');
 const CorpRequest= require('../Schemas/CorpRequest.js');
+const sendCertificate = require("../utils/sendCertificate");
 
 const { array } = require('joi');
 
@@ -1191,19 +1193,52 @@ if(Answeri[1]==CorrectAnswer[1]){
 var Question_Grade= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Grade -_id');
 var x = (JSON.stringify(Question_Grade).split(":"));
 var y = x[1].split("}")
-grade+=y[0]
+grade+=Number(y[0])
 }
 }
-var Final = (grade/TotalGrade)*100;
+var Final = (Number(grade)/Number(TotalGrade))*100;
 await StudentTookexam.updateOne({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID},{StudentTookExam_Grades:Final})
+var countExams = await Exam.find({Exam_Course_ID:CourseID}).count().exec();
+var ExamIDs=[];
+await (await Exam.find({Exam_Course_ID:CourseID})).map((Ex) =>{
+ ExamIDs.push(Ex.Exam_ID)
+})
+var progressPerExam = 100/countExams;
+var progress =0;
+while (ExamIDs.length>0){
+  await (await StudentTookexam.find({StudentTookExam_Exam_ID:ExamIDs.pop()})).map((Ex)=>{
+    if(Final>=50)
+    progress+=progressPerExam;
+  })
+}
 
+await (StudentTakeCourse.update({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type},{StudentTakeCourse_Progress:progress}))
 
+var coursename =await (course.find({Course_ID:CourseID}, 'Course_Title -_id'))
+var x = (JSON.stringify(coursename).split(":"));
+var y = x[1].split("}")
+y= y[0]+" Certificate";
+
+console.log(y)
+if(progress==100){
+    var email;
+    if(req.body.Type==1){
+      await (await user.find({IndividualUser_ID:UserID})).map((co) => {
+        email=co.individualUser_Email})
+    }
+    else{
+      await (await corp.find({CorporateUser_ID:UserID})).map((co) => {
+        email=co.CorporateUser_Email})
+    }
+      await sendCertificate(email,y, "Congratulations on completing the course!!");
+      
+    
+}
 
 res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final})
 }
 }
 })
-
 
 router.post('/myCoursesCorp', async (req,res)=>{
   var id = req.body.ID;
@@ -1658,16 +1693,55 @@ router.post('/requestRefund', async (req,res)=>{
 //47 report a problem with a course. The problem can be "technical", "financial" or "other"
 router.post('/reportProblem', async (req,res)=>{
   var id = await Problem.count().exec()+1;
-  courseRouter.createProblem(req.body, id)
+  var userId = req.body.ID
+  var userType= req.body.User_Type
+  var courseID = req.body.CourseID
+  var courseTitle;
+  var username;
+  if (userType==3){
+    await (await Instructor.find({Instructor_ID:userId})).map((user)=>{
+      username=user.Instructor_username
+    })
+  }
+  else if (userType==1){
+    await (await user.find({IndividualUser_ID:userId})).map((user)=>{
+      username=user.individualUser_UserName
+    })
+  } else{
+    await (await corp.find({CorporateUser_ID:userId})).map((user)=>{
+      username=user.CorporateUser_UserName
+    })
+
+  }
+  await(await course.find({Course_ID:courseID})).map((course)=>{
+    courseTitle=course.Course_Title
+  })
+ 
+  courseRouter.createProblem(req.body,username,courseTitle, id)
   res.send('Problem reported');
  
 })
 
 //48 see all previously repoted problems and their statuses
 router.get('/viewMyProblems', async (req,res)=>{
-  var userId = req.body.User_ID;
+  var userId = req.body.ID;
   var userType = req.body.User_Type;
-  res.send(await Problem.find({User_ID:userId,User_Type:userType}));
+  var username;
+  if (userType==3){
+    await (await Instructor.find({Instructor_ID:userId})).map((user)=>{
+      username=user.Instructor_username
+    })
+  }
+  else if (userType==1){
+    await (await user.find({IndividualUser_ID:userId})).map((user)=>{
+      username=user.individualUser_UserName
+    })
+  } else{
+    await (await corp.find({CorporateUser_ID:userId})).map((user)=>{
+      username=user.CorporateUser_UserName
+    })
+  }
+  res.send(await Problem.find({User_userName:username,User_Type:userType}));
  
 })
 
@@ -1694,20 +1768,25 @@ router.get('/courseRequests', async (req,res)=>{
   res.send(await CorpRequest.find());
 })
 
+
 //60 set a promotion (% sale) for specific courses, several courses or all courses
-router.put('setSpecificPromotion', async(req,res)=>{
+router.post('setSpecificPromotion', async(req,res)=>{
   var courseId= req.body.Course_ID
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
-  await course.update({Course_ID:courseId},{Course_Discount:discount,Course_Discount_Duration:duration})
+  await course.updateOne({Course_ID:courseId},{Course_Discount:discount,Course_Discount_Duration:duration})
   res.send('promotion applied')
+
 })
+
 router.put('setAllPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
   await course.update({Course_Discount:discount,Course_Discount_Duration:duration})
   res.send('promotion applied')
 })
+
+
 
 ////////end sprint 3
 
