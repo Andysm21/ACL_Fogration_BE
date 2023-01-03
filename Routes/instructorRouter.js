@@ -570,7 +570,7 @@ router.post("/createExam", async (req, res) =>{
 
 
 //define a promotion for the course (% discount) and for how long
-router.put("/course_promotion", async (req, res) =>{
+router.post("/course_promotion", async (req, res) =>{
 
   const {courseID} = req.body;
   const Discount = req.body.discount;
