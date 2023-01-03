@@ -278,7 +278,9 @@ router.post("/filterSubjectRating", async (req, res) => {
   });
   router.get("/viewCoursesALL", async (req, res) => {
     
-    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
+    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID Course_Discount_Duration Course_Discount -_id')
+  //  console.log(data)
+    // var data1= await course.find({}).select('Course_Discount_Duration Course_Discount Course_ID -_id')
     var final= []
     // var JustID= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
   
@@ -289,8 +291,9 @@ router.post("/filterSubjectRating", async (req, res) => {
         var arrayException=test1.split("[")
         var DataAlone=test1.split(",")
         var data1;
+     //   console.log(DataAlone)
     //Now Doing Trainees
-    console.log(DataAlone)
+    //console.log(DataAlone)
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
@@ -298,7 +301,7 @@ router.post("/filterSubjectRating", async (req, res) => {
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
-    console.log(DataAlone)
+    //console.log(DataAlone)
         var CC= DataAlone[6].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
@@ -319,10 +322,18 @@ router.post("/filterSubjectRating", async (req, res) => {
     var CH= DataAlone[5].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
-        //Now DOing ID
-        var CI= DataAlone[0].split(':')
-        CI=CI[1].split("'")
-        CI=CI[0]
+    //Now DOing ID
+    var CI= DataAlone[0].split(':')
+    CI=CI[1].split("'")
+    CI=CI[0]
+    //Now Discount
+    var CD= DataAlone[7].split(':')
+    CD=CD[1].split("'")
+    CD=CD[0]
+    //Now Discount duration
+    var CDD= DataAlone[8].split(':')
+    CDD=CDD[1].split("'")
+    CDD=CDD[0]
     // console.log(DataAlone)
      data1 = {
           "Course_ID": CI,
@@ -332,10 +343,14 @@ router.post("/filterSubjectRating", async (req, res) => {
           "Course_Instructor": X,
           "Course_Hours": CH,
           "Course_Country": CC,
-          "Course_Trainee": CTT
+          "Course_Trainee": CTT,
+          "Course_Discount": CD,
+          "Course_Discount_Duration": CDD
       }
       final.push(data1)
     }
+    console.log(final)
+
     res.send(final)
     });
   
