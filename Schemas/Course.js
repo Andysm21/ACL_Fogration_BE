@@ -41,10 +41,12 @@ const courseSchema = new Schema({
   Course_Discount: {
     type: Number,
     required: false,
+    default:0,
   },
   Course_Discount_Duration: {
     type: Number,
     required: false,
+    default:0,
   },
   Course_Subtitle: {
     type: Array,

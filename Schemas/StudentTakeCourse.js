@@ -21,7 +21,7 @@ StudentTakeCourse_StudentID: {
   },
   StudentTakeCourse_Progress: {
     type: Number,
-    required: false
+    required: false,
   },
   StudentTakeCourse_Type: {
     type: Number,

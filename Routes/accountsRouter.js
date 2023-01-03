@@ -398,7 +398,7 @@ var person = {
 
 router.post("/individualProfile", async (req,res)=>{
     var User_ID= req.body.User_ID
-    var data = await user.findOne({IndividualUser_ID:User_ID}).select('IndividualUser_ID individualUser_UserName individualUser_Password individualUser_Email individualUser_FirstName individualUser_LastName individualUser_Gender IndividualUser_Country  isCorporate -_id');
+    var data = await user.findOne({IndividualUser_ID:User_ID}).select('IndividualUser_ID individualUser_UserName individualUser_Password individualUser_Email individualUser_FirstName individualUser_LastName individualUser_Gender IndividualUser_Country  isCorporate individualUser_Wallet -_id');
     data = JSON.stringify(data).split(",")
     console.log(data)
 
@@ -438,6 +438,11 @@ router.post("/individualProfile", async (req,res)=>{
     var isCorporate=data[8].split(":")
     isCorporate= isCorporate[1].split('"')
     isCorporate=isCorporate[0]
+    //wallet
+    var wallet=data[9].split(":")
+    wallet= wallet[1].split('"')
+    wallet=wallet[0].split('}')
+    wallet = Number(wallet[0])
  
 
 
@@ -573,6 +578,7 @@ var person = {
   User_Courses: ArrayofCourses,
   User_Corporate: "",
   User_isCorporate: isCorporate,
+  User_Wallet: wallet
 }
     //res.send(courses)
     //res.send(await corp.findOne({CorporateUser_ID:User_ID}).select('CorporateUser_ID CorporateUser_UserName CorporateUser_Password CorporateUser_Email CorporateUser_FirstName CorporateUser_LastName CorporateUser_Gender CorporateUser_Counrty CorporateUser_Corporate -_id'))
