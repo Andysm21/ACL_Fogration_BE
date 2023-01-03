@@ -12,18 +12,40 @@ const CorpRequest= require('../Schemas/CorpRequest.js');
 const Instructor = require("../Schemas/Instructor.js");
 
 function createSubtitle(p1,id){
-Subtitle.create({Subtitle_ID:id,Subtitle_Name:p1.body.name,Subtitle_Course_ID:p1.body.cid,Subtitle_Video:p1.body.videos,Subtitle_Hours:p1.body.hours})
+Subtitle.create({
+    Subtitle_ID:id,
+    Subtitle_Name:p1.body.name,
+    Subtitle_Course_ID:p1.body.cid,
+    Subtitle_Video:p1.body.videos,
+    Subtitle_Hours:p1.body.hours})
+}
+
+
+function createCourse(p1,id) {
+    course.create({
+        Course_ID:id,
+        Course_Title:p1.body.Course_Title,
+        Course_Subject:p1.body.Course_Subject,
+        Course_Description:p1.body.Course_Description,
+        Course_Price:p1.body.Course_Price,
+        Course_Rating:5,
+        Course_Instructor:p1.body.Course_Instructor,
+        Course_Hours:0,
+        Course_Country:p1.body.Course_Country,
+        Course_Discount:0,
+        Course_Discount_Duration:0,
+        Course_Subtitle:[],
+        Course_Trainee:[],
+        Course_Review:[],
+        Course_Rate:5,
+        Course_Exam:p1.body.Course_Exam,
+        Course_Video_Preview:p1.body.Course_Video_Preview, 
+        Course_Views:0})
 }
 
 function createVideo(p1,id){
-Video.create({Video_ID:id,Video_Link:p1.body.link,Video_Subtitle:p1.body.subtitle,Video_Description:p1.body.desc,Video_Length:p1.body.length});
-}
-function createCourse(p1,id) {
-    course.create({Course_ID:id,Course_Title:p1.body.Course_Title,Course_Subject:p1.body.Course_Subject,Course_Description:p1.body.Course_Description
-        ,Course_Price:p1.body.Course_Price,Course_Rating:p1.body.Course_Rating,Course_Instructor:p1.body.Course_Instructor,Course_Hours:p1.body.Course_Hours,Course_Country:p1.body.Course_Country,
-        Course_Discount:p1.body.Course_Discount,Course_Discount_Duration:p1.body.Course_Discount_Duration,Course_Subtitle:p1.body.Course_Subtitle,Course_Trainee:p1.body.Course_Trainee,
-        Course_Review:p1.body.Course_Review,Course_Rate:p1.body.Course_Rate,Course_Exam:p1.body.Course_Exam,Course_Video_Preview:p1.body.Course_Video_Preview, Course_Views:0})
-}
+    Video.create({Video_ID:id,Video_Link:p1.body.link,Video_Subtitle:p1.body.subtitle,Video_Description:p1.body.desc,Video_Length:p1.body.length});
+    }
 function createStudentTakeExam(p1,id) {
     StudentTookexam.create({StudentTookExam_ID:id,StudentTookExam_Student_ID:p1.body.StudentTookExam_Student_ID,
     StudentTookExam_Exam_ID:p1.body.StudentTookExam_Exam_ID,StudentTookExam_Type:p1.body.StudentTookExam_Type })
@@ -84,7 +106,6 @@ async function getHoursAllSubtitles(coursename,res,req){
         return Response;
         //
 }
-
 async function SearchCourseTitle (title) {
     const Course_Title= title
     var data= await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
