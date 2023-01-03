@@ -622,7 +622,7 @@ router.put("/editBiographyOrEmail", async (req, res) => {
   const x= req.body.Instructor_ID 
   if(email == "" && bio != ""){
     await instructor.update({Instructor_ID:x},{Instructor_Biography:bio})
-    res.status(200).send("Info updated");
+    res.status(200).send("In fo updated");
   }
   else if(bio == "" && email != ""){
     await instructor.update({Instructor_ID:x},{Instructor_Email:email})
@@ -651,12 +651,10 @@ router.put("/editProfile", async (req, res) => {
  const country = req.body.Instructor_Country
  const checkUN = await instructor.findOne({Instructor_username:username},'Instructor_ID -_id');
  const checkEM = await instructor.findOne({Instructor_Email: email},'Instructor_ID -_id');
-console.log(req.body)
+//console.log(req.body);
 // console.log(checkEM);
-console.log(id);
+//console.log(id);
 // console.log(checkUN);
-
-
   if(username == '') //username cannot be empty
     res.send("1");
   else if(checkUN != null && checkUN.Instructor_ID != id){ //username already in use
@@ -666,11 +664,13 @@ console.log(id);
     res.send("3");
   }
   else{
-    const x = await instructor.updateOne({Instructor_ID: id},{Instructor_Biography:bio ,
-      Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country})
-    res.send("4")
+    const x = await instructor.updateOne({Instructor_ID: id},
+      {Instructor_Biography:bio , Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country})
+      res.send("4")
   }
 });
+
+
 //Username and Email
 router.put("/editProfileUserEmail", async (req, res) => {
   const id = req.body.Instructor_ID
