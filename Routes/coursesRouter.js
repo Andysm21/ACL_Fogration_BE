@@ -1457,13 +1457,30 @@ res.send(ArrayOfCourses)
 
 
 //Nour's enroll+pay first installment
+
+//15 enter their credit card details to pay for a course they want to register for
+
+router.post('/topUpWallet', async (req,res) =>{
+  var id = req.body.User_ID
+  var amount = parseInt(req.body.amount)
+  var wallet=0;
+  await (await user.find({IndividualUser_ID:id})).map((user =>
+    {
+     wallet = parseInt(user.individualUser_Wallet)
+    }))
+    amount = amount + wallet;
+    await user.update({IndividualUser_ID:id},{individualUser_Wallet:amount})
+    res.send('done')
+})
 //16 pay for a course
 router.post('/enrollAndPayCourse', async (req,res)=>{
+  var id = req.body.StudentTakeCourse_StudentID
   var coursePrice;
   var courseDiscount;
+  var wallet=0;
   
   if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
-    StudentTakeCourse_StudentID:req.body.StudentTakeCourse_StudentID,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
+    StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
       res.send("student already enrolled in this course")
     }
   else{
@@ -1471,9 +1488,22 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
       coursePrice=co.Course_Price
       courseDiscount =co.Course_Discount
     })
+    await (await user.find({IndividualUser_ID:id})).map((user =>
+      {
+       wallet = parseInt(user.individualUser_Wallet)
+      }))
+   
     coursePrice=coursePrice -(coursePrice*courseDiscount/100)
+    wallet = wallet -coursePrice
+    if(wallet<0){
+      res.send("insufficient funds")
+    }
+    else{
+      await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
     courseRouter.createStudentTakeCourse(req,coursePrice)
     res.send("done")
+    }
+    
   }
 
 })
@@ -1662,6 +1692,21 @@ router.put('/markProblem', async (req,res)=>{
 //58 view course requests from corporate trainees
 router.get('/courseRequests', async (req,res)=>{
   res.send(await CorpRequest.find());
+})
+
+//60 set a promotion (% sale) for specific courses, several courses or all courses
+router.put('setSpecificPromotion', async(req,res)=>{
+  var courseId= req.body.Course_ID
+  var discount = req.body.Course_Discount
+  var duration= req.body.Course_Discount_Duration
+  await course.update({Course_ID:courseId},{Course_Discount:discount,Course_Discount_Duration:duration})
+  res.send('promotion applied')
+})
+router.put('setAllPromotions', async(req,res)=>{
+  var discount = req.body.Course_Discount
+  var duration= req.body.Course_Discount_Duration
+  await course.update({Course_Discount:discount,Course_Discount_Duration:duration})
+  res.send('promotion applied')
 })
 
 ////////end sprint 3
