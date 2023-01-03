@@ -1119,7 +1119,7 @@ res.send("done")
 res.send("done")
 })*/
 
-//view my single course
+//view course with progress and exam grade
 router.post("/viewMyCourse/:id", async (req, res) => {
   var id = req.params.id;
   var userId = req.body.UserID
