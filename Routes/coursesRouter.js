@@ -817,8 +817,7 @@ router.post("/viewCourse/:id", async (req, res) => {
 //   res.send(final)
 //   });
 
-
-  router.get("/viewCoursesCorporate", async (req, res) => {
+router.get("/viewCoursesCorporate", async (req, res) => {
     const x = req.body.User_ID
     var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
     var final= []
@@ -1120,6 +1119,136 @@ res.send("done")
 res.send("done")
 })*/
 
+//view course with progress and exam grade
+router.post("/viewMyCourse/:id", async (req, res) => {
+  var id = req.params.id;
+  var userId = req.body.UserID
+  var type = req.body.type
+  var courseID;
+  var progress;
+  await (await StudentTakeCourse.find({StudentTakeCourse_StudentID:userId,StudentTakeCourse_Type:type,StudentTakeCourse_CourseID:id})).map((ex) => 
+  {
+    progress =ex.StudentTakeCourse_Progress;
+  }
+  ) 
+
+  const courses = await course.find({Course_ID:Number(id) },'-_id');
+  
+  console.log(courses);
+  var {Course_Subtitle} = courses[0];
+  var subtitle = []
+  var videos = []
+  for(let i = 0; i < Course_Subtitle.length; i++)
+  {
+    var tempVideo = [];
+    subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
+    //console.log(subtitleTemp);
+    var {Subtitle_Video} = subtitleTemp[0];
+    
+    for(let j = 0; j < Subtitle_Video.length; j++){
+      
+      //console.log(Subtitle_Video[j]);
+      var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      const Videos = {
+          Video_ID: videosTemp[0].Video_ID,
+          Video_Link: videosTemp[0].Video_Link,
+          Video_Subtitle: videosTemp[0].Video_Subtitle,
+          Video_Description: videosTemp[0].Video_Description,
+          Video_Length: videosTemp[0].Video_Length
+      }
+      tempVideo[j] = Videos;
+      
+    }
+    videos[i] = tempVideo;
+    const subtitleObj = {
+      Subtitle_ID: subtitleTemp[0].Subtitle_ID,
+      Subtitle_Name: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Course_ID: subtitleTemp[0].Subtitle_Name,
+      Subtitle_Video: videos[i],
+      Subtitle_Hours: subtitleTemp[0].Subtitle_Hours
+    }
+
+   // console.log(subtitleObj);
+    subtitle[i] = subtitleObj;
+  }
+ // console.log(subtitle);
+  var exams = courses[0].Course_Exam;
+  var ExamObj = [];
+  var grade;
+  for(let i = 0; i < exams.length; i++){
+    await (await StudentTookexam.find({StudentTookExam_Student_ID:userId,StudentTookExam_Type:type,StudentTookExam_Exam_ID:exams[i]})).map((ex) => 
+    {
+      grade =ex.StudentTookExam_Grades;
+    }
+    ) 
+    console.log(grade);
+    const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
+    var QuestionObj = [];
+   // console.log(ExamTemp);
+    for(let j = 0; j< ExamTemp[0].Exam_Question_ID.length; j++){
+      var qq = await Question.find({Question_ID: ExamTemp[0].Exam_Question_ID[j]},'-_id');
+      //console.log(qq)
+      qq = qq[0];
+      const tempQ = {
+          Question_ID: qq.Question_ID,
+          Question_Name: qq.Question_Name,
+          Question_choices: qq.Question_choices,
+          Question_Correct_Answers: qq.Question_Correct_Answers,
+          Question_Grade: qq.Question_Grade,
+
+      }
+      
+      QuestionObj[j] = tempQ;
+    }
+   
+    const exam = {
+      Exam_ID: exams[0].Exam_ID,
+      Exam_Question_ID: QuestionObj,
+      Exam_Grade: exams[0].Exam_Grade,
+      Exam_Instructor_ID: exams[0].Exam_Instructor_ID,
+      Exam_Course_ID: exams[0].Exam_Course_ID,
+      Exam_Grade:grade,
+    }
+    ExamObj[i] = exam;
+  }
+  
+  var instructor = await Instructor.findOne({Instructor_ID: courses[0].Course_Instructor}).select('-_id -createdAt -updatedAt -__v')
+  //.select('Instructor_ID Instructor_FirstName -_id');
+  //instructor = instructor[0];
+
+  //console.log(instructor);
+  const CourseT = {
+    Course_ID: courses[0].Course_ID,
+    Course_Title: courses[0].Course_Title,
+    Course_Subject: courses[0].Course_Subject,
+    Course_Description: courses[0].Course_Description,
+    Course_Price: courses[0].Course_Price,
+    Course_Rating: courses[0].Course_Rating,
+    Course_Instructor: instructor,
+    // {
+    //   Instructor_ID: instructor.Instructor_ID,
+    //   Instructor_FirstName: instructor.Instructor_FirstName,
+    //   Instructor_LastName: instructor.Instructor_LastName
+    // },
+    Course_Hours: courses[0].Course_Hours,
+    Course_Country: courses[0].Course_Country,
+    Course_Discount: courses[0].Course_Discount,
+    Course_Discount_Duration: courses[0].Course_Discount_Duration,
+    Course_Subtitle: subtitle,
+    Course_Trainee: courses[0].Course_Trainee.length,
+    Course_Review: courses[0].Course_Review,
+    Course_Rate: courses[0].Course_Rate,
+    Course_Exam: ExamObj,
+    Course_Progress:progress
+  };
+  //console.log(Course.Course_ID);
+  //console.log(courses[0].Course_Trainee.length);
+
+
+res.send(CourseT)
+
+})
+
 router.post('/examGrades', async (req,res)=>{
 var UserID =Number(req.body.UserID) ;
 var EID = Number(req.body.EID);
@@ -1261,6 +1390,10 @@ ArrayOfCIDS.push(Number(x[0]))
 // console.log(ArrayOfCIDS)
 for (let i=0; i<ArrayOfCIDS.length; i++){
   const courses = await course.find({Course_ID: Number(ArrayOfCIDS[i])},'-_id');
+  var progress;
+  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:Number(ArrayOfCIDS[i]),StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:2})).map((co)=>{
+    progress =co.StudentTakeCourse_Progress;
+  })
   //console.log(courses);
   var {Course_Subtitle} = courses[0];
   var subtitle = []
@@ -1355,7 +1488,8 @@ for (let i=0; i<ArrayOfCIDS.length; i++){
     Course_Trainee: courses[0].Course_Trainee.length,
     Course_Review: courses[0].Course_Review,
     Course_Rate: courses[0].Course_Rate,
-    Course_Exam: ExamObj
+    Course_Exam: ExamObj,
+    Course_Progress:progress,
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
@@ -1374,15 +1508,20 @@ router.post('/myCoursesInd', async (req,res)=>{
   var ArrayOfCIDS=[];
   var ArrayOfCourses=[];
   for(let i=0; i<STC.length; i++)
-{
-var x = STC[i].split(':')
-x=x[1].split('}')
-console.log(x[0])
-ArrayOfCIDS.push(Number(x[0]))
-}
+  {
+    var x = STC[i].split(':')
+    x=x[1].split('}')
+    console.log(x[0])
+    ArrayOfCIDS.push(Number(x[0]))
+    }
 
 for (let i=0; i<ArrayOfCIDS.length; i++){
   const courses = await course.find({Course_ID: Number(ArrayOfCIDS[i])},'-_id');
+  var progress;
+
+  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:Number(ArrayOfCIDS[i]),StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map((co)=>{
+    progress =co.StudentTakeCourse_Progress;
+  })
   //console.log(courses);
   var {Course_Subtitle} = courses[0];
   var subtitle = []
@@ -1441,6 +1580,8 @@ for (let i=0; i<ArrayOfCIDS.length; i++){
       
       QuestionObj[j] = tempQ;
     }
+    var Examgrade;
+    await StudentTookexam.find({})
     const exam = {
       Exam_ID: exams[0].Exam_ID,
       Exam_Question_ID: QuestionObj,
@@ -1477,7 +1618,8 @@ for (let i=0; i<ArrayOfCIDS.length; i++){
     Course_Trainee: courses[0].Course_Trainee.length,
     Course_Review: courses[0].Course_Review,
     Course_Rate: courses[0].Course_Rate,
-    Course_Exam: ExamObj
+    Course_Exam: ExamObj,
+    Course_Progress:progress
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
@@ -1489,10 +1631,6 @@ res.send(ArrayOfCourses)
 })
 
 //Sprint 3
-
-
-//Nour's enroll+pay first installment
-
 //15 enter their credit card details to pay for a course they want to register for
 
 router.post('/topUpWallet', async (req,res) =>{
@@ -1721,7 +1859,6 @@ router.post('/reportProblem', async (req,res)=>{
   res.send('Problem reported');
  
 })
-
 //48 see all previously repoted problems and their statuses
 router.get('/viewMyProblems', async (req,res)=>{
   var userId = req.body.ID;
@@ -1768,9 +1905,13 @@ router.get('/courseRequests', async (req,res)=>{
   res.send(await CorpRequest.find());
 })
 
+router.get('/getProgress', async(req,res)=>{
+
+})
+
 
 //60 set a promotion (% sale) for specific courses, several courses or all courses
-router.post('setSpecificPromotion', async(req,res)=>{
+router.post('/setSpecificPromotion', async(req,res)=>{
   var courseId= req.body.Course_ID
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
@@ -1779,7 +1920,7 @@ router.post('setSpecificPromotion', async(req,res)=>{
 
 })
 
-router.put('setAllPromotions', async(req,res)=>{
+router.put('/setAllPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
   await course.update({Course_Discount:discount,Course_Discount_Duration:duration})
