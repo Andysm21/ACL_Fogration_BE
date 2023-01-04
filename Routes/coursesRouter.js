@@ -290,7 +290,7 @@ router.post("/filterSubjectRating", async (req, res) => {
         var DataAlone=test1.split(",")
         var data1;
     //Now Doing Trainees
-    console.log(DataAlone)
+    // console.log(DataAlone)
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
@@ -298,7 +298,7 @@ router.post("/filterSubjectRating", async (req, res) => {
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
-    console.log(DataAlone)
+    // console.log(DataAlone)
         var CC= DataAlone[6].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
@@ -1680,6 +1680,33 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
   }
 
 })
+
+// view wallet
+router.post('/balance', async (req,res)=>{
+  var id = req.body.ID
+  var balance;
+  await (await user.find({IndividualUser_ID:id})).map((user)=>{
+    balance=user.individualUser_Wallet
+    res.json(balance);
+
+  })
+  // console.log(balance);
+})
+
+router.post('/getCoursePrice', async (req,res)=>{
+  var id = req.body.ID
+  var price;
+  await (await course.find({Course_ID:id})).map((course)=>{
+    console.log(course.Course_Price)
+    price=course.Course_Price-(course.Course_Price*course.Course_Discount/100)
+    res.json(price);
+     console.log(price);
+
+  })
+  // console.log(balance);
+})
+
+
 
 // 14 view the most viewed/ most popular courses
 router.post('/mostViewedCourses', async (req,res)=>{
