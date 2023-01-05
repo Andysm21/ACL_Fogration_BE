@@ -19,6 +19,7 @@ const user = require('../Schemas/IndividualUser.js');
 const corp = require('../Schemas/CorporateUser.js');
 const Problem= require('../Schemas/Problem.js');
 const CorpRequest= require('../Schemas/CorpRequest.js');
+const RefundRequest= require('../Schemas/RefundRequest.js');
 const sendCertificate = require("../utils/sendCertificate");
 
 const { array } = require('joi');
@@ -1808,16 +1809,29 @@ router.post('/requestRefund', async (req,res)=>{
   var courseID= req.body.courseID
   var refundable= false;
   var amount;
-  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map(async (co) => {
-    if (co.StudentTakeCourse_Progress<50){
-      refundable = true;
-      amount =co.StudentTakeCourse_Money_Paid
-    }
-    })
-
-  if(refundable){
+  if(await RefundRequest.find({User_ID:id,Course_ID:courseID}).count().exec()==0){
+    await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map( (co) => {
+      if (co.StudentTakeCourse_Progress<50){
+        refundable = true;
+        amount =co.StudentTakeCourse_Money_Paid/2
+      }
+      })
+      
+      if(refundable){
+        await courseRouter.createRefundRequest(id,courseID,amount);
+        res.send('Request successful')
+      }
+      else{
+        res.send('More than 50% of course is completed, refund is not possible')
+       }
+  }
+  else{
+    res.send('Refund already requested')
+  }
+ 
+  /*if(refundable){
     await (await user.find({IndividualUser_ID:id})).map((user) => {
-    wallet = user.individualUser_Wallet + amount/2
+    wallet = user.individualUser_Wallet + amount
   })
     await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
      StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
@@ -1825,7 +1839,24 @@ router.post('/requestRefund', async (req,res)=>{
   }
   else{
    res.send('More than 50% of course is completed, refund is not possible')
-  }
+  }*/
+})
+
+//54 refund an amount to a trainee to their wallet
+router.post('/refundWallet', async (req,res)=>{
+  var id = req.body.ID;
+  var courseID= req.body.courseID
+  var amount;
+  await (await RefundRequest.find({User_ID:id,Course_ID:courseID})).map((re)=>{
+    amount= re.Refund_Amount;
+  })
+  await (await user.find({IndividualUser_ID:id})).map((user) => {
+    amount +=Number(user.individualUser_Wallet)
+  })
+  await RefundRequest.deleteOne({User_ID:id,Course_ID:courseID})
+  await user.update({IndividualUser_ID:id},{individualUser_Wallet:amount})
+  await StudentTakeCourse.remove({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
+  res.send('done')
 })
 
 //47 report a problem with a course. The problem can be "technical", "financial" or "other"
@@ -1884,9 +1915,32 @@ router.get('/viewMyProblems', async (req,res)=>{
 
 //50 request access to a specific course they do not have access to
 router.post('/requestAccess', async (req,res)=>{
-  courseRouter.createRequest(req.body)
-  res.send('Access Requested');
+  var userCompany;
+  var courseTitle;
+  await (await corp.find({CorporateUser_ID:req.body.User_ID})).map((user)=>{
+    userCompany= user.CorporateUser_Corporate;
+  })
+  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
+    courseTitle= co.Course_Title;
+  })
+  if(await StudentTakeCourse.find({StudentTakeCourse_StudentID:req.body.User_ID, StudentTakeCourse_CourseID:req.body.Course_ID,StudentTakeCourse_Type:2}).count().exec()>0){
+    res.send('Student already enrolled');
+  }
+  else{
+    courseRouter.createRequest(req.body.User_ID,courseTitle,userCompany)
+    res.send('Access Requested');
+
+  }
  
+ 
+})
+
+router.post('/getCourseTitle', async(req,res)=>{
+  var courseTitle;
+  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
+    courseTitle= co.Course_Title;
+  })
+  res.json(courseTitle);
 })
 
 //52 view reported problems - should automaticalled be marked as "unseen"
@@ -1902,13 +1956,29 @@ router.put('/markProblem', async (req,res)=>{
 
 //58 view course requests from corporate trainees
 router.get('/courseRequests', async (req,res)=>{
+
   res.send(await CorpRequest.find());
 })
 
-router.get('/getProgress', async(req,res)=>{
+//59 grant corporate trainees access to specific courses
+router.put('/grantAccess', async (req,res)=>{
+  var courseId= req.body.Course_ID
+  var userId= req.body.userId
+  var courseTitle;
 
+  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
+    courseTitle= co.Course_Title;
+  })
+
+  await CorpRequest.remove({User_ID:userId,Course_Title:courseTitle})
+  await courseRouter.createCorpStudentTakeCourse(courseId,userId)
+  res.json('access granted')
 })
 
+router.put('/refuseAccess', async (req,res)=>{
+  var courseId= req.body.Course_ID
+  var userId= req.body.userId
+})
 
 //60 set a promotion (% sale) for specific courses, several courses or all courses
 router.post('/setSpecificPromotion', async(req,res)=>{
@@ -1923,11 +1993,9 @@ router.post('/setSpecificPromotion', async(req,res)=>{
 router.put('/setAllPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
-  await course.update({Course_Discount:discount,Course_Discount_Duration:duration})
+  await course.updateMany({Course_Discount:discount,Course_Discount_Duration:duration})
   res.send('promotion applied')
 })
-
-
 
 ////////end sprint 3
 
