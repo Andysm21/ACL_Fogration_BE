@@ -56,6 +56,14 @@ const InstructorSchema = new Schema({
     type: Boolean,
     required: true,
       default: false,
+  },
+  Instructor_Current_Balance:{
+    type: Number,
+    required: true,
+  },
+  Instructor_Balance_Date:{
+    type: Date,
+    required: true,
   }
   
 }, { timestamps: true });

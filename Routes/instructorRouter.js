@@ -39,7 +39,7 @@ router.post("/RatingInstructor", async (req, res) => {
 //DONEEEEEEEEEEEEEEEEEEEEEEEEE
 router.post('/viewMyCoursesInstructor', async (req,res)=>{
   const x = req.body.Instructor_ID
-  var data= await course.find({Course_Instructor: x}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
+  var data= await course.find({Course_Instructor: x}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID Course_Discount_Duration Course_Discount -_id')
    var final= []
    for(let i =0;i<data.length;i++)
    {
@@ -48,7 +48,7 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
        var arrayException=test1.split("[")
        var DataAlone=test1.split(",")
        var data1;
-    console.log(DataAlone)
+    // console.log(DataAlone)
    //Now Doing Trainees
    var CTT= arrayException[1].split(']')
    CTT= Number(CTT.length)
@@ -57,7 +57,6 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
        CT=CT[1].split('"')
        CT=CT[0]
    //Now Doing Country
-   console.log(DataAlone)
        var CC= DataAlone[6].split(':"')
        CC=CC[1].split('"')
        CC=CC[0]
@@ -82,6 +81,14 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
       var CID= DataAlone[0].split(':')
       CID=CID[1].split("'")
       CID=CID[0]
+    //Now Discount
+    var CD= DataAlone[7].split(':')
+    CD=CD[1].split("'")
+    CD=CD[0]
+    //Now Discount duration
+    var CDD= DataAlone[8].split(':')
+    CDD=CDD[1].split("'")
+    CDD=CDD[0]
     data1 = {
          "Course_ID": CID,
          "Course_Title": CT,
@@ -90,10 +97,13 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
          "Course_Instructor": X,
          "Course_Hours": CH,
          "Course_Country": CC,
-         "Course_Trainee": CTT
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
      }
      final.push(data1)
    }
+   console.log(final)
    res.send(final);
 
 });
@@ -533,7 +543,13 @@ router.post("/filterPriceAndSubjectInst", async (req, res) => {
 
 router.post("/instructorProfile", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
-  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews -_id'))
+  var date = new Date();
+  await (await Instructor.find({Instructor_ID:Inst_ID})).map(async (inst)=>{
+    if(inst.Instructor_Balance_Date.getMonth()!=date.getMonth()){
+      await Instructor.update({Instructor_ID:Inst_ID},{Instructor_Current_Balance:0,Instructor_Balance_Date:date})
+    }
+  })
+  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews Instructor_Current_Balance -_id'))
 })
 
 
@@ -579,6 +595,7 @@ router.post("/instructorAccount", async (req,res)=>{
 
 
 })
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //create a multiple choice exam with 4 choices per question
 router.post("/createExam", async(req, res) => {
@@ -894,7 +911,6 @@ router.post("/forgotPassword", async (req, res) => {
 
 
   router.post("/ytl", async (req, res) =>{
-
   })
 
   router.post("/InstContractStatus",async (req, res) =>{
