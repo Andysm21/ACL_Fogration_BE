@@ -518,8 +518,15 @@ router.post("/filterPriceAndSubjectInst", async (req, res) => {
 
 router.post("/instructorProfile", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
-  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews -_id'))
+  var date = new Date();
+  await (await Instructor.find({Instructor_ID:Inst_ID})).map(async (inst)=>{
+    if(inst.Instructor_Balance_Date.getMonth()!=date.getMonth()){
+      await Instructor.update({Instructor_ID:Inst_ID},{Instructor_Current_Balance:0,Instructor_Balance_Date:date})
+    }
+  })
+  res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews Instructor_Current_Balance -_id'))
 })
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //create a multiple choice exam with 4 choices per question
 router.post("/createExam", async (req, res) =>{
@@ -786,7 +793,6 @@ router.post("/forgotPassword", async (req, res) => {
 
 
   router.post("/ytl", async (req, res) =>{
-
   })
 
   router.post("/InstContractStatus",async (req, res) =>{

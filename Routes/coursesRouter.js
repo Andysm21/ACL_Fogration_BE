@@ -1652,6 +1652,9 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
   var coursePrice;
   var courseDiscount;
   var wallet=0;
+  var instructor;
+  var instructorBalance;
+  var date =new Date();
   
   if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
     StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
@@ -1661,12 +1664,24 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
     await (await course.find({Course_ID:req.body.StudentTakeCourse_CourseID})).map((co)=>{
       coursePrice=co.Course_Price
       courseDiscount =co.Course_Discount
+      instructor =co.Course_Instructor
     })
     await (await user.find({IndividualUser_ID:id})).map((user =>
       {
        wallet = parseInt(user.individualUser_Wallet)
       }))
-   
+    await (await Instructor.find({Instructor_ID:instructor})).map((inst)=>{
+      if(inst.Instructor_Balance_Date.getMonth()!=date.getMonth()){
+        inst.Instructor_Current_Balance=0;
+        instructorBalance=0;
+      }
+      else{
+        instructorBalance=inst.Instructor_Current_Balance
+        date=inst.Instructor_Balance_Date;
+      }
+      
+    })
+    instructorBalance= instructorBalance+ (coursePrice*0.6)
     coursePrice=coursePrice -(coursePrice*courseDiscount/100)
     wallet = wallet -coursePrice
     if(wallet<0){
@@ -1675,6 +1690,7 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
     else{
       await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
     courseRouter.createStudentTakeCourse(req,coursePrice)
+    await Instructor.update({Instructor_ID:instructor},{Instructor_Current_Balance:instructorBalance,Instructor_Balance_Date:date})
     res.send("done")
     }
     
@@ -1706,8 +1722,6 @@ router.post('/getCoursePrice', async (req,res)=>{
   })
   // console.log(balance);
 })
-
-
 
 // 14 view the most viewed/ most popular courses
 router.post('/mostViewedCourses', async (req,res)=>{
@@ -1992,11 +2006,29 @@ router.put('/grantAccess', async (req,res)=>{
   var courseId= req.body.Course_ID
   var userId= req.body.userId
   var courseTitle;
+  var coursePrice;
+  var instructor;
+  var instructorBalance;
+  var date =new Date();
 
   await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
     courseTitle= co.Course_Title;
+    coursePrice=co.Course_Price;
+    instructor =co.Course_Instructor;
   })
-
+  await (await Instructor.find({Instructor_ID:instructor})).map((inst)=>{
+    if(inst.Instructor_Balance_Date.getMonth()!=date.getMonth()){
+      inst.Instructor_Current_Balance=0;
+      instructorBalance=0;
+    }
+    else{
+      instructorBalance=inst.Instructor_Current_Balance
+      date=inst.Instructor_Balance_Date;
+    }
+    
+  })
+  instructorBalance= instructorBalance+ (coursePrice*0.6)
+await Instructor.update({Instructor_ID:instructor},{Instructor_Current_Balance:instructorBalance,Instructor_Balance_Date:date})
   await CorpRequest.remove({User_ID:userId,Course_Title:courseTitle})
   await courseRouter.createCorpStudentTakeCourse(courseId,userId)
   res.json('access granted')
@@ -2021,6 +2053,18 @@ router.put('/setAllPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
   await course.updateMany({Course_Discount:discount,Course_Discount_Duration:duration})
+  res.send('promotion applied')
+})
+
+router.put('/setGeneralPromotions', async(req,res)=>{
+  var discount = req.body.Course_Discount
+  var duration= req.body.Course_Discount_Duration
+  //var courses =req.body.courses
+  var courses = ["Data Structures"]
+  for (var i=0; i<courses.length;i++){
+    await course.update({Course_Title:courses[i]},{Course_Discount:discount,Course_Discount_Duration:duration})
+  }
+  
   res.send('promotion applied')
 })
 
