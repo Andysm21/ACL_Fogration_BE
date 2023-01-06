@@ -14,10 +14,10 @@ const Instructor = require("../Schemas/Instructor.js");
 function createSubtitle(p1,id){
 Subtitle.create({
     Subtitle_ID:id,
-    Subtitle_Name:p1.body.name,
-    Subtitle_Course_ID:p1.body.cid,
-    Subtitle_Video:p1.body.videos,
-    Subtitle_Hours:p1.body.hours})
+    Subtitle_Name: p1.body.Subtitle,
+    Subtitle_Course_ID: Number(p1.body.Subtitle_Course_ID),
+    Subtitle_Video:[],
+    Subtitle_Hours:0})
 }
 
 
@@ -38,14 +38,20 @@ function createCourse(p1,id) {
         Course_Trainee:[],
         Course_Review:[],
         Course_Rate:5,
-        Course_Exam:p1.body.Course_Exam,
+        Course_Exam:[],
         Course_Video_Preview:p1.body.Course_Video_Preview, 
         Course_Views:0})
 }
 
 function createVideo(p1,id){
-    Video.create({Video_ID:id,Video_Link:p1.body.link,Video_Subtitle:p1.body.subtitle,Video_Description:p1.body.desc,Video_Length:p1.body.length});
+    Video.create({
+        Video_ID:id,
+        Video_Link:p1.body.link,
+        Video_Subtitle: Number(p1.body.subtitle),
+        Video_Description:p1.body.description,
+        Video_Length:20});
     }
+
 function createStudentTakeExam(p1,id) {
     StudentTookexam.create({StudentTookExam_ID:id,StudentTookExam_Student_ID:p1.body.StudentTookExam_Student_ID,
     StudentTookExam_Exam_ID:p1.body.StudentTookExam_Exam_ID,StudentTookExam_Type:p1.body.StudentTookExam_Type })

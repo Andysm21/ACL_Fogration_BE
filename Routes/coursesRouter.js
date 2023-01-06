@@ -354,7 +354,6 @@ router.post("/filterSubjectRating", async (req, res) => {
     res.send(final)
     });
   
-
 //10 filter the courses based on price (price can be FREE)
 router.post("/filterPrice", async (req, res) => {// for all but not for Corporate
     const FilterPriceLower= req.body.FilterPrice1
@@ -902,17 +901,43 @@ router.get("/hoverOnCourse", async (req, res) => {
   });
 
 //TO BE MOVED LATER WHEN WE CREATE THEIR ROUTERS AND THEIR CONTROLLERS
-router.get("/createVideo", async (req, res) => {
+router.post("/createVideo", async (req, res) => {
   var id = await Video.count().exec()+1;
-  courseRouter.createVideo(req,id)
-  res.status(200).send("Video Created");
+  console.log(req.body);
+  courseRouter.createVideo(req,id);
+
+ // console.log(Subtitle.findOne({Subtitle_ID: Number(req.body.subtitle)}));
+ // Subtitle.updateOne({Subtitle_ID: Number(req.body.subtitle)}, {Subtitle_Hours: 20})
+  await Subtitle.updateOne(
+    { Subtitle_ID: req.body.subtitle },
+    { 
+      $push: { 
+        Subtitle_Video: {
+            $each: [ id ],
+            $position: 0
+         }
+       } 
+     }).exec()
+  res.status(200).send(id + "");
+ // res.status(200).send("Video Created");
 
 });
 
-router.get("/createSubtitle", async (req, res) => {
+router.post("/createSubtitle", async (req, res) => {
   var id = await sub.count().exec()+1;
+  console.log(req.body);
   courseRouter.createSubtitle(req,id)
-  res.status(200).send("Subtitle Created");
+  await course.updateOne(
+    { Course_ID: req.body.Subtitle_Course_ID },
+    { 
+      $push: { 
+        Course_Subtitle: {
+            $each: [ id ],
+            $position: 0
+         }
+       } 
+     }).exec()
+  res.status(200).send(id + "");
 
 });
 

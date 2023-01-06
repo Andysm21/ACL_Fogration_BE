@@ -20,6 +20,21 @@ const Instructor = require('../Schemas/Instructor.js');
 //const youtubekey='1081702991015-3ube06jg6k96mf2ckvcp850lv7iibq48.apps.googleusercontent.com'
 
 
+router.post("/RatingInstructor", async (req, res) => {
+  await Instructor.updateOne(
+    { Instructor_ID: req.body.ID},
+    { 
+      $push: { 
+        Course_Rate: {
+            $each: [ Number(req.body.Rating) ],
+            $position: 0
+         }
+       } 
+     }).exec()
+     res.send(await instructor.find({Instructor_ID: req.body.ID }).select('Instructor_Ratings -_id').exec());
+
+});
+
 //18 view all the titles of the courses given by him/her
 //DONEEEEEEEEEEEEEEEEEEEEEEEEE
 router.post('/viewMyCoursesInstructor', async (req,res)=>{
@@ -520,9 +535,102 @@ router.post("/instructorProfile", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
   res.send(await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Reviews -_id'))
 })
+
+
+router.post("/instructorAccount", async (req,res)=>{
+  var Inst_ID= req.body.Instructor_ID
+  //console.log(Inst_ID);
+  const instructor = await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Courses Instructor_Reviews  -_id')
+  //console.log(instructor);
+  var {Instructor_Courses} = instructor;
+  var courses = []
+  var rate = []
+  for(let i = 0; i < Instructor_Courses.length; i++)
+  {
+    courseTemp = await course.find({Course_ID: Instructor_Courses[i]},'-_id');
+    const courseObj = {
+      Course_ID: courseTemp[0].Course_ID,
+      Course_Title: courseTemp[0].Course_Title,
+      Course_Description: courseTemp[0].Course_Description,
+      Course_Rate: courseTemp[0].Course_Rate
+    }
+ 
+    courses[i] = courseObj;
+    rate = [];
+  }
+
+  const instructorObj = {
+    Instructor_ID: instructor.Instructor_ID,
+    Instructor_username: instructor.Instructor_username,
+    Instructor_Password: instructor.Instructor_Password,
+    Instructor_Email: instructor.Instructor_Email,
+    Instructor_FirstName: instructor.Instructor_FirstName,
+    Instructor_LastName: instructor.Instructor_LastName,
+    Instructor_Gender: instructor.Instructor_Gender,
+    Instructor_Counrty: instructor.Instructor_Counrty,
+    Instructor_Biography: instructor.Instructor_Biography,
+    Instructor_Ratings: instructor.Instructor_Ratings, 
+    Instructor_Courses: courses,
+    Instructor_Reviews: instructor.Instructor_Reviews
+
+  }
+  console.log(instructorObj);
+  res.send(instructorObj);
+
+
+})
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //create a multiple choice exam with 4 choices per question
-router.post("/createExam", async (req, res) =>{
+router.post("/createExam", async(req, res) => {
+  var id = await Exam.count().exec()+1;
+  exams.createExam(req,id);
+  console.log(req.body.Course);
+  await course.updateOne(
+    { Course_ID: Number(req.body.Course) },
+    { 
+      $push: { 
+        Course_Exam: {
+            $each: [ id ],
+            $position: 0
+         }
+       } 
+     }).exec()
+
+  console.log("Exam Created")
+  res.send(id + "");
+})
+
+router.post("/createQuestion", async(req,res) => {
+  var id = await Question.count().exec()+1;
+  console.log(req.body);
+  var question_choices = [];
+  question_choices[0] = req.body.questionChoice1;
+  question_choices[1] = req.body.questionChoice2;
+  question_choices[2] = req.body.questionChoice3;
+  question_choices[3] = req.body.questionChoice4;
+  exams.createQuestion(parseInt(id),req.body.Question_Name,question_choices,req.body.Question_Correct_Answer);
+  console.log(Exam.findOne({ Exam_ID: req.body.exam_id }))
+  await Exam.updateOne(
+    { Exam_ID: req.body.exam_id },
+    { 
+      $push: { 
+        Exam_Question_ID: {
+            $each: [ id ],
+            $position: 0
+         }
+       } 
+     }).exec()
+
+    // var number = await Exam.findOne({ Exam_ID: req.body.exam_id }, 'Exam_Question_ID -_id')
+    // var grade = number.length;
+    // await Exam.updateOne({ Exam_ID: req.body.exam_id }, {Exam_Grade: grade});
+
+    res.send("");
+
+})
+
+
+router.post("/createExam1", async (req, res) =>{
   var Question_Choices = [] ;
   var Question_Name;
   var allQuestions = req.body.questions;

@@ -119,7 +119,8 @@ router.post('/createCourse', async (req,res)=>{
         res.send("Course already exists.");
     else if(req.body.Course_Title!= null || req.body.Course_Price != null || req.body.Course_Description != null || req.body.Course_Subject != null || req.body.Course_Instructor != null || req.body.Course_Country != null) {
       courseRouter.createCourse(req,id)
-        res.send("Create a new course.")
+      //console.log("I am Here");
+      res.send(id + "");
         }
     else{
         res.send("Please fill all required fields")
