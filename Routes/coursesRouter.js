@@ -19,6 +19,7 @@ const user = require('../Schemas/IndividualUser.js');
 const corp = require('../Schemas/CorporateUser.js');
 const Problem= require('../Schemas/Problem.js');
 const CorpRequest= require('../Schemas/CorpRequest.js');
+const RefundRequest= require('../Schemas/RefundRequest.js');
 const sendCertificate = require("../utils/sendCertificate");
 
 const { array } = require('joi');
@@ -293,7 +294,9 @@ router.post("/filterSubjectRating", async (req, res) => {
         var data1;
      //   console.log(DataAlone)
     //Now Doing Trainees
+
     //console.log(DataAlone)
+
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
@@ -301,7 +304,9 @@ router.post("/filterSubjectRating", async (req, res) => {
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
+
     //console.log(DataAlone)
+
         var CC= DataAlone[6].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
@@ -1422,7 +1427,7 @@ if(progress==100){
         email=co.CorporateUser_Email})
     }
       await sendCertificate(email,y, "Congratulations on completing the course!!");
-      
+    await StudentTakeCourse.remove({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})
     
 }
 
@@ -1704,6 +1709,9 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
   var coursePrice;
   var courseDiscount;
   var wallet=0;
+  var instructor;
+  var instructorBalance;
+  var date =new Date();
   
   if (!(await StudentTakeCourse.find({StudentTakeCourse_CourseID:req.body.StudentTakeCourse_CourseID,
     StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:req.body.StudentTakeCourse_Type}))){
@@ -1713,12 +1721,24 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
     await (await course.find({Course_ID:req.body.StudentTakeCourse_CourseID})).map((co)=>{
       coursePrice=co.Course_Price
       courseDiscount =co.Course_Discount
+      instructor =co.Course_Instructor
     })
     await (await user.find({IndividualUser_ID:id})).map((user =>
       {
        wallet = parseInt(user.individualUser_Wallet)
       }))
-   
+    await (await Instructor.find({Instructor_ID:instructor})).map((inst)=>{
+      if(inst.Instructor_Balance_Date.getMonth()!=date.getMonth()){
+        inst.Instructor_Current_Balance=0;
+        instructorBalance=0;
+      }
+      else{
+        instructorBalance=inst.Instructor_Current_Balance
+        date=inst.Instructor_Balance_Date;
+      }
+      
+    })
+    instructorBalance= instructorBalance+ (coursePrice*0.6)
     coursePrice=coursePrice -(coursePrice*courseDiscount/100)
     wallet = wallet -coursePrice
     if(wallet<0){
@@ -1727,11 +1747,37 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
     else{
       await user.updateOne({IndividualUser_ID:id},{individualUser_Wallet:wallet})
     courseRouter.createStudentTakeCourse(req,coursePrice)
+    await Instructor.update({Instructor_ID:instructor},{Instructor_Current_Balance:instructorBalance,Instructor_Balance_Date:date})
     res.send("done")
     }
     
   }
 
+})
+
+// view wallet
+router.post('/balance', async (req,res)=>{
+  var id = req.body.ID
+  var balance;
+  await (await user.find({IndividualUser_ID:id})).map((user)=>{
+    balance=user.individualUser_Wallet
+    res.json(balance);
+
+  })
+  // console.log(balance);
+})
+
+router.post('/getCoursePrice', async (req,res)=>{
+  var id = req.body.ID
+  var price;
+  await (await course.find({Course_ID:id})).map((course)=>{
+    console.log(course.Course_Price)
+    price=course.Course_Price-(course.Course_Price*course.Course_Discount/100)
+    res.json(price);
+     console.log(price);
+
+  })
+  // console.log(balance);
 })
 
 // 14 view the most viewed/ most popular courses
@@ -1861,16 +1907,29 @@ router.post('/requestRefund', async (req,res)=>{
   var courseID= req.body.courseID
   var refundable= false;
   var amount;
-  await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map(async (co) => {
-    if (co.StudentTakeCourse_Progress<50){
-      refundable = true;
-      amount =co.StudentTakeCourse_Money_Paid
-    }
-    })
-
-  if(refundable){
+  if(await RefundRequest.find({User_ID:id,Course_ID:courseID}).count().exec()==0){
+    await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})).map( (co) => {
+      if (co.StudentTakeCourse_Progress<50){
+        refundable = true;
+        amount =co.StudentTakeCourse_Money_Paid/2
+      }
+      })
+      
+      if(refundable){
+        await courseRouter.createRefundRequest(id,courseID,amount);
+        res.send('Request successful')
+      }
+      else{
+        res.send('More than 50% of course is completed, refund is not possible')
+       }
+  }
+  else{
+    res.send('Refund already requested')
+  }
+ 
+  /*if(refundable){
     await (await user.find({IndividualUser_ID:id})).map((user) => {
-    wallet = user.individualUser_Wallet + amount/2
+    wallet = user.individualUser_Wallet + amount
   })
     await user.updateOne({IndividualUser_ID:id},{individualUser_Wallet:wallet})
      StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
@@ -1878,7 +1937,24 @@ router.post('/requestRefund', async (req,res)=>{
   }
   else{
    res.send('More than 50% of course is completed, refund is not possible')
-  }
+  }*/
+})
+
+//54 refund an amount to a trainee to their wallet
+router.post('/refundWallet', async (req,res)=>{
+  var id = req.body.ID;
+  var courseID= req.body.courseID
+  var amount;
+  await (await RefundRequest.find({User_ID:id,Course_ID:courseID})).map((re)=>{
+    amount= re.Refund_Amount;
+  })
+  await (await user.find({IndividualUser_ID:id})).map((user) => {
+    amount +=Number(user.individualUser_Wallet)
+  })
+  await RefundRequest.deleteOne({User_ID:id,Course_ID:courseID})
+  await user.update({IndividualUser_ID:id},{individualUser_Wallet:amount})
+  await StudentTakeCourse.remove({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
+  res.send('done')
 })
 
 //47 report a problem with a course. The problem can be "technical", "financial" or "other"
@@ -1938,9 +2014,32 @@ router.get('/viewMyProblems', async (req,res)=>{
 
 //50 request access to a specific course they do not have access to
 router.post('/requestAccess', async (req,res)=>{
-  courseRouter.createRequest(req.body)
-  res.send('Access Requested');
+  var userCompany;
+  var courseTitle;
+  await (await corp.find({CorporateUser_ID:req.body.User_ID})).map((user)=>{
+    userCompany= user.CorporateUser_Corporate;
+  })
+  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
+    courseTitle= co.Course_Title;
+  })
+  if(await StudentTakeCourse.find({StudentTakeCourse_StudentID:req.body.User_ID, StudentTakeCourse_CourseID:req.body.Course_ID,StudentTakeCourse_Type:2}).count().exec()>0){
+    res.send('Student already enrolled');
+  }
+  else{
+    courseRouter.createRequest(req.body.User_ID,courseTitle,userCompany)
+    res.send('Access Requested');
+
+  }
  
+ 
+})
+
+router.post('/getCourseTitle', async(req,res)=>{
+  var courseTitle;
+  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
+    courseTitle= co.Course_Title;
+  })
+  res.json(courseTitle);
 })
 
 //52 view reported problems - should automaticalled be marked as "unseen"
@@ -1956,7 +2055,47 @@ router.put('/markProblem', async (req,res)=>{
 
 //58 view course requests from corporate trainees
 router.get('/courseRequests', async (req,res)=>{
+
   res.send(await CorpRequest.find());
+})
+
+
+//59 grant corporate trainees access to specific courses
+router.put('/grantAccess', async (req,res)=>{
+  var courseId= req.body.Course_ID
+  var userId= req.body.userId
+  var courseTitle;
+  var coursePrice;
+  var instructor;
+  var instructorBalance;
+  var date =new Date();
+
+  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
+    courseTitle= co.Course_Title;
+    coursePrice=co.Course_Price;
+    instructor =co.Course_Instructor;
+  })
+  await (await Instructor.find({Instructor_ID:instructor})).map((inst)=>{
+    if(inst.Instructor_Balance_Date.getMonth()!=date.getMonth()){
+      inst.Instructor_Current_Balance=0;
+      instructorBalance=0;
+    }
+    else{
+      instructorBalance=inst.Instructor_Current_Balance
+      date=inst.Instructor_Balance_Date;
+    }
+    
+  })
+  instructorBalance= instructorBalance+ (coursePrice*0.6)
+await Instructor.update({Instructor_ID:instructor},{Instructor_Current_Balance:instructorBalance,Instructor_Balance_Date:date})
+  await CorpRequest.remove({User_ID:userId,Course_Title:courseTitle})
+  await courseRouter.createCorpStudentTakeCourse(courseId,userId)
+  res.json('access granted')
+})
+
+router.put('/refuseAccess', async (req,res)=>{
+  var courseId= req.body.Course_ID
+  var userId= req.body.userId
 })
 
 
@@ -1973,11 +2112,23 @@ router.post('/setSpecificPromotion', async(req,res)=>{
 router.put('/setAllPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
-  await course.updateOne({Course_Discount:discount,Course_Discount_Duration:duration})
+
+  await course.updateMany({Course_Discount:discount,Course_Discount_Duration:duration})
+
   res.send('promotion applied')
 })
 
-
+router.put('/setGeneralPromotions', async(req,res)=>{
+  var discount = req.body.Course_Discount
+  var duration= req.body.Course_Discount_Duration
+  //var courses =req.body.courses
+  var courses = ["Data Structures"]
+  for (var i=0; i<courses.length;i++){
+    await course.update({Course_Title:courses[i]},{Course_Discount:discount,Course_Discount_Duration:duration})
+  }
+  
+  res.send('promotion applied')
+})
 
 ////////end sprint 3
 

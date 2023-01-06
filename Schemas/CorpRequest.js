@@ -6,8 +6,16 @@ const CorpRequestSchema = new Schema({
     type: Number,
     required: true
   },
-  Course_ID: {
-    type: Number,
+  Course_Title: {
+    type: String,
+    required: true
+  },
+  Request_status:{
+    type: String,
+    required: true
+},
+  User_Company:{
+    type: String,
     required: true
   },
 }, { timestamps: true });

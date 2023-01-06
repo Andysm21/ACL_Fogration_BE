@@ -10,6 +10,7 @@ const StudentTakeCourse= require('../Schemas/StudentTakeCourse.js');
 const Problem= require('../Schemas/Problem.js');
 const CorpRequest= require('../Schemas/CorpRequest.js');
 const Instructor = require("../Schemas/Instructor.js");
+const RefundRequest= require('../Schemas/RefundRequest.js');
 
 function createSubtitle(p1,id){
 Subtitle.create({
@@ -50,8 +51,8 @@ function createStudentTakeExam(p1,id) {
     StudentTookexam.create({StudentTookExam_ID:id,StudentTookExam_Student_ID:p1.body.StudentTookExam_Student_ID,
     StudentTookExam_Exam_ID:p1.body.StudentTookExam_Exam_ID,StudentTookExam_Type:p1.body.StudentTookExam_Type })
 }
-function createStudentTakeCourse(p1,coursePrice) {
-    StudentTakeCourse.create({StudentTakeCourse_CourseID:p1.body.StudentTakeCourse_CourseID,
+async function createStudentTakeCourse(p1,coursePrice) {
+   await StudentTakeCourse.create({StudentTakeCourse_CourseID:p1.body.StudentTakeCourse_CourseID,
                                 StudentTakeCourse_StudentID:p1.body.StudentTakeCourse_StudentID,
                                 StudentTakeCourse_WatchedVideo:p1.body.StudentTakeCourse_WatchedVideo,
                                 StudentTakeCourse_StudentTakeExam:p1.body.StudentTakeCourse_StudentTakeExam,
@@ -60,6 +61,7 @@ function createStudentTakeCourse(p1,coursePrice) {
                               ,StudentTakeCourse_Money_Paid:coursePrice
                              })
 }
+
 async function getHoursAllSubtitles(coursename,res,req){
     var y= await course.find({Course_Title:coursename}).select('Course_Subtitle -_id');
     var x = (JSON.stringify(y).split(":"));
@@ -282,9 +284,26 @@ async function SearchCourseIntrsuctor (instructors) {
 function createProblem(p1,username,courseTitle,id){
     Problem.create({Problem_ID:id,User_userName:username,User_Type:p1.User_Type,Problem_Type:p1.Problem_Type,Course_Title:courseTitle,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description})
  }
-function createRequest(p1,id){
-    CorpRequest.create({User_ID:p1.User_ID,Course_ID:p1.Course_ID})
+function createRequest(id,title,company){
+    CorpRequest.create({User_ID:id,Course_Title:title,Request_status:'Unseen',User_Company:company})
 }
+async function createCorpStudentTakeCourse(courseId,studentID){
+    await StudentTakeCourse.create({StudentTakeCourse_CourseID:courseId,
+         StudentTakeCourse_StudentID:studentID,
+         StudentTakeCourse_Progress:0,
+         StudentTakeCourse_Type:2,
+         StudentTakeCourse_Money_Paid:0
+      })
+ 
+ }
+async function createRefundRequest(userID,courseID,amount){
+    await RefundRequest.create({User_ID:userID,
+        Course_ID:courseID,
+        Request_Status:'Unseen',
+        Refund_Amount:amount
+      })
+ 
+ }
   
   module.exports={
     createStudentTakeCourse,
@@ -295,5 +314,7 @@ function createRequest(p1,id){
     createVideo,
     createProblem,
     createRequest,
-    SearchCourseTitle,SearchCourseSubject, SearchCourseIntrsuctor
+    SearchCourseTitle,SearchCourseSubject, SearchCourseIntrsuctor,
+    createCorpStudentTakeCourse,
+    createRefundRequest
 }
