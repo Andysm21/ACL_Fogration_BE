@@ -24,7 +24,7 @@ const Instructor = require('../Schemas/Instructor.js');
 //DONEEEEEEEEEEEEEEEEEEEEEEEEE
 router.post('/viewMyCoursesInstructor', async (req,res)=>{
   const x = req.body.Instructor_ID
-  var data= await course.find({Course_Instructor: x}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
+  var data= await course.find({Course_Instructor: x}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID Course_Discount_Duration Course_Discount -_id')
    var final= []
    for(let i =0;i<data.length;i++)
    {
@@ -33,7 +33,7 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
        var arrayException=test1.split("[")
        var DataAlone=test1.split(",")
        var data1;
-    console.log(DataAlone)
+    // console.log(DataAlone)
    //Now Doing Trainees
    var CTT= arrayException[1].split(']')
    CTT= Number(CTT.length)
@@ -42,7 +42,6 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
        CT=CT[1].split('"')
        CT=CT[0]
    //Now Doing Country
-   console.log(DataAlone)
        var CC= DataAlone[6].split(':"')
        CC=CC[1].split('"')
        CC=CC[0]
@@ -67,6 +66,14 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
       var CID= DataAlone[0].split(':')
       CID=CID[1].split("'")
       CID=CID[0]
+    //Now Discount
+    var CD= DataAlone[7].split(':')
+    CD=CD[1].split("'")
+    CD=CD[0]
+    //Now Discount duration
+    var CDD= DataAlone[8].split(':')
+    CDD=CDD[1].split("'")
+    CDD=CDD[0]
     data1 = {
          "Course_ID": CID,
          "Course_Title": CT,
@@ -75,10 +82,13 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
          "Course_Instructor": X,
          "Course_Hours": CH,
          "Course_Country": CC,
-         "Course_Trainee": CTT
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
      }
      final.push(data1)
    }
+   console.log(final)
    res.send(final);
 
 });
@@ -577,7 +587,7 @@ router.post("/createExam", async (req, res) =>{
 
 
 //define a promotion for the course (% discount) and for how long
-router.put("/course_promotion", async (req, res) =>{
+router.post("/course_promotion", async (req, res) =>{
 
   const {courseID} = req.body;
   const Discount = req.body.discount;
@@ -629,7 +639,7 @@ router.put("/editBiographyOrEmail", async (req, res) => {
   const x= req.body.Instructor_ID 
   if(email == "" && bio != ""){
     await instructor.update({Instructor_ID:x},{Instructor_Biography:bio})
-    res.status(200).send("Info updated");
+    res.status(200).send("In fo updated");
   }
   else if(bio == "" && email != ""){
     await instructor.update({Instructor_ID:x},{Instructor_Email:email})
@@ -658,12 +668,10 @@ router.put("/editProfile", async (req, res) => {
  const country = req.body.Instructor_Country
  const checkUN = await instructor.findOne({Instructor_username:username},'Instructor_ID -_id');
  const checkEM = await instructor.findOne({Instructor_Email: email},'Instructor_ID -_id');
-console.log(req.body)
+//console.log(req.body);
 // console.log(checkEM);
-console.log(id);
+//console.log(id);
 // console.log(checkUN);
-
-
   if(username == '') //username cannot be empty
     res.send("1");
   else if(checkUN != null && checkUN.Instructor_ID != id){ //username already in use
@@ -673,11 +681,13 @@ console.log(id);
     res.send("3");
   }
   else{
-    const x = await instructor.updateOne({Instructor_ID: id},{Instructor_Biography:bio ,
-      Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country})
-    res.send("4")
+    const x = await instructor.updateOne({Instructor_ID: id},
+      {Instructor_Biography:bio , Instructor_FirstName: firstName, Instructor_LastName: lastname, Instructor_Gender: gender, Instructor_Country: country})
+      res.send("4")
   }
 });
+
+
 //Username and Email
 router.put("/editProfileUserEmail", async (req, res) => {
   const id = req.body.Instructor_ID

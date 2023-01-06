@@ -116,9 +116,9 @@ router.post('/createCorporateUser', async (req,res)=>{
 router.post('/createCourse', async (req,res)=>{
     var id = await course.count().exec()+1;
     if(await (await (course.find({Course_Title: req.body.Course_Title}).select('Course_Title '))).length>0)
-        res.send("Course already exists.")
-    else if(req.body.Course_Title!= null || req.body.Course_Subtitle != null || req.body.Course_Price != null || req.body.Course_Description != null || req.body.Course_Subject != null || req.body.Course_Instructor != null || req.body.Course_Country != null) {
-        courseRouter.createCourse(req,id)
+        res.send("Course already exists.");
+    else if(req.body.Course_Title!= null || req.body.Course_Price != null || req.body.Course_Description != null || req.body.Course_Subject != null || req.body.Course_Instructor != null || req.body.Course_Country != null) {
+      courseRouter.createCourse(req,id)
         res.send("Create a new course.")
         }
     else{
