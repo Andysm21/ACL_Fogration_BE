@@ -1361,7 +1361,7 @@ if(progress==100){
         email=co.CorporateUser_Email})
     }
       await sendCertificate(email,y, "Congratulations on completing the course!!");
-      
+    await StudentTakeCourse.remove({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})
     
 }
 
