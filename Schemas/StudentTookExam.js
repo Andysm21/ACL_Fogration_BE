@@ -1,3 +1,4 @@
+const { boolean, bool } = require('joi');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -26,6 +27,11 @@ const StudentTookExamSchema = new Schema({
   StudentTookExam_Type: {
     type: Number,
     required: true,
+  },
+  StudentTookExam_Flag: {
+    type: Boolean,
+    required: false,
+    default: false
   },
 }, { timestamps: true });
 

@@ -659,7 +659,7 @@ router.post("/viewCourse/:id", async (req, res) => {
   var views = await course.find({Course_ID: Number(ID)}).select('Course_Views -_id');
   var viewsNum= JSON.stringify(views).split(":")
   var viewsFinal= viewsNum[1].split("}")
-  await course.update({Course_ID: Number(ID)},{Course_Views : (Number(viewsFinal[0]) +1)})
+  await course.updateOne({Course_ID: Number(ID)},{Course_Views : (Number(viewsFinal[0]) +1)})
   // var test =ID.split(":")
   // console.log(test)
   const courses = await course.find({Course_ID: Number(ID)},'-_id');
@@ -1173,10 +1173,10 @@ router.post("/SubmitAnswers", async (req, res) => {
   var id_exam=req.body.EID;
   var id_user=req.body.UserID;
   var answer=req.body.answer;
-  var exam_course=await Exam.find({Exam_ID:EID}).select('Exam_Course_ID -_id');
-  var x = (JSON.stringify(exam_course).split(":"));
-  var z= x[1].split('"');
-  var course_array=await course.find({Course_ID:z[1]}).select('Course_Trainee -_id');
+  var exam_course=await Exam.findOne({Exam_ID:id_exam}).select('Exam_Course_ID -_id');
+  // var x = (JSON.stringify(exam_course).split(":"));
+  // var z= x[1].split('"');
+  var course_array=await course.find({Course_ID:exam_course.Exam_Course_ID}).select('Course_Trainee -_id');
   var constant=0;
   var x = (JSON.stringify(course_array).split(":"));
   var z= x[1].split(" ");
@@ -1206,13 +1206,24 @@ router.post("/SubmitAnswers", async (req, res) => {
     res.send("Wrong Question ID")
   }
   else{
+    console.log("The Answer is "+ answer)
     await StudentTookexam.updateOne(
       { StudentTookExam_Exam_ID: id_exam },
       { 
         $set: { 
           [`StudentTookExam_Answers.${indexquestion}`]:answer,
+                    // [`StudentTookExam_Answers.${indexquestion}`]:answer,
+
          } 
        }).exec()
+       await StudentTookexam.updateOne({StudentTookExam_Exam_ID: id_exam,StudentTookExam_Student_ID:id_user,StudentTookExam_Type:req.body.Type},
+        {
+         $set:{
+            StudentTookExam_Flag:
+              true
+            
+         } 
+        })
        res.send("done");
   }
   }
@@ -1223,6 +1234,9 @@ router.post("/SubmitAnswers", async (req, res) => {
 
 router.post('/createStudentTakeExam', async (req,res)=>{
   var id = await StudentTookexam.count().exec()+1;
+  var Found = await StudentTookexam.findOne({StudentTookExam_Student_ID:req.body.StudentTookExam_Student_ID,
+    StudentTookExam_Exam_ID:req.body.StudentTookExam_Exam_ID,StudentTookExam_Type:req.body.StudentTookExam_Type }).select(' _id');
+  if(Found==null){
   courseRouter.createStudentTakeExam(req,id)
   var CourseID=await Exam.findOne({Exam_ID: req.body.StudentTookExam_Exam_ID}).select('Exam_Course_ID -_id');
   await StudentTakeCourse.updateOne({StudentTakeCourse_CourseID:CourseID.Exam_Course_ID,StudentTakeCourse_StudentID:req.body.StudentTookExam_Student_ID},
@@ -1246,7 +1260,8 @@ router.post('/createStudentTakeExam', async (req,res)=>{
    for (let i =0;i<final.length;i++){
     total++;
 }
-  for(let i=0;i<total;i++){
+  var EX=await (await Exam.findOne({Exam_ID:req.body.StudentTookExam_Exam_ID}).select('Exam_Question_ID -_id'))
+  for(let i=0;i<EX.Exam_Question_ID.length;i++){
     await StudentTookexam.updateOne(
       { StudentTookExam_Exam_ID: req.body.StudentTookExam_Exam_ID },
       { 
@@ -1255,10 +1270,24 @@ router.post('/createStudentTakeExam', async (req,res)=>{
               $each: [ null ],
            }
          } 
-       }).exec()
+       }
+      ).exec()
   }
   
-res.send("done")
+res.send(false)
+}
+else{
+  // await StudentTookexam.updateOne(
+  //   { StudentTookExam_Student_ID:req.body.StudentTookExam_Student_ID,
+  //     StudentTookExam_Exam_ID:req.body.StudentTookExam_Exam_ID,StudentTookExam_Type:req.body.StudentTookExam_Type},
+  //   { 
+  //     $set: { 
+  //       StudentTookExam_Flag:true,
+  //      } 
+  //    }
+  //   ).exec()
+     res.send(true)
+}
 })
 
 //Andrew's
@@ -1270,11 +1299,29 @@ res.send("done")
 res.send("done")
 })*/
 
+router.post('/retakeExam', async (req,res)=>{
+  var UserID =Number(req.body.UserID) ;
+  var EID = Number(req.body.EID);
+  var Type = Number(req.body.Type);
+
+  await StudentTookexam.updateOne(
+    { StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID,StudentTookExam_Type:Type },
+    { 
+      $set: { 
+        StudentTookExam_Answers: {
+         },
+         StudentTookExam_Flag:false,
+       } 
+
+     }
+    ).exec()
+
+})
 router.post('/examGrades', async (req,res)=>{
 var UserID =Number(req.body.UserID) ;
 var EID = Number(req.body.EID);
 var Type = Number(req.body.Type);
-
+var TotalRight=0;
 var CourseID= await Exam.find({Exam_ID: EID}).select('Exam_Course_ID -_id');
 //JSON SPLITTING SHIT
 var data = (JSON.stringify(CourseID).split(":"));
@@ -1307,19 +1354,10 @@ var x = (JSON.stringify(question_array).split(":"));
     var yy= y[0].split("[");
     //ARray of Question IDS
     var FinalQuestionArray = yy[1].split(',');
-var StudentAns= await StudentTookexam.find({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID}).select('StudentTookExam_Answers -_id');
-var x = (JSON.stringify(StudentAns).split(":"));
-    var z= x[1].split(" ");
-    var y= z[0].split("]");
-    var yy= y[0].split("[");
-    var FinalStudenAnswer = yy[1].split(',');
-var StudentAnswersArray = new Array(FinalStudenAnswer.length).fill(0)
-for (let i =0;i<FinalStudenAnswer.length;i++){
-  StudentAnswersArray[i]=FinalStudenAnswer[i]
-}
+var StudentAns= await StudentTookexam.findOne({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID}).select('StudentTookExam_Answers -_id');
 
-var FinalStudentBEGAD=new Array(FinalStudenAnswer.length).fill(0);
-var FinalModelBEGAD=new Array(FinalStudenAnswer.length).fill(0);
+var FinalStudentBEGAD=new Array(StudentAns?.StudentTookExam_Answers).fill(0);
+var FinalModelBEGAD=new Array(StudentAns?.StudentTookExam_Answers).fill(0);
 
 var TotalGrade = 0;
 var grade =0;
@@ -1330,16 +1368,19 @@ var z= x[1].split("'");
 //THIS IS ANSWERS EL CORRECT
 var CorrectAnswer = z[0].split('"')
 //THIS IS ANSWERS EL STUDENT
- Answeri=StudentAnswersArray[i].split('"');
+var Choices = await Question.findOne({Question_ID:FinalQuestionArray[i]}).select('Question_Choices -_id');
+Choices=Choices.Question_Choices;
+//  Answeri=StudentAnswersArray[i].split('"');
 var Question_Grade= await Question.find({Question_ID:FinalQuestionArray[i]}).select('Question_Grade -_id');
 var x = (JSON.stringify(Question_Grade).split(":"));
 var y = x[1].split("}")
 TotalGrade+=Number(y[0])
 //Check if correctAnswer
-FinalStudentBEGAD[i]=Answeri[1]
+FinalStudentBEGAD[i]=Choices[Number(StudentAns?.StudentTookExam_Answers[i])-1]
 FinalModelBEGAD[i]=CorrectAnswer[1]
 
-if(Answeri[1]==CorrectAnswer[1]){
+if(FinalStudentBEGAD[i]==FinalModelBEGAD[i]){
+TotalRight++;
 var Question_Grade= await Question.find({Question_ID:Number(FinalQuestionArray[i])}).select('Question_Grade -_id');
 var x = (JSON.stringify(Question_Grade).split(":"));
 var y = x[1].split("}")
@@ -1362,7 +1403,7 @@ while (ExamIDs.length>0){
   })
 }
 
-await (StudentTakeCourse.update({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type},{StudentTakeCourse_Progress:progress}))
+await (StudentTakeCourse.updateOne({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type},{StudentTakeCourse_Progress:progress}))
 
 var coursename =await (course.find({Course_ID:CourseID}, 'Course_Title -_id'))
 var x = (JSON.stringify(coursename).split(":"));
@@ -1385,7 +1426,7 @@ if(progress==100){
     
 }
 
-res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final})
+res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final,TotalRight:TotalRight})
 }
 }
 })
@@ -1654,7 +1695,7 @@ router.post('/topUpWallet', async (req,res) =>{
      wallet = parseInt(user.individualUser_Wallet)
     }))
     amount = amount + wallet;
-    await user.update({IndividualUser_ID:id},{individualUser_Wallet:amount})
+    await user.updateOne({IndividualUser_ID:id},{individualUser_Wallet:amount})
     res.send('done')
 })
 //16 pay for a course
@@ -1684,7 +1725,7 @@ router.post('/enrollAndPayCourse', async (req,res)=>{
       res.send("insufficient funds")
     }
     else{
-      await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
+      await user.updateOne({IndividualUser_ID:id},{individualUser_Wallet:wallet})
     courseRouter.createStudentTakeCourse(req,coursePrice)
     res.send("done")
     }
@@ -1831,7 +1872,7 @@ router.post('/requestRefund', async (req,res)=>{
     await (await user.find({IndividualUser_ID:id})).map((user) => {
     wallet = user.individualUser_Wallet + amount/2
   })
-    await user.update({IndividualUser_ID:id},{individualUser_Wallet:wallet})
+    await user.updateOne({IndividualUser_ID:id},{individualUser_Wallet:wallet})
      StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
    res.send("done")
   }
@@ -1909,7 +1950,7 @@ router.get('/viewReportedProblems', async (req,res)=>{
   
 //53 mark reported problems as "resolved" or "pending"
 router.put('/markProblem', async (req,res)=>{
-  await Problem.update({Problem_ID:req.body.Problem_ID},{Problem_Status:req.body.Problem_Status})
+  await Problem.updateOne({Problem_ID:req.body.Problem_ID},{Problem_Status:req.body.Problem_Status})
   res.send('Problem marked');
 })
 
@@ -1932,7 +1973,7 @@ router.post('/setSpecificPromotion', async(req,res)=>{
 router.put('/setAllPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
-  await course.update({Course_Discount:discount,Course_Discount_Duration:duration})
+  await course.updateOne({Course_Discount:discount,Course_Discount_Duration:duration})
   res.send('promotion applied')
 })
 
@@ -1944,9 +1985,10 @@ router.put('/setAllPromotions', async(req,res)=>{
 router.post('/getExam', async(req,res)=>{
   var ExamID = req.body.Exam_ID
   var CourseID= req.body.Course_ID
+  var UserID = req.body.UserID
   var data = await Exam.findOne({Exam_Course_ID:CourseID,Exam_ID:ExamID}).select('-_id -updatedAt -createdAt -__v');
   console.log(data)
-  console.log(data.Exam_Question_ID)
+  // console.log(data.Exam_Question_ID)
   var arrayOfQuestionIDS = data.Exam_Question_ID;
   var Questions=[];
   for(let i =0;i<arrayOfQuestionIDS.length;i++){
