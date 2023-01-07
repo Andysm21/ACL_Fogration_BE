@@ -556,9 +556,9 @@ router.post("/instructorProfile", async (req,res)=>{
 router.post("/instructorAccount", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
   //console.log(Inst_ID);
-  const instructor = await Instructor.findOne({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Courses Instructor_Reviews  -_id')
+  const instructor = await Instructor.find({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Courses Instructor_Reviews  -_id')
   //console.log(instructor);
-  var {Instructor_Courses} = instructor;
+  var {Instructor_Courses} = instructor[0];
   var courses = []
   var rate = []
   for(let i = 0; i < Instructor_Courses.length; i++)
@@ -576,21 +576,23 @@ router.post("/instructorAccount", async (req,res)=>{
   }
 
   const instructorObj = {
-    Instructor_ID: instructor.Instructor_ID,
-    Instructor_username: instructor.Instructor_username,
-    Instructor_Password: instructor.Instructor_Password,
-    Instructor_Email: instructor.Instructor_Email,
-    Instructor_FirstName: instructor.Instructor_FirstName,
-    Instructor_LastName: instructor.Instructor_LastName,
-    Instructor_Gender: instructor.Instructor_Gender,
-    Instructor_Counrty: instructor.Instructor_Counrty,
-    Instructor_Biography: instructor.Instructor_Biography,
-    Instructor_Ratings: instructor.Instructor_Ratings, 
+    Instructor_ID: instructor[0].Instructor_ID,
+    Instructor_username: instructor[0].Instructor_username,
+    Instructor_Password: instructor[0].Instructor_Password,
+    Instructor_Email: instructor[0].Instructor_Email,
+    Instructor_FirstName: instructor[0].Instructor_FirstName,
+    Instructor_LastName: instructor[0].Instructor_LastName,
+    Instructor_Gender: instructor[0].Instructor_Gender,
+    Instructor_Counrty: instructor[0].Instructor_Counrty,
+    Instructor_Biography: instructor[0].Instructor_Biography,
+    Instructor_Ratings: instructor[0].Instructor_Ratings, 
     Instructor_Courses: courses,
-    Instructor_Reviews: instructor.Instructor_Reviews
+    Instructor_Reviews: instructor[0].Instructor_Reviews
 
   }
-  console.log(instructorObj);
+  var ArrayOfCourses=[];
+  ArrayOfCourses.push(instructorObj)
+  console.log(ArrayOfCourses);
   res.send(instructorObj);
 
 
