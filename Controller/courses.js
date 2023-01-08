@@ -116,8 +116,7 @@ async function getHoursAllSubtitles(coursename,res,req){
 }
 async function SearchCourseTitle (title) {
     const Course_Title= title
-    var data= await course.find({Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
-    //console.log(data)
+    var data= await course.find({Course_Title:Course_Title},'Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
     var final= []
     for(let i =0;i<data.length;i++)
     {
@@ -126,7 +125,8 @@ async function SearchCourseTitle (title) {
         var arrayException=test1.split("[")
         var DataAlone=test1.split(",")
         var data1;
-  
+        console.log(DataAlone)
+
     //Now Doing Trainees
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
@@ -156,6 +156,17 @@ async function SearchCourseTitle (title) {
     var CH= DataAlone[4].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
+   //Now Discount
+   var CD= DataAlone[7].split(':')
+   CD=CD[1].split("'")
+   CD=CD[0]
+   //Now Discount duration
+   var CDD= DataAlone[8].split(':')
+   CDD=CDD[1].split("'")
+   CDD=CDD[0]
+   CDD=CDD.split("[")
+   CDD=CDD[1]
+   console.log(CDD)
      data1 = {
           "Course_Title": CT,
           "Course_Price": CP,
@@ -163,7 +174,9 @@ async function SearchCourseTitle (title) {
           "Course_Instructor": X,
           "Course_Hours": CH,
           "Course_Country": CC,
-          "Course_Trainee": CTT
+          "Course_Trainee": CTT,
+          "Course_Discount": CD,
+          "Course_Discount_Duration": CDD
       }
       final.push(data1)
     }
@@ -173,7 +186,7 @@ async function SearchCourseTitle (title) {
   };
 async function SearchCourseSubject (subject) {
     const Course_Subject = subject
-    var data= await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+    var data= await course.find({Course_Subject:Course_Subject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID Course_Discount Course_Discount_Duration -_id')
     console.log(data.length);
     var final= []
     for(let i =0;i<data.length;i++)
@@ -213,6 +226,17 @@ async function SearchCourseSubject (subject) {
     var CH= DataAlone[4].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
+   //Now Discount
+   var CD= DataAlone[7].split(':')
+   CD=CD[1].split("'")
+   CD=CD[0]
+   //Now Discount duration
+   var CDD= DataAlone[8].split(':')
+   CDD=CDD[1].split("'")
+   CDD=CDD[0]
+   CDD=CDD.split("[")
+   CDD=CDD[1]
+   console.log(CDD)
      data1 = {
           "Course_Title": CT,
           "Course_Price": CP,

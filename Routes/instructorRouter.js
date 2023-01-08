@@ -18,6 +18,7 @@ const Video = require('../Schemas/Video.js');
 const subtitle = require('../Schemas/Subtitle.js');
 const Instructor = require('../Schemas/Instructor.js');
 //const youtubekey='1081702991015-3ube06jg6k96mf2ckvcp850lv7iibq48.apps.googleusercontent.com'
+const courseRouter = require('../Controller/courses.js');
 
 
 router.post("/RatingInstructor", async (req, res) => {
@@ -40,7 +41,8 @@ router.post("/RatingInstructor", async (req, res) => {
 router.post('/viewMyCoursesInstructor', async (req,res)=>{
   const x = req.body.Instructor_ID
   var data= await course.find({Course_Instructor: x}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID Course_Discount_Duration Course_Discount -_id')
-   var final= []
+  
+  var final= []
    for(let i =0;i<data.length;i++)
    {
      var test1= JSON.stringify(data[i])
@@ -51,6 +53,7 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
     // console.log(DataAlone)
    //Now Doing Trainees
    var CTT= arrayException[1].split(']')
+   CTT=CTT[0].split(",")
    CTT= Number(CTT.length)
    //Now Doing CourseTitle
        var CT= DataAlone[1].split(':"')
@@ -103,7 +106,7 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
      }
      final.push(data1)
    }
-   console.log(final)
+   //console.log(final)
    res.send(final);
 
 });
@@ -225,7 +228,54 @@ router.get("/SearchCourseTitleInst", async (req, res) => {
     res.send(final);
   }
  });
- 
+ router.post("/searchmycourses", async(req,res) =>{
+  const searched = req.body.searchR;
+  const {id} = req.body;
+  const title = await course.find({Course_Title:searched, Course_Instructor: id},'Course_ID -_id');
+  const subject = await course.find({Course_Subject:searched, Course_Instructor: id},'Course_ID -_id');
+  var final = [];
+
+  console.log(title.length);
+  console.log(subject.length);
+  if(title.length != 0) {
+    res.send(await courseRouter.SearchCourseTitle(searched));
+  }
+  else if (subject.length != 0){
+    res.send(await courseRouter.SearchCourseSubject(searched));
+  }
+  else 
+    res.send("");
+  
+
+});
+
+router.post("/Search", async(req,res) =>{
+  const searched = req.body.searchR;
+  //const {id} = req.body.id;
+  const title = await course.find({Course_Title:searched},'Course_ID -_id');
+  const subject = await course.find({Course_Subject:searched},'Course_ID -_id');
+  var final = [];
+  const instructor = await Instructor.find({Instructor_FirstName:searched},'Instructor_ID -_id');
+
+  console.log(title.length);
+  console.log(subject.length);
+  console.log(instructor.length);  
+  if(title.length != 0) {
+    res.send(await courseRouter.SearchCourseTitle(searched));
+     }
+    else if (subject.length != 0){
+    res.send(await courseRouter.SearchCourseSubject(searched));
+    }
+  else if (instructor.length != 0){
+    const {Instructor_ID} = instructor[0]
+   // console.log(Instructor_ID);
+    res.send(await courseRouter.SearchCourseIntrsuctor(Instructor_ID));
+    }
+  else 
+    res.send("");
+  
+
+});
 //not yet front
 router.get("/SearchCourseSubjectInst", async (req, res) => {
 const Instructor_id = req.body.Instructor_ID
