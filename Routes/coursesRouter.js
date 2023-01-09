@@ -2075,22 +2075,26 @@ router.post('/refundWallet', async (req,res)=>{
 
 //47 report a problem with a course. The problem can be "technical", "financial" or "other"
 router.post('/reportProblem', async (req,res)=>{
+  console.log(req.body);
   var id = await Problem.count().exec()+1;
   var userId = req.body.ID
   var userType= req.body.User_Type
   var courseID = req.body.CourseID
   var courseTitle;
   var username;
-  if (userType==3){
+  if (userType=='Instructor'){
+    userType = 3;
     await (await Instructor.find({Instructor_ID:userId})).map((user)=>{
       username=user.Instructor_username
     })
   }
-  else if (userType==1){
+  else if (userType=='User'){
+    userType = 1;
     await (await user.find({IndividualUser_ID:userId})).map((user)=>{
       username=user.individualUser_UserName
     })
   } else{
+    userType = 2;
     await (await corp.find({CorporateUser_ID:userId})).map((user)=>{
       username=user.CorporateUser_UserName
     })
@@ -2100,7 +2104,7 @@ router.post('/reportProblem', async (req,res)=>{
     courseTitle=course.Course_Title
   })
  
-  courseRouter.createProblem(req.body,username,courseTitle, id)
+  courseRouter.createProblem(req.body,userType,username,courseTitle, id)
   res.send('Problem reported');
  
 })
