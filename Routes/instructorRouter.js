@@ -115,9 +115,9 @@ router.post('/viewMyCoursesInstructor', async (req,res)=>{
 router.get("/SearchCourseTitleInst", async (req, res) => {
   const Instructor_id = req.body.Instructor_ID
   const Course_Title= req.body.Course_Title
-  console.log(Course_Title.length)
+  // console.log(Course_Title.length)
   if(Course_Title.length == Number(0) ){
-      var data = await course.find({Instructor_ID:Instructor_id }).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id');
+      var data = await course.find({Instructor_ID:Instructor_id }).select('Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id');
 
       var final= []
       for(let i =0;i<data.length;i++)
@@ -136,7 +136,7 @@ router.get("/SearchCourseTitleInst", async (req, res) => {
           CT=CT[1].split('"')
           CT=CT[0]
       //Now Doing Country
-      console.log(DataAlone)
+      // console.log(DataAlone)
           var CC= DataAlone[5].split(':"')
           CC=CC[1].split('"')
           CC=CC[0]
@@ -157,15 +157,31 @@ router.get("/SearchCourseTitleInst", async (req, res) => {
       var CH= DataAlone[4].split(':')
       CH=CH[1].split("'")
       CH=CH[0]
-       data1 = {
-            "Course_Title": CT,
-            "Course_Price": CP,
-            "Course_Rating": CR,
-            "Course_Instructor": X,
-            "Course_Hours": CH,
-            "Course_Country": CC,
-            "Course_Trainee": CTT
-        }
+  //Now Discount
+  var CD= DataAlone[7].split(':')
+  CD=CD[1].split("'")
+  CD=CD[0]
+  //Now Discount duration
+  var CDD= DataAlone[8].split(':')
+  CDD=CDD[1].split("'")
+  CDD=CDD[0]
+  CDD=CDD.split("[")
+  CDD=CDD[1].split(']')
+  CDD=CDD[0]
+  console.log("hi")
+  console.log(CDD)
+  console.log("bye")
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
         final.push(data1)
       }
       res.status(200).send(final);
@@ -175,7 +191,7 @@ router.get("/SearchCourseTitleInst", async (req, res) => {
       res.status(200).send([]);
   }   
   else{
-    var data = await course.find({Course_Instructor: Instructor_id, Course_Title:Course_Title},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id') 
+    var data = await course.find({Course_Instructor: Instructor_id, Course_Title:Course_Title},'Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id') 
     var final= []
     for(let i =0;i<data.length;i++)
     {
@@ -214,15 +230,31 @@ router.get("/SearchCourseTitleInst", async (req, res) => {
     var CH= DataAlone[4].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
-     data1 = {
-          "Course_Title": CT,
-          "Course_Price": CP,
-          "Course_Rating": CR,
-          "Course_Instructor": X,
-          "Course_Hours": CH,
-          "Course_Country": CC,
-          "Course_Trainee": CTT
-      }
+  //Now Discount
+  var CD= DataAlone[7].split(':')
+  CD=CD[1].split("'")
+  CD=CD[0]
+  //Now Discount duration
+  var CDD= DataAlone[8].split(':')
+  CDD=CDD[1].split("'")
+  CDD=CDD[0]
+  CDD=CDD.split("[")
+  CDD=CDD[1].split(']')
+  CDD=CDD[0]
+  console.log("hi")
+  console.log(CDD)
+  console.log("bye")
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
       final.push(data1)
     }
     res.send(final);
@@ -257,10 +289,11 @@ router.post("/Search", async(req,res) =>{
   var final = [];
   const instructor = await Instructor.find({Instructor_FirstName:searched},'Instructor_ID -_id');
 
-  console.log(title.length);
-  console.log(subject.length);
-  console.log(instructor.length);  
+  ////console.log(title.length);
+ // console.log(subject.length);
+ // console.log(instructor.length);  
   if(title.length != 0) {
+    console.log("In here")
     res.send(await courseRouter.SearchCourseTitle(searched));
      }
     else if (subject.length != 0){
@@ -281,7 +314,7 @@ router.get("/SearchCourseSubjectInst", async (req, res) => {
 const Instructor_id = req.body.Instructor_ID
   const SearchSubject= req.body.Course_Subject
   if(SearchSubject.length==Number(0)){
-    var data = await course.find({Instructor_ID:Instructor_id }).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id');
+    var data = await course.find({Instructor_ID:Instructor_id }).select('Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id');
 
       var final= []
       for(let i =0;i<data.length;i++)
@@ -321,15 +354,31 @@ const Instructor_id = req.body.Instructor_ID
       var CH= DataAlone[4].split(':')
       CH=CH[1].split("'")
       CH=CH[0]
-       data1 = {
-            "Course_Title": CT,
-            "Course_Price": CP,
-            "Course_Rating": CR,
-            "Course_Instructor": X,
-            "Course_Hours": CH,
-            "Course_Country": CC,
-            "Course_Trainee": CTT
-        }
+  //Now Discount
+  var CD= DataAlone[7].split(':')
+  CD=CD[1].split("'")
+  CD=CD[0]
+  //Now Discount duration
+  var CDD= DataAlone[8].split(':')
+  CDD=CDD[1].split("'")
+  CDD=CDD[0]
+  CDD=CDD.split("[")
+  CDD=CDD[1].split(']')
+  CDD=CDD[0]
+  console.log("hi")
+  console.log(CDD)
+  console.log("bye")
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
         final.push(data1)
       }
       res.status(200).send(final);
@@ -339,7 +388,7 @@ const Instructor_id = req.body.Instructor_ID
           res.status(200).send("Subject Not Found");
       } 
   else{
-      var data = await course.find({Course_Instructor: Instructor_id, Course_Subject:SearchSubject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id');
+      var data = await course.find({Course_Instructor: Instructor_id, Course_Subject:SearchSubject},'Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id');
 
       var final= []
       for(let i =0;i<data.length;i++)
@@ -379,15 +428,31 @@ const Instructor_id = req.body.Instructor_ID
       var CH= DataAlone[4].split(':')
       CH=CH[1].split("'")
       CH=CH[0]
-       data1 = {
-            "Course_Title": CT,
-            "Course_Price": CP,
-            "Course_Rating": CR,
-            "Course_Instructor": X,
-            "Course_Hours": CH,
-            "Course_Country": CC,
-            "Course_Trainee": CTT
-        }
+  //Now Discount
+  var CD= DataAlone[7].split(':')
+  CD=CD[1].split("'")
+  CD=CD[0]
+  //Now Discount duration
+  var CDD= DataAlone[8].split(':')
+  CDD=CDD[1].split("'")
+  CDD=CDD[0]
+  CDD=CDD.split("[")
+  CDD=CDD[1].split(']')
+  CDD=CDD[0]
+  console.log("hi")
+  console.log(CDD)
+  console.log("bye")
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
         final.push(data1)
       }
       res.status(200).send(final);
@@ -401,7 +466,7 @@ router.post("/filterPriceInst", async (req, res) => {
   const Instructor_id = req.body.Instructor_ID
   const FilterPriceLower= req.body.FilterPrice1
   const FilterPriceHigher= req.body.FilterPrice2
-  var data= await course.find({Course_Instructor:Instructor_id},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+  var data= await course.find({Course_Instructor:Instructor_id},'Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
   //console.log(data)
   var final= []
   for(let i =0;i<data.length;i++)
@@ -441,15 +506,28 @@ router.post("/filterPriceInst", async (req, res) => {
   var CH= DataAlone[4].split(':')
   CH=CH[1].split("'")
   CH=CH[0]
-   data1 = {
-        "Course_Title": CT,
-        "Course_Price": CP,
-        "Course_Rating": CR,
-        "Course_Instructor": X,
-        "Course_Hours": CH,
-        "Course_Country": CC,
-        "Course_Trainee": CTT
-    }
+   //Now Discount
+   var CD= DataAlone[6].split(':')
+   CD=CD[1].split("'")
+   CD=CD[0]
+//    console.log(CD)
+//    console.log(DataAlone)
+
+   //Now Discount duration
+   var CDD= DataAlone[7].split(':')
+   CDD=CDD[1].split("'")
+   CDD=CDD[0]
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
 
     if(Number(FilterPriceLower)<=Number(CP )){
       if(Number(CP)<=Number(FilterPriceHigher)){
@@ -468,7 +546,7 @@ router.post("/filterPriceInst", async (req, res) => {
 router.post("/filterSubjectInst", async (req, res) => {
   const x = req.body.Instructor_ID
   const {FilterSubject} = req.body
-  var data=await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+  var data=await course.find({Course_Instructor: x, Course_Subject:FilterSubject},'Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
   
   var final= []
   for(let i =0;i<data.length;i++)
@@ -508,15 +586,28 @@ router.post("/filterSubjectInst", async (req, res) => {
   var CH= DataAlone[4].split(':')
   CH=CH[1].split("'")
   CH=CH[0]
-   data1 = {
-        "Course_Title": CT,
-        "Course_Price": CP,
-        "Course_Rating": CR,
-        "Course_Instructor": X,
-        "Course_Hours": CH,
-        "Course_Country": CC,
-        "Course_Trainee": CTT
-    }
+   //Now Discount
+   var CD= DataAlone[6].split(':')
+   CD=CD[1].split("'")
+   CD=CD[0]
+//    console.log(CD)
+//    console.log(DataAlone)
+
+   //Now Discount duration
+   var CDD= DataAlone[7].split(':')
+   CDD=CDD[1].split("'")
+   CDD=CDD[0]
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
     final.push(data1)
   }
   res.status(200).send(final);
@@ -528,7 +619,7 @@ router.post("/filterPriceAndSubjectInst", async (req, res) => {
   const FilterPriceLower= req.body.FilterPrice1
   const FilterPriceHigher= req.body.FilterPrice2
   const {FilterSubject} = req.body
-  var data= await course.find({Course_Instructor:Instructor_id,Course_Subject:FilterSubject},'Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+  var data= await course.find({Course_Instructor:Instructor_id,Course_Subject:FilterSubject},'Course_Discount Course_Discount_Duration Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
   console.log(data)
   var final= []
   for(let i =0;i<data.length;i++)
@@ -568,15 +659,28 @@ router.post("/filterPriceAndSubjectInst", async (req, res) => {
   var CH= DataAlone[4].split(':')
   CH=CH[1].split("'")
   CH=CH[0]
-   data1 = {
-        "Course_Title": CT,
-        "Course_Price": CP,
-        "Course_Rating": CR,
-        "Course_Instructor": X,
-        "Course_Hours": CH,
-        "Course_Country": CC,
-        "Course_Trainee": CTT
-    }
+   //Now Discount
+   var CD= DataAlone[6].split(':')
+   CD=CD[1].split("'")
+   CD=CD[0]
+//    console.log(CD)
+//    console.log(DataAlone)
+
+   //Now Discount duration
+   var CDD= DataAlone[7].split(':')
+   CDD=CDD[1].split("'")
+   CDD=CDD[0]
+    data1 = {
+         "Course_Title": CT,
+         "Course_Price": CP,
+         "Course_Rating": CR,
+         "Course_Instructor": X,
+         "Course_Hours": CH,
+         "Course_Country": CC,
+         "Course_Trainee": CTT,
+         "Course_Discount": CD,
+         "Course_Discount_Duration": CDD
+     }
 
     if(Number(FilterPriceLower)<=Number(CP )){
       if(Number(CP)<=Number(FilterPriceHigher)){
@@ -696,13 +800,18 @@ router.post("/createQuestion", async(req,res) => {
             $each: [ id ],
             $position: 0
          }
-       } 
+       } ,
      }).exec()
-
+     var x = await Exam.findOne({Exam_ID:Number(req.body.exam_id)}).select('Exam_Grade -_id')
+     x=x.Exam_Grade+1;
+     await Exam.updateOne(
+      { Exam_ID:Number(req.body.exam_id)},{Exam_Grade:x}
+       ).exec()
+  console.log("hello")
     // var number = await Exam.findOne({ Exam_ID: req.body.exam_id }, 'Exam_Question_ID -_id')
     // var grade = number.length;
     // await Exam.updateOne({ Exam_ID: req.body.exam_id }, {Exam_Grade: grade});
-
+     
     res.send("");
   }
 
@@ -762,6 +871,9 @@ router.post("/course_promotion", async (req, res) =>{
   const {courseID} = req.body;
   const Discount = req.body.discount;
   const Duration = req.body.duration;
+  console.log(Discount)
+  console.log(Duration)
+  console.log("HIII")
   if(Discount.length == 0){
     res.status(200).send("Discount value should not be empty!");
   }
@@ -966,7 +1078,10 @@ router.post("/forgotPassword", async (req, res) => {
          }
        } 
      }).exec()
-     
+     subtitle.updateOne({Subtitle_ID: parseInt(req.body.subtitle)},{ 
+      Subtitle_Hours:SubtitleHours+req.body.length
+        
+     }).exec()
 
      res.send("Video Created");
   });
