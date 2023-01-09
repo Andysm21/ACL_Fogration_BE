@@ -2176,7 +2176,7 @@ router.post('/viewMyProblems', async (req,res)=>{
       username=user.CorporateUser_UserName
     })
   }
-  res.send(await Problem.findOne({User_userName:username,User_Type:userType}));
+  res.send(await Problem.find({User_userName:username,User_Type:userType}));
  
 })
 router.get('/getCourseTitles', async(req,res)=>{
@@ -2215,6 +2215,7 @@ router.post('/getCourseTitle', async(req,res)=>{
 
 //52 view reported problems - should automaticalled be marked as "unseen"
 router.get('/viewReportedProblems', async (req,res)=>{
+  console.log(await Problem.find());
   res.send(await Problem.find());
 })
   
@@ -2308,6 +2309,7 @@ router.post('/setFollowUp', async(req,res)=>{
     var courseTitle = req.body.courseTitle
     var followUPDesc=req.body.followUpDescription
     var username;
+    console.log(courseTitle);
     if (userType=='Instructor'){
       userType = 3;
       await (await Instructor.find({Instructor_ID:userId})).map((user)=>{

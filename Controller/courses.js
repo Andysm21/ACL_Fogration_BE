@@ -328,8 +328,8 @@ async function SearchCourseIntrsuctor (instructors) {
   };
 
   //// sprint 3
-function createProblem(p1,username,courseTitle,id){
-    Problem.create({Problem_ID:id,User_userName:username,User_Type:p1.User_Type,Problem_Type:p1.Problem_Type,Course_Title:courseTitle,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description,Problem_followUP:false})
+function createProblem(p1,Usertype,username,courseTitle,id){
+    Problem.create({Problem_ID:id,User_userName:username,User_Type:Usertype,Problem_Type:p1.Problem_Type,Course_Title:courseTitle,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description,Problem_followUP:false})
  }
 
  function createFollowUP(p1,username,courseTitle,id){
