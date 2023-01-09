@@ -2110,25 +2110,28 @@ router.post('/reportProblem', async (req,res)=>{
 })
 
 //48 see all previously repoted problems and their statuses
-router.get('/viewMyProblems', async (req,res)=>{
+router.post('/viewMyProblems', async (req,res)=>{
   var userId = req.body.ID;
   var userType = req.body.User_Type;
   var username;
-  if (userType==3){
+  if (userType=='Instructor'){
+      userType=3
     await (await Instructor.find({Instructor_ID:userId})).map((user)=>{
       username=user.Instructor_username
     })
   }
-  else if (userType==1){
+  else if ( userType=='User'){
+    userType=1
     await (await user.find({IndividualUser_ID:userId})).map((user)=>{
       username=user.individualUser_UserName
     })
   } else{
+    userType= 2;
     await (await corp.find({CorporateUser_ID:userId})).map((user)=>{
       username=user.CorporateUser_UserName
     })
   }
-  res.send(await Problem.find({User_userName:username,User_Type:userType}));
+  res.send(await Problem.findOne({User_userName:username,User_Type:userType}));
  
 })
 router.get('/getCourseTitles', async(req,res)=>{
@@ -2257,29 +2260,30 @@ router.post('/setFollowUp', async(req,res)=>{
     var id = await Problem.count().exec()+1;
     var userId = req.body.ID
     var userType= req.body.User_Type
-    var courseID = req.body.CourseID
-    var courseTitle;
+    var courseTitle = req.body.courseTitle
+    var followUPDesc=req.body.followUpDescription
     var username;
-    if (userType==3){
+    if (userType=='Instructor'){
+      userType = 3;
       await (await Instructor.find({Instructor_ID:userId})).map((user)=>{
         username=user.Instructor_username
       })
     }
-    else if (userType==1){
+    else if (userType=='User'){
+      userType = 1;
       await (await user.find({IndividualUser_ID:userId})).map((user)=>{
         username=user.individualUser_UserName
       })
     } else{
+      userType = 2;
       await (await corp.find({CorporateUser_ID:userId})).map((user)=>{
         username=user.CorporateUser_UserName
       })
   
     }
-    await(await course.find({Course_ID:courseID})).map((course)=>{
-      courseTitle=course.Course_Title
-    })
    
-    courseRouter.createFollowUP(req.body,username,courseTitle, id)
+    await Problem.update({User_userName:username,User_Type:userType,Course_Title:courseTitle},{Problem_followUP:true,Follow_UP_Description:followUPDesc})
+    console.log(await Problem.findOne({User_userName:username,User_Type:userType,Course_Title:courseTitle}));
     res.send('Problem reported');
    
   })
