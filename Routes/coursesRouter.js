@@ -1187,8 +1187,9 @@ router.post("/RatingInstructor", async (req, res) => {
 });
 
 router.post("/RatingCourse", async (req, res) => {
+  console.log(req.body);
   await Course.updateOne(
-    { Course_ID: req.body.ID },
+    { Course_ID: Number(req.body.ID) },
     { 
       $push: { 
         Course_Rate: {
@@ -1197,7 +1198,16 @@ router.post("/RatingCourse", async (req, res) => {
          }
        } 
      }).exec()
-     res.send(await Course.find({Course_ID: req.body.ID }).select('Course_Rate -_id').exec());
+     var rating = 0;
+     var {Course_Rate} = await Course.findOne({ Course_ID: req.body.ID }, 'Course_Rate');
+     for(let i = 0; i < Course_Rate.length; i++){
+        rating += Course_Rate[i];
+     }
+     rating = rating/Course_Rate.length;
+     await Course.updateOne({ Course_ID: req.body.ID }, {Course_Rating: rating});
+     const {Course_Rating} = await Course.findOne({Course_ID: req.body.ID }).select('Course_Rating -_id').exec();
+     console.log(Course_Rating);
+     res.send(Course_Rating + "");
 
 });
 
