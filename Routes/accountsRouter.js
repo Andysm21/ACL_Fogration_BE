@@ -117,11 +117,15 @@ router.post('/createCourse', async (req,res)=>{
     var id = await course.count().exec()+1;
     if(await (await (course.find({Course_Title: req.body.Course_Title}).select('Course_Title '))).length>0)
         res.send("Course already exists.");
-    else if(req.body.Course_Title!= null || req.body.Course_Price != null || req.body.Course_Description != null || req.body.Course_Subject != null || req.body.Course_Instructor != null || req.body.Course_Country != null) {
+    else if((req.body.Course_Title!= null && req.body.Course_Title!= "") && (req.body.Course_Price != null && req.body.Course_Price != "") && 
+      (req.body.Course_Description != null && req.body.Course_Description != "") && (req.body.Course_Subject != null && req.body.Course_Subject != "") && 
+      (req.body.Course_Country != null && req.body.Course_Country != "") && (req.body.Course_Instructor != null && req.body.Course_Instructor != "") && 
+      (req.body.Course_Video_Preview != null && req.body.Course_Video_Preview != "")) {
+
       courseRouter.createCourse(req,id)
       //console.log("I am Here");
       res.send(id + "");
-        }
+      }
     else{
         res.send("Please fill all required fields")
         }
