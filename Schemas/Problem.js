@@ -34,6 +34,10 @@ const ProblemsSchema = new Schema({
     type: Boolean,
     required: true
   },
+  Follow_UP_Description: {
+    type: String,
+    required: false
+  },
 }, { timestamps: true });
 
 const Problem = mongoose.model('Problem', ProblemsSchema);
