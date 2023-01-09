@@ -311,8 +311,13 @@ async function SearchCourseIntrsuctor (instructors) {
   };
 
   //// sprint 3
+
 function createProblem(p1,userType,username,courseTitle,id){
     Problem.create({Problem_ID:id,User_userName:username,User_Type:userType,Problem_Type:p1.Problem_Type,Course_Title:courseTitle,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description})
+
+ function createFollowUP(p1,username,courseTitle,id){
+    Problem.create({Problem_ID:id,User_userName:username,User_Type:p1.User_Type,Problem_Type:p1.Problem_Type,Course_Title:courseTitle,Problem_Status:'Unseen',Problem_Description:p1.Problem_Description,Problem_followUP:true})
+
  }
 function createRequest(id,title,company){
     CorpRequest.create({User_ID:id,Course_Title:title,Request_status:'Unseen',User_Company:company})
@@ -346,5 +351,6 @@ async function createRefundRequest(userID,courseID,amount){
     createRequest,
     SearchCourseTitle,SearchCourseSubject, SearchCourseIntrsuctor,
     createCorpStudentTakeCourse,
-    createRefundRequest
+    createRefundRequest,
+    createFollowUP
 }

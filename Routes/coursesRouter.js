@@ -2131,7 +2131,10 @@ router.get('/viewMyProblems', async (req,res)=>{
   res.send(await Problem.find({User_userName:username,User_Type:userType}));
  
 })
-
+router.get('/getCourseTitles', async(req,res)=>{
+  
+  res.send(await course.find().select('Course_Title -_id'))
+})
 //50 request access to a specific course they do not have access to
 router.post('/requestAccess', async (req,res)=>{
   var userCompany;
@@ -2249,6 +2252,37 @@ router.put('/setGeneralPromotions', async(req,res)=>{
   
   res.send('promotion applied')
 })
+
+router.post('/setFollowUp', async(req,res)=>{
+    var id = await Problem.count().exec()+1;
+    var userId = req.body.ID
+    var userType= req.body.User_Type
+    var courseID = req.body.CourseID
+    var courseTitle;
+    var username;
+    if (userType==3){
+      await (await Instructor.find({Instructor_ID:userId})).map((user)=>{
+        username=user.Instructor_username
+      })
+    }
+    else if (userType==1){
+      await (await user.find({IndividualUser_ID:userId})).map((user)=>{
+        username=user.individualUser_UserName
+      })
+    } else{
+      await (await corp.find({CorporateUser_ID:userId})).map((user)=>{
+        username=user.CorporateUser_UserName
+      })
+  
+    }
+    await(await course.find({Course_ID:courseID})).map((course)=>{
+      courseTitle=course.Course_Title
+    })
+   
+    courseRouter.createFollowUP(req.body,username,courseTitle, id)
+    res.send('Problem reported');
+   
+  })
 
 ////////end sprint 3
 
