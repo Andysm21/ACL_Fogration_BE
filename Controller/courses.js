@@ -50,7 +50,7 @@ function createVideo(p1,id){
         Video_Link:p1.body.link,
         Video_Subtitle: Number(p1.body.subtitle),
         Video_Description:p1.body.description,
-        Video_Length:20});
+        Video_Length:10});
     }
 
 function createStudentTakeExam(p1,id) {

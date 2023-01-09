@@ -672,6 +672,15 @@ router.post("/createExam", async(req, res) => {
 router.post("/createQuestion", async(req,res) => {
   var id = await Question.count().exec()+1;
   console.log(req.body);
+  if(req.body.questionChoice1 == null || req.body.questionChoice1 == "" || 
+  req.body.questionChoice2 == null || req.body.questionChoice2 == "" ||
+  req.body.questionChoice3 == null || req.body.questionChoice3 == "" ||
+  req.body.questionChoice4 == null || req.body.questionChoice4 == "" ||
+  req.body.Question_Name == null || req.body.Question_Name == "" ||
+  req.body.Question_Correct_Answer == null || req.body.Question_Correct_Answer == "")
+  res.send("Please fill all required fields");
+  else{
+    
   var question_choices = [];
   question_choices[0] = req.body.questionChoice1;
   question_choices[1] = req.body.questionChoice2;
@@ -695,6 +704,7 @@ router.post("/createQuestion", async(req,res) => {
     // await Exam.updateOne({ Exam_ID: req.body.exam_id }, {Exam_Grade: grade});
 
     res.send("");
+  }
 
 })
 

@@ -1097,41 +1097,60 @@ router.get("/hoverOnCourse", async (req, res) => {
 //TO BE MOVED LATER WHEN WE CREATE THEIR ROUTERS AND THEIR CONTROLLERS
 router.post("/createVideo", async (req, res) => {
   var id = await Video.count().exec()+1;
-  console.log(req.body);
-  courseRouter.createVideo(req,id);
-
- // console.log(Subtitle.findOne({Subtitle_ID: Number(req.body.subtitle)}));
- // Subtitle.updateOne({Subtitle_ID: Number(req.body.subtitle)}, {Subtitle_Hours: 20})
-  await Subtitle.updateOne(
-    { Subtitle_ID: req.body.subtitle },
-    { 
-      $push: { 
-        Subtitle_Video: {
-            $each: [ id ],
-            $position: 0
-         }
-       } 
-     }).exec()
-  res.status(200).send(id + "");
+  if(req.body.link  == null || req.body.link  == "" || req.body.description  == null || req.body.description == "" 
+  || req.body.subtitle == null || req.body.subtitle == "")
+    res.send("Please fill all required fields")
+  else {
+    console.log(req.body);
+    courseRouter.createVideo(req,id);
+  
+  
+   //update Subtitle Hours
+   const {Subtitle_Hours} = await Subtitle.findOne({Subtitle_ID: parseInt(req.body.subtitle)}, 'Subtitle_Hours');
+   const newSubtitle = Subtitle_Hours + 10;
+   await Subtitle.updateOne({ Subtitle_ID: req.body.subtitle }, {Subtitle_Hours: newSubtitle});
+  
+   
+   Subtitle.updateOne({Subtitle_ID: Number(req.body.subtitle)}, {Subtitle_Hours: 10});
+    await Subtitle.updateOne(
+      { Subtitle_ID: req.body.subtitle },
+      { 
+        $push: { 
+          Subtitle_Video: {
+              $each: [ id ],
+              $position: 0
+           }
+         } 
+       }).exec()
+    res.status(200).send(id + "");
+  }
+ 
  // res.status(200).send("Video Created");
+
+ //res.send("ok");
 
 });
 
 router.post("/createSubtitle", async (req, res) => {
   var id = await sub.count().exec()+1;
   console.log(req.body);
-  courseRouter.createSubtitle(req,id)
-  await course.updateOne(
-    { Course_ID: req.body.Subtitle_Course_ID },
-    { 
-      $push: { 
-        Course_Subtitle: {
-            $each: [ id ],
-            $position: 0
-         }
-       } 
-     }).exec()
-  res.status(200).send(id + "");
+  if(req.body.Subtitle == null || req.body.Subtitle == "" || req.body.Subtitle_Course_ID == null || req.body.Subtitle_Course_ID == "")
+    res.send("Please fill all required fields")
+  else {
+    courseRouter.createSubtitle(req,id)
+    await course.updateOne(
+      { Course_ID: req.body.Subtitle_Course_ID },
+      { 
+        $push: { 
+          Course_Subtitle: {
+              $each: [ id ],
+              $position: 0
+           }
+         } 
+       }).exec()
+    res.status(200).send(id + "");
+  }
+ 
 
 });
 
