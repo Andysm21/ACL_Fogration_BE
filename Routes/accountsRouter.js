@@ -648,4 +648,22 @@ router.get('/refundWallet', async (req,res)=>{
 
 ////////////end Sprint 3
 
+
+//Andrew Adding Features for Global View////
+router.post('/NameInd', async (req,res)=>{
+  var id = req.body.UserID;
+  var x =await user.findOne({IndividualUser_ID:id}).select('individualUser_FirstName -_id')
+  res.send(x.individualUser_FirstName);
+})
+router.post('/NameCorp', async (req,res)=>{
+  var id = req.body.UserID;
+  var x =await corp.findOne({CorporateUser_ID:id}).select('CorporateUser_FirstName -_id')
+  res.send(x.CorporateUser_FirstName);
+})
+router.post('/NameInst', async (req,res)=>{
+  var id = req.body.UserID;
+  var x =await inst.findOne({Instructor_ID:id}).select('Instructor_FirstName -_id')
+  res.send(x.Instructor_FirstName);
+})
+
 module.exports=router;
