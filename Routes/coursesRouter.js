@@ -393,7 +393,7 @@ router.post("/filterSubjectRating", async (req, res) => {
       }
       final.push(data1)
     }
-    console.log(final)
+    // console.log(123)
 
     res.send(final)
     });
@@ -1072,7 +1072,7 @@ res.send(CourseT)
 
   router.get("/viewCoursesCorporate", async (req, res) => {
     const x = req.body.User_ID
-    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee CourseID -_id')
+    var data= await course.find({}).select('Course_Title Course_Rating Course_Hours Course_Instructor Course_Country Course_Price Course_Trainee Course_ID -_id')
     var final= []
   
   
@@ -1083,16 +1083,20 @@ res.send(CourseT)
         var arrayException=test1.split("[")
         var DataAlone=test1.split(",")
         var data1;
+        console.log(DataAlone)
+        var CID = DataAlone[0].split(":")
+        CID=CID[1].split("'")
+        CID=CID[0]
     //Now Doing Trainees
     var CTT= arrayException[1].split(',')
     CTT= Number(CTT.length)
     //Now Doing CourseTitle
-        var CT= DataAlone[0].split(':"')
+        var CT= DataAlone[1].split(':"')
         CT=CT[1].split('"')
         CT=CT[0]
     //Now Doing Country
     console.log(DataAlone)
-        var CC= DataAlone[5].split(':"')
+        var CC= DataAlone[6].split(':"')
         CC=CC[1].split('"')
         CC=CC[0]
     //Course Instructor ID and Name JSON FILE
@@ -1101,18 +1105,19 @@ res.send(CourseT)
         var InstId=Number(test1[0])
         var X = await Instructor.findOne({Instructor_ID:InstId}).select('Instructor_FirstName Instructor_ID -_id')
     //Now Doing Course_Price
-    var CP= DataAlone[1].split(':')
+    var CP= DataAlone[2].split(':')
     CP=CP[1].split("'")
     CP=CP[0]
     //Now DOing Course_Rating
-    var CR= DataAlone[2].split(':')
+    var CR= DataAlone[3].split(':')
     CR=CR[1].split("'")
     CR=CR[0]
     //Now DOing Course_Hours
-    var CH= DataAlone[4].split(':')
+    var CH= DataAlone[5].split(':')
     CH=CH[1].split("'")
     CH=CH[0]
      data1 = {
+          "Course_ID":CID,
           "Course_Title": CT,
           "Course_Rating": CR,
           "Course_Instructor": X,
@@ -2187,6 +2192,7 @@ router.get('/getCourseTitles', async(req,res)=>{
 router.post('/requestAccess', async (req,res)=>{
   var userCompany;
   var courseTitle;
+  console.log(req.body.Course_ID)
   await (await corp.find({CorporateUser_ID:req.body.User_ID})).map((user)=>{
     userCompany= user.CorporateUser_Corporate;
   })
@@ -2194,11 +2200,11 @@ router.post('/requestAccess', async (req,res)=>{
     courseTitle= co.Course_Title;
   })
   if(await StudentTakeCourse.find({StudentTakeCourse_StudentID:req.body.User_ID, StudentTakeCourse_CourseID:req.body.Course_ID,StudentTakeCourse_Type:2}).count().exec()>0){
-    res.send('Student already enrolled');
+    res.json("Student already enrolled");
   }
   else{
     courseRouter.createRequest(req.body.User_ID,courseTitle,userCompany)
-    res.send('Access Requested');
+    res.json("Access Requested");
 
   }
  
@@ -2226,24 +2232,24 @@ router.put('/markProblem', async (req,res)=>{
 })
 
 //58 view course requests from corporate trainees
-router.get('/courseRequests', async (req,res)=>{
+router.post('/courseRequests', async (req,res)=>{
 
   res.send(await CorpRequest.find());
 })
 
 
 //59 grant corporate trainees access to specific courses
-router.put('/grantAccess', async (req,res)=>{
-  var courseId= req.body.Course_ID
+router.post('/grantAccess', async (req,res)=>{
+  var courseTitle= req.body.Course_ID
   var userId= req.body.userId
-  var courseTitle;
+  var courseId;
   var coursePrice;
   var instructor;
   var instructorBalance;
   var date =new Date();
 
-  await (await course.find({Course_ID:req.body.Course_ID})).map((co)=>{
-    courseTitle= co.Course_Title;
+  await (await course.find({Course_Title: courseTitle})).map((co)=>{
+    courseId= co.Course_ID;
     coursePrice=co.Course_Price;
     instructor =co.Course_Instructor;
   })
@@ -2262,6 +2268,14 @@ router.put('/grantAccess', async (req,res)=>{
 await Instructor.update({Instructor_ID:instructor},{Instructor_Current_Balance:instructorBalance,Instructor_Balance_Date:date})
   await CorpRequest.remove({User_ID:userId,Course_Title:courseTitle})
   await courseRouter.createCorpStudentTakeCourse(courseId,userId)
+  await course.updateOne({Course_ID:courseId},{
+    $push: { 
+      Course_Trainee: {
+          $each: [ userId ],
+          $position: 0
+       }
+     } 
+  })
   res.json('access granted')
 })
 
@@ -2293,8 +2307,8 @@ router.put('/setAllPromotions', async(req,res)=>{
 router.put('/setGeneralPromotions', async(req,res)=>{
   var discount = req.body.Course_Discount
   var duration= req.body.Course_Discount_Duration
-  //var courses =req.body.courses
-  var courses = ["Data Structures"]
+  var courses =req.body.courses
+  // var courses = ["Data Structures"]
   for (var i=0; i<courses.length;i++){
     await course.update({Course_Title:courses[i]},{Course_Discount:discount,Course_Discount_Duration:duration})
   }
@@ -2360,4 +2374,22 @@ router.post('/getExam', async(req,res)=>{
 }
 res.send(Exams)
 })
+
+
+router.post('/checkAccess', async (req,res)=>{
+
+  var x = await CorpRequest.findOne({User_ID:req.body.UserID,Course_Title:req.body.title}).select('User_ID -_id')
+  console.log(req.body.UserID)
+  console.log(req.body.title)
+  // console.log(x)
+  if(x==null){
+    res.json(1)//Not found
+  }
+  else{
+    res.json(2) // Found
+  }
+
+ 
+})
+
 module.exports=router;
