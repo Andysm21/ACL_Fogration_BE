@@ -1523,6 +1523,10 @@ console.log(STC)
   //console.log("HI")
   var ArrayOfCIDS=[];
   var ArrayOfCourses=[];
+  if(STC[0]=='[]'){
+    res.send();
+  }
+  else{
   for(let i=0; i<STC.length; i++)
 {
 var x = STC[i].split(':')
@@ -1637,15 +1641,20 @@ ArrayOfCourses.push(CourseT)
 }
 
 res.send(ArrayOfCourses)
+  }
 })
 
 router.post('/myCoursesInd', async (req,res)=>{
   var id = req.body.ID;
   var STC = await StudentTakeCourse.find({StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1}).select('StudentTakeCourse_CourseID -_id') 
   STC= JSON.stringify(STC).split(',');
-  console.log(STC)
+  console.log(STC[0])
   var ArrayOfCIDS=[];
   var ArrayOfCourses=[];
+  if(STC[0]=='[]'){
+    res.send();
+  }
+  else{
   for(let i=0; i<STC.length; i++)
 {
 var x = STC[i].split(':')
@@ -1759,6 +1768,7 @@ ArrayOfCourses.push(CourseT)
 }
 
 res.send(ArrayOfCourses)
+  }
 })
 
 //Sprint 3
