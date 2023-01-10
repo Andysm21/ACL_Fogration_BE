@@ -15,7 +15,8 @@ const StudentTakeCourse = require('../Schemas/StudentTakeCourse');
 const sendCertificate = require("../utils/sendCertificate");
 const PDFDocument = require('pdfkit');
 const fs =require('fs');
-const express= require("express")
+const express= require("express");
+const { boolean } = require('joi');
 const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
@@ -76,10 +77,22 @@ router.post('/createInstructor',async (req,res)=>{
         res.send("1")
     else if(req.body.Instructor_Password=="") //Password field should not be empty
         res.send("2")
-    else 
-        if(await (await inst.find({Instructor_username: req.body.Instructor_username}).select('Instructor_username')).length > 0)
+    else if(await (await inst.find({Instructor_username: req.body.Instructor_username}).select('Instructor_username')).length > 0)
+        {
+          res.send("3")
+        }
         //Choose another username.
+    else if(await (await Admin.find({Admin_Username: req.body.Instructor_username}).select('Admin_Username')).length > 0){
+      res.send("3")
+       }
+   else if(await (await corp.find({CorporateUser_UserName: req.body.Instructor_username}).select('CorporateUser_UserName')).length > 0){
+          res.send("3")
+        }
+      else
+          if(await (await user.find({individualUser_UserName: req.body.Instructor_username}).select('individual_Username')).length > 0)
+        {
         res.send("3")
+      }       
     else{
         signRouter.createInstructor(req,id)
         //Create a new Instructor.
@@ -95,18 +108,26 @@ router.post('/createCorporateUser', async (req,res)=>{
         res.send("1")
     else if(req.body.CorporateUser_Password=="")
         res.send("2")
-    else 
-        if(await (await corp.find({CorporateUser_UserName: req.body.CorporateUser_UserName}).select('CorporateUser_UserName')).length > 0)
-        res.send("3")
-    else{
-        if(await (await user.find({individualUser_UserName: req.body.CorporateUser_UserName}).select('individual_Username')).length > 0)
+        else if(await (await inst.find({Instructor_username: req.body.CorporateUser_UserName}).select('Instructor_username')).length > 0)
         {
-            res.send("3")
+          res.send("3")
         }
+        //Choose another username.
+    else if(await (await Admin.find({Admin_Username: req.body.CorporateUser_UserName}).select('Admin_Username')).length > 0){
+      res.send("3")
+       }
+   else if(await (await corp.find({CorporateUser_UserName: req.body.CorporateUser_UserName}).select('CorporateUser_UserName')).length > 0){
+          res.send("3")
+        }
+      else
+          if(await (await user.find({individualUser_UserName: req.body.CorporateUser_UserName}).select('individual_Username')).length > 0)
+        {
+        res.send("3")
+      }
         else{
         signRouter.createCorporateUser(req,id)
         res.send("4")
-    }
+    
     }
     
 })
@@ -136,24 +157,55 @@ router.post('/createCourse', async (req,res)=>{
 // a username, email, password, first name, last name and gender
 router.post('/signUp', async (req,res)=>{
     var id = await user.count().exec()+1;
-    console.log(req.body)
-    if(await (await (user.find({individualUser_Email: req.body.individualUser_Email}).select('individualUser_Email'))).length > 0)
+    // console.log(req.body)  
+    var sign =1;
+    if(await (await (user.find({individualUser_Email: req.body.individualUser_Email}).select('individualUser_Email'))).length > 0){
+      console.log("1")
+      sign=0;
         res.send("1")
-    else 
-        if(await (await user.find({individualUser_UserName: req.body.individualUser_UserName}).select('individualUser_UserName')).length > 0)
+      }
+    else if(await (await user.find({individualUser_UserName: req.body.individualUser_UserName}).select('individualUser_UserName')).length > 0){
+      console.log("2")
+      sign=0;
         res.send("2")
-        else{
-            if(await (await corp.find({CorporateUser_UserName: req.body.individualUser_UserName}).select('CorporateUser_UserName')).length > 0)
+      }
+     else if(await (await corp.find({CorporateUser_UserName: req.body.individualUser_UserName}).select('CorporateUser_UserName')).length > 0){
+      console.log("3")
+      sign=0;
+
                 res.send("3")
-        
+}
+      else if((await inst.find({Instructor_username: req.body.individualUser_UserName}).select('Instructor_username')).length>0)
+                {
+                  sign=0;
+                  console.log("3")
+                  res.send("3")
+                }
+                //Choose another username.
+            else if(await (await Admin.find({Admin_Username: req.body.individualUser_UserName}).select('Admin_Username')).length > 0){
+              console.log("3")
+              res.send("3")
+               }
+           else if(await (await corp.find({CorporateUser_UserName: req.body.individualUser_UserName}).select('CorporateUser_UserName')).length > 0){
+            console.log("3")
+                  res.send("3")
+                }
+              else
+                  if(await (await user.find({individualUser_UserName: req.body.individualUser_UserName}).select('individual_Username')).length > 0)
+                {
+                  console.log("3")
+                res.send("3")
+              }
     else if(req.body.individualUser_UserName == "" || req.body.individualUser_Password == "" || req.body.individualUser_Email == "" || req.body.individualUser_FirstName == "" || req.body.individualUser_LastName == "" || req.body.individualUser_Gender == "" || req.body.individualUser_Country == "") {
-       res.send("5")
+      console.log("5")
+      res.send("5")
     }
     else {
          signRouter.signUP(req,id)
+         console.log("4")
         res.send("4")
     }
-}
+
 
 })
 //same login page or not ?? I SAY NOT ~Andrew
