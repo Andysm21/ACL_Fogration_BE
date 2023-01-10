@@ -2111,6 +2111,8 @@ router.post('/refundWallet', async (req,res)=>{
   var id = req.body.ID;
   var courseID= req.body.courseID
   var amount;
+  console.log(id);
+  console.log(courseID)
   await (await RefundRequest.find({User_ID:id,Course_ID:courseID})).map((re)=>{
     amount= re.Refund_Amount;
   })
@@ -2118,8 +2120,8 @@ router.post('/refundWallet', async (req,res)=>{
     amount +=Number(user.individualUser_Wallet)
   })
   await RefundRequest.deleteOne({User_ID:id,Course_ID:courseID})
-  await user.update({IndividualUser_ID:id},{individualUser_Wallet:amount})
-  await StudentTakeCourse.remove({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
+  await user.updateOne({IndividualUser_ID:id},{individualUser_Wallet:amount})
+  await StudentTakeCourse.deleteOne({StudentTakeCourse_CourseID:courseID,StudentTakeCourse_StudentID:id,StudentTakeCourse_Type:1})
   res.send('done')
 })
 
@@ -2236,7 +2238,10 @@ router.post('/courseRequests', async (req,res)=>{
 
   res.send(await CorpRequest.find());
 })
+router.post('/refunds', async (req,res)=>{
 
+  res.send(await RefundRequest.find());
+})
 
 //59 grant corporate trainees access to specific courses
 router.post('/grantAccess', async (req,res)=>{
