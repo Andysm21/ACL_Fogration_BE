@@ -2397,4 +2397,11 @@ router.post('/checkAccess', async (req,res)=>{
  
 })
 
+router.post('/getviddescription', async (req,res)=>{
+
+  var x = await Video.findOne({Video_ID:req.body.Video_ID}).select('Video_Description -_id')
+  res.send(x.Video_Description)
+})
+
+
 module.exports=router;
