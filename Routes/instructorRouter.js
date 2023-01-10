@@ -1070,7 +1070,8 @@ router.post("/forgotPassword", async (req, res) => {
   router.post("/upload_video", async (req, res) =>{
     var id = await Video.count().exec()+1;
     Video.create({Video_ID: id, Video_Link: req.body.link, Video_Subtitle: req.body.subtitle, Video_Description: req.body.description, Video_Length: parseInt(req.body.length)});
-
+    var hours= await subtitle.findOne({Subtitle_ID: parseInt(req.body.subtitle)}).select('Subtitle_Hours')
+    hours=hours.Subtitle_Hours;
     subtitle.updateOne({Subtitle_ID: parseInt(req.body.subtitle)},{ 
       $push: { 
         Subtitle_Video: {
@@ -1079,7 +1080,7 @@ router.post("/forgotPassword", async (req, res) => {
        } 
      }).exec()
      subtitle.updateOne({Subtitle_ID: parseInt(req.body.subtitle)},{ 
-      Subtitle_Hours:SubtitleHours+req.body.length
+      Subtitle_Hours:hours+req.body.length
         
      }).exec()
 
