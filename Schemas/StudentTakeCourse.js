@@ -1,4 +1,4 @@
-const { date } = require('joi');
+const { date, boolean } = require('joi');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -31,6 +31,7 @@ StudentTakeCourse_StudentID: {
     type: Number,
     required: true,
   },
+ 
 }, { timestamps: true });
 
 const StudentTakeCourse = mongoose.model('StudentTakeCourse', StudentTakeCourseSchema);

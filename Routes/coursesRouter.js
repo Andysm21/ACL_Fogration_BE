@@ -1571,8 +1571,8 @@ var x = (JSON.stringify(coursename).split(":"));
 var y = x[1].split("}")
 y= y[0]+" Certificate";
 
-console.log(y)
-if(progress==100){
+//console.log(y)
+/*if(progress==100){
     var email;
     if(req.body.Type==1){
       await (await user.find({IndividualUser_ID:UserID})).map((co) => {
@@ -1585,9 +1585,9 @@ if(progress==100){
       await sendCertificate(email,y, "Congratulations on completing the course!!");
     await StudentTakeCourse.remove({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})
     
-}
-
-res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final,TotalRight:TotalRight})
+}*/
+console.log({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final,TotalRight:TotalRight,Progress:progress})
+res.send({Model:FinalModelBEGAD,Student:FinalStudentBEGAD,Grade:Final,TotalRight:TotalRight,Progress:progress,Course_ID:CourseID})
 }
 }
 })

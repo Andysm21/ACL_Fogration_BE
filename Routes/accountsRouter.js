@@ -17,6 +17,7 @@ const PDFDocument = require('pdfkit');
 const fs =require('fs');
 const express= require("express");
 const { boolean } = require('joi');
+const StudentTookexam = require('../Schemas/StudentTookexam.js');
 const router=express.Router();
 router.use(bodyParser.urlencoded());
 router.use(bodyParser.json());
@@ -646,7 +647,7 @@ var person = {
 
 //41 receive a certificate as a PDF after completing the course via email
 router.post('/sendCertificate', async (req,res)=>{
-  var email;
+  /*var email;
   var id = req.body.ID
   if(req.body.type==1){
     await (await user.find({IndividualUser_ID:id})).map((co) => {
@@ -657,19 +658,55 @@ router.post('/sendCertificate', async (req,res)=>{
       email=co.CorporateUser_Email})
   }
     await sendCertificate(email, "Congratulations!!", 'Certificate of completion');
-    res.send('done')
+    res.send('done')*/
+    var y;
+    var CourseID = req.body.courseId;
+    var UserID = req.body.userid;
+    var Type = req.body.Type;
+    var flag = true;
+
+   await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})).map((co)=>{
+    console.log(co.StudentTakeCourse_Certificate)
+    flag =co.StudentTakeCourse_Certificate
+   })
+   if (flag ==false){
+    await (await (course.find({Course_ID:CourseID}))).map((co)=>{
+      y = co.Course_Title+ " Certificate";
+  })
+    var email;
+    if(req.body.Type==1){
+      await (await user.find({IndividualUser_ID:UserID})).map((co) => {
+        email=co.individualUser_Email})
+    }
+    else{
+      await (await corp.find({CorporateUser_ID:UserID})).map((co) => {
+        email=co.CorporateUser_Email})
+    }
+      await sendCertificate(email,y, "Congratulations on completing the course!!");
+   // await StudentTakeCourse.remove({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})
+   /* var ExamIDS=[];
+    await (await Exam.find({Exam_Course_ID:CourseID})).map((Ex)=>{
+      ExamIDS.push(Ex.Exam_ID)
+    })
+    for(var i =0; i<ExamIDS.length;i++){
+      await StudentTookexam.remove({StudentTookExam_Exam_ID:ExamIDS[i],StudentTookExam_Student_ID:UserID,StudentTookExam_Type:Type})
+    }*/
+    flag == true;
+   }
+  
+      res.send('done')
   
 })
 
 //42 download the certificate as a PDF from the website
 router.get('/downloadCertificate', async (req,res)=>{
   
-    res.download('../Uploads/trial.pdf')
+    res.download('../Uploads/Certificate.pdf')
   
 })
 
 //44 download the notes as a PDF
-router.get('/downloadNotes', async (req,res)=>{
+router.post('/downloadNotes', async (req,res)=>{
   const doc = new PDFDocument;
   doc.pipe(fs.createWriteStream('../Uploads/Notes.pdf'));
   doc.fontSize(18).text(req.body.notes, 100, 100);
