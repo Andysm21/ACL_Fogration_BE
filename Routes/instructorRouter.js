@@ -19,6 +19,7 @@ const subtitle = require('../Schemas/Subtitle.js');
 const Instructor = require('../Schemas/Instructor.js');
 //const youtubekey='1081702991015-3ube06jg6k96mf2ckvcp850lv7iibq48.apps.googleusercontent.com'
 const courseRouter = require('../Controller/courses.js');
+const Admin = require('../Schemas/Administrator.js');
 
 
 router.post("/RatingInstructor", async (req, res) => {
@@ -1105,6 +1106,7 @@ router.post("/forgotPassword", async (req, res) => {
       res.send("Done");
   })
 
+
   router.post("/getMoneyOwed", async(req,res)=>{
     var id = req.body.id
     var moneyOwed;
@@ -1124,4 +1126,25 @@ router.post("/forgotPassword", async (req, res) => {
   })
 
 
+  router.post("/changeForgetPassword", async (req, res) => {
+    const pass= req.body.Password
+    const username=req.body.username
+    if(await (await instructor.find({Instructor_username: username}).select('Instructor_username')).length > 0)
+    {
+      await instructor.findOneAndUpdate({Instructor_username: username},{Instructor_Password: pass})
+    }
+    //Choose another username.
+else if(await (await Admin.find({Admin_Username: username}).select('Admin_Username')).length > 0){
+    await Admin.findOneAndUpdate({Admin_Username: username},{Admin_Password: pass})
+   }
+else if(await (await corporateUser.find({CorporateUser_UserName: username}).select('CorporateUser_UserName')).length > 0){
+  await corporateUser.findOneAndUpdate({CorporateUser_UserName: username},{CorporateUser_Password: pass})
+    }
+  else if(await (await individualUser.find({individualUser_UserName: username}).select('individual_Username')).length > 0)
+    {
+      await individualUser.findOneAndUpdate({individualUser_UserName: username},{individualUser_Password: pass})
+  }       
+
+
+});
 module.exports=router;
