@@ -1105,5 +1105,23 @@ router.post("/forgotPassword", async (req, res) => {
       res.send("Done");
   })
 
+  router.post("/getMoneyOwed", async(req,res)=>{
+    var id = req.body.id
+    var moneyOwed;
+    var month;
+    var today = new Date();
+    var currMonth = today.getMonth()
+    await (await instructor.find({Instructor_ID:id})).map((inst)=>{
+      month =inst.Instructor_Balance_Date;
+      if(currMonth==month.getMonth()){
+        moneyOwed = inst.Instructor_Current_Balance
+      }
+      else{
+        moneyOwed =0;
+      }
+    })
+    res.send({Money:moneyOwed})
+  })
+
 
 module.exports=router;
