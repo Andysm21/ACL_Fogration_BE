@@ -755,7 +755,7 @@ router.get("/viewCourses", async (req, res) => {
 //Salma's Single Course Method
 router.post("/viewCourse/:id", async (req, res) => {
   console.log(req.params)
-
+  var hours=0;
   const ID= req.params.id
   var views = await course.find({Course_ID: Number(ID)}).select('Course_Views -_id');
   var viewsNum= JSON.stringify(views).split(":")
@@ -779,6 +779,7 @@ router.post("/viewCourse/:id", async (req, res) => {
       
       //console.log(Subtitle_Video[j]);
       var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      hours=hours+Number(videosTemp[0].Video_Length);
       const Videos = {
           Video_ID: videosTemp[0].Video_ID,
           Video_Link: videosTemp[0].Video_Link,
@@ -850,7 +851,6 @@ router.post("/viewCourse/:id", async (req, res) => {
     //   Instructor_FirstName: instructor.Instructor_FirstName,
     //   Instructor_LastName: instructor.Instructor_LastName
     // },
-    Course_Hours: courses[0].Course_Hours,
     Course_Country: courses[0].Course_Country,
     Course_Discount: courses[0].Course_Discount,
     Course_Discount_Duration: courses[0].Course_Discount_Duration,
@@ -860,7 +860,8 @@ router.post("/viewCourse/:id", async (req, res) => {
     Course_Rate: courses[0].Course_Rate,
     Course_Exam: ExamObj,
     Course_Video_Preview: courses[0].Course_Video_Preview,
-    Course_Views: courses[0].Course_Views
+    Course_Views: courses[0].Course_Views,
+    Course_Hours:Math.floor(hours/60)
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
@@ -927,11 +928,17 @@ router.post("/viewMyCourse/:id", async (req, res) => {
   var ExamObj = [];
   var grade =0;
   for(let i = 0; i < exams.length; i++){
+    var x = await StudentTookexam.find({StudentTookExam_Student_ID:userId,StudentTookExam_Type:type,StudentTookExam_Exam_ID:exams[i]});
+    if(x.length > 0){
     await (await StudentTookexam.find({StudentTookExam_Student_ID:userId,StudentTookExam_Type:type,StudentTookExam_Exam_ID:exams[i]})).map((ex) => 
     {
       grade =ex.StudentTookExam_Grades;
     }
     ) 
+  }
+  else{
+    grade=0;
+  }
     // console.log(grade);
     const ExamTemp = await Exam.find({Exam_ID: exams[i]},'-_id');
 
@@ -998,8 +1005,8 @@ router.post("/viewMyCourse/:id", async (req, res) => {
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
   // console.log(QuestionObj)
-  console.log("END")
-  console.log(CourseT)
+  // console.log("END")
+  // console.log(CourseT)
 
 res.send(CourseT)
 
