@@ -1144,6 +1144,10 @@ else if(await (await corporateUser.find({CorporateUser_UserName: username}).sele
     {
       await individualUser.findOneAndUpdate({individualUser_UserName: username},{individualUser_Password: pass})
   }       
+  else{
+    res.send("wrong username");
+    
+    }
 
 
 });
