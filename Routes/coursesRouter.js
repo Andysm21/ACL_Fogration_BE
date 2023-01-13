@@ -1346,7 +1346,7 @@ router.post("/SubmitAnswers", async (req, res) => {
   var id_question = req.body.QID;
   var id_exam=req.body.EID;
   var id_user=req.body.UserID;
-  var answer=req.body.answer;
+  var answer=Number(req.body.answer);
   var exam_course=await Exam.findOne({Exam_ID:id_exam}).select('Exam_Course_ID -_id');
   // var x = (JSON.stringify(exam_course).split(":"));
   // var z= x[1].split('"');
@@ -1381,7 +1381,7 @@ router.post("/SubmitAnswers", async (req, res) => {
   }
   else{
     console.log("The Answer is "+ answer)
-    await StudentTookexam.updateOne(
+    await StudentTookexam.update(
       { StudentTookExam_Exam_ID: id_exam },
       { 
         $set: { 
@@ -1562,7 +1562,7 @@ grade+=Number(y[0])
 }
 }
 var Final = (Number(grade)/Number(TotalGrade))*100;
-await StudentTookexam.updateOne({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID},{StudentTookExam_Grades:Final})
+await StudentTookexam.updateOne({StudentTookExam_Exam_ID: EID,StudentTookExam_Student_ID:UserID,StudentTookExam_Type:Type},{StudentTookExam_Grades:Final})
 var countExams = await Exam.find({Exam_Course_ID:CourseID}).count().exec();
 var ExamIDs=[];
 await (await Exam.find({Exam_Course_ID:CourseID})).map((Ex) =>{
@@ -1571,8 +1571,8 @@ await (await Exam.find({Exam_Course_ID:CourseID})).map((Ex) =>{
 var progressPerExam = 100/countExams;
 var progress =0;
 while (ExamIDs.length>0){
-  await (await StudentTookexam.find({StudentTookExam_Exam_ID:ExamIDs.pop()})).map((Ex)=>{
-    if(Final>=50)
+  await (await StudentTookexam.find({StudentTookExam_Exam_ID:ExamIDs.pop(),StudentTookExam_Student_ID:UserID,StudentTookExam_Type:Type})).map((Ex)=>{
+    if(Ex.StudentTookExam_Grades>=50)
     progress+=progressPerExam;
   })
 }
