@@ -771,6 +771,7 @@ router.post("/viewCourse/:id", async (req, res) => {
   for(let i = 0; i < Course_Subtitle.length; i++)
   {
     var tempVideo = [];
+    console.log("HELLO: " + Course_Subtitle)
     subtitleTemp = await Subtitle.find({Subtitle_ID: Course_Subtitle[i]},'-_id');
     //console.log(subtitleTemp);
     var {Subtitle_Video} = subtitleTemp[0];
@@ -790,6 +791,7 @@ router.post("/viewCourse/:id", async (req, res) => {
       tempVideo[j] = Videos;
       
     }
+
     videos[i] = tempVideo;
     const subtitleObj = {
       Subtitle_ID: subtitleTemp[0].Subtitle_ID,
@@ -875,6 +877,8 @@ router.post("/viewMyCourse/:id", async (req, res) => {
   var id = req.params.id;
   var userId = req.body.UserID
   var type = req.body.type
+  var hours=0;
+
   var courseID;
   var progress;
   await (await StudentTakeCourse.find({StudentTakeCourse_StudentID:userId,StudentTakeCourse_Type:type,StudentTakeCourse_CourseID:id})).map((ex) => 
@@ -900,6 +904,8 @@ router.post("/viewMyCourse/:id", async (req, res) => {
       
       //console.log(Subtitle_Video[j]);
       var videosTemp= await Video.find({Video_ID: Subtitle_Video[j]},'-_id');
+      hours=hours+Number(videosTemp[0].Video_Length);
+
       const Videos = {
           Video_ID: videosTemp[0].Video_ID,
           Video_Link: videosTemp[0].Video_Link,
@@ -991,7 +997,6 @@ router.post("/viewMyCourse/:id", async (req, res) => {
     //   Instructor_FirstName: instructor.Instructor_FirstName,
     //   Instructor_LastName: instructor.Instructor_LastName
     // },
-    Course_Hours: courses[0].Course_Hours,
     Course_Country: courses[0].Course_Country,
     Course_Discount: courses[0].Course_Discount,
     Course_Discount_Duration: courses[0].Course_Discount_Duration,
@@ -1000,7 +1005,9 @@ router.post("/viewMyCourse/:id", async (req, res) => {
     Course_Review: courses[0].Course_Review,
     Course_Rate: courses[0].Course_Rate,
     Course_Exam: ExamObj,
-    Course_Progress:progress
+    Course_Progress:progress,
+        Course_Hours:Math.floor(hours/60)
+
   };
   //console.log(Course.Course_ID);
   //console.log(courses[0].Course_Trainee.length);
@@ -1201,7 +1208,6 @@ router.post("/createSubtitle", async (req, res) => {
         $push: { 
           Course_Subtitle: {
               $each: [ id ],
-              $position: 0
            }
          } 
        }).exec()
