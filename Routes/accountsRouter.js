@@ -663,13 +663,7 @@ router.post('/sendCertificate', async (req,res)=>{
     var CourseID = req.body.courseId;
     var UserID = req.body.userid;
     var Type = req.body.Type;
-    var flag = true;
-
-   await (await StudentTakeCourse.find({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})).map((co)=>{
-    console.log(co.StudentTakeCourse_Certificate)
-    flag =co.StudentTakeCourse_Certificate
-   })
-   if (flag ==false){
+    console.log(UserID)
     await (await (course.find({Course_ID:CourseID}))).map((co)=>{
       y = co.Course_Title+ " Certificate";
   })
@@ -682,7 +676,10 @@ router.post('/sendCertificate', async (req,res)=>{
       await (await corp.find({CorporateUser_ID:UserID})).map((co) => {
         email=co.CorporateUser_Email})
     }
-      await sendCertificate(email,y, "Congratulations on completing the course!!");
+    console.log(email)
+    await sendCertificate(email,y, "Congratulations on completing the course!!");
+       
+      
    // await StudentTakeCourse.remove({StudentTakeCourse_CourseID:CourseID,StudentTakeCourse_StudentID:UserID,StudentTakeCourse_Type:Type})
    /* var ExamIDS=[];
     await (await Exam.find({Exam_Course_ID:CourseID})).map((Ex)=>{
@@ -691,8 +688,7 @@ router.post('/sendCertificate', async (req,res)=>{
     for(var i =0; i<ExamIDS.length;i++){
       await StudentTookexam.remove({StudentTookExam_Exam_ID:ExamIDS[i],StudentTookExam_Student_ID:UserID,StudentTookExam_Type:Type})
     }*/
-    flag == true;
-   }
+    
   
       res.send('done')
   
