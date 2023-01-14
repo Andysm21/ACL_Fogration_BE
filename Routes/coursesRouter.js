@@ -757,10 +757,15 @@ router.post("/viewCourse/:id", async (req, res) => {
   console.log(req.params)
   var hours=0;
   const ID= req.params.id
-  var views = await course.find({Course_ID: Number(ID)}).select('Course_Views -_id');
-  var viewsNum= JSON.stringify(views).split(":")
-  var viewsFinal= viewsNum[1].split("}")
-  await course.updateOne({Course_ID: Number(ID)},{Course_Views : (Number(viewsFinal[0]) +1)})
+  var views = await course.findOne({Course_ID: Number(ID)}).select('Course_Views -_id');
+  var x= JSON.stringify(views)
+  console.log(123,x)
+  x=x.split(":")
+  x=x[1].split("{")
+  x=x[0].split("}")
+  x=Number(x[0])+1
+  
+  await course.updateOne({Course_ID: Number(ID)},{Course_Views : (x)})
   // var test =ID.split(":")
   // console.log(test)
   const courses = await course.find({Course_ID: Number(ID)},'-_id');
