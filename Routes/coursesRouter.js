@@ -754,7 +754,14 @@ router.get("/viewCourses", async (req, res) => {
 
 //Salma's Single Course Method
 router.post("/viewCourse/:id", async (req, res) => {
-  console.log(req.params)
+
+  if(req.params.id=="null"){ 
+    console.log("Moshkela")
+  }
+  else{
+    console.log("TEST")
+    console.log(req.params.id)
+    console.log(req.params.id=="null")
   var hours=0;
   const ID= req.params.id
   var views = await course.findOne({Course_ID: Number(ID)}).select('Course_Views -_id');
@@ -874,7 +881,7 @@ router.post("/viewCourse/:id", async (req, res) => {
   //console.log(courses[0].Course_Trainee.length);
   res.send(CourseT);
   console.log("HI")
-
+}
 })
 
 //view course with progress and exam grade
@@ -883,7 +890,10 @@ router.post("/viewMyCourse/:id", async (req, res) => {
   var userId = req.body.UserID
   var type = req.body.type
   var hours=0;
-
+  if(req.params.id=="null"){ 
+    console.log("Moshkela")
+  }
+  else{
   var courseID;
   var progress;
   await (await StudentTakeCourse.find({StudentTakeCourse_StudentID:userId,StudentTakeCourse_Type:type,StudentTakeCourse_CourseID:id})).map((ex) => 
@@ -1021,7 +1031,7 @@ router.post("/viewMyCourse/:id", async (req, res) => {
   // console.log(CourseT)
 
 res.send(CourseT)
-
+  }
 })
 
 //DONE 3ANDY All Courses For Guest/Individual/Instructor by Andrew
