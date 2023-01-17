@@ -11,6 +11,31 @@ const Problem = require('../Schemas/Problem.js');
 const CorpRequest = require('../Schemas/CorpRequest.js');
 const Instructor = require("../Schemas/Instructor.js");
 const RefundRequest = require('../Schemas/RefundRequest.js');
+const review = require('../Schemas/StudentMadeReview.js');
+
+async function updateReview(p1){
+    await review.updateOne({
+        StudentMadeReview_StudentID: p1.body.id}, {StudentMadeReview_Review: p1.body.Review})
+}
+
+async function createReview(p1, id){
+    await review.create({
+        StudentMadeReview_ID: id,
+        
+        StudentMadeReview_StudentID: p1.body.StudentID,
+        
+        StudentMadeReview_CourseID: p1.body.CourseID,
+    
+        StudentMadeReview_Type: p1.body.Type,
+    
+        StudentMadeReview_Review: p1.body.Review
+    })
+}
+
+async function deleteReview(id){
+   await review.deleteOne({StudentMadeReview_StudentID: id})
+}
+
 
 function createSubtitle(p1, id) {
     Subtitle.create({
@@ -373,5 +398,8 @@ module.exports = {
     SearchCourseTitle, SearchCourseSubject, SearchCourseIntrsuctor,
     createCorpStudentTakeCourse,
     createRefundRequest,
-    createFollowUP
+    createFollowUP,
+    createReview,
+    updateReview,
+    deleteReview
 }

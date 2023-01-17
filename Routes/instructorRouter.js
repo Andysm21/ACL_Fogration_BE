@@ -711,7 +711,7 @@ router.post("/instructorProfile", async (req,res)=>{
 router.post("/instructorAccount", async (req,res)=>{
   var Inst_ID= req.body.Instructor_ID
   //console.log(Inst_ID);
-  const instructor = await Instructor.find({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Counrty Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Courses Instructor_Reviews  -_id')
+  const instructor = await Instructor.find({Instructor_ID:Inst_ID}).select('Instructor_ID Instructor_username Instructor_Password Instructor_Email Instructor_FirstName Instructor_LastName Instructor_Gender Instructor_Country Instructor_Counrty Instructor_Biography Instructor_Ratings Instructor_Courses Instructor_Reviews  -_id')
   //console.log(instructor);
   var {Instructor_Courses} = instructor[0];
   var courses = []
@@ -738,7 +738,7 @@ router.post("/instructorAccount", async (req,res)=>{
     Instructor_FirstName: instructor[0].Instructor_FirstName,
     Instructor_LastName: instructor[0].Instructor_LastName,
     Instructor_Gender: instructor[0].Instructor_Gender,
-    Instructor_Counrty: instructor[0].Instructor_Counrty,
+    Instructor_Country: instructor[0].Instructor_Country,
     Instructor_Biography: instructor[0].Instructor_Biography,
     Instructor_Ratings: instructor[0].Instructor_Ratings, 
     Instructor_Courses: courses,
