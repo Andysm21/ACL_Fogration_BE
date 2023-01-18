@@ -21,8 +21,40 @@ const Problem = require('../Schemas/Problem.js');
 const CorpRequest = require('../Schemas/CorpRequest.js');
 const RefundRequest = require('../Schemas/RefundRequest.js');
 const sendCertificate = require("../utils/sendCertificate");
-
+const review = require('../Schemas/StudentMadeReview.js');
 const { array } = require('joi');
+
+
+router.post("/createReview", async (req, res) => {
+  var id = await review.count().exec() + 1;
+  courseRouter.createReview(req, id);
+  res.send("Created");
+});
+
+router.post("/updateReview", async (req, res) => {
+  courseRouter.updateReview(req);
+  res.send("Updated");
+});
+
+router.post("/deleteReview", async (req, res) => {
+  courseRouter.deleteReview(req.body.id);
+  res.send("Deleted");
+});
+
+router.post("/getReviewCourse", async (req, res) => {
+  const reviews = await review.find({StudentMadeReview_CourseID: req.body.CourseID});
+  res.send(reviews);
+});
+
+
+router.post("/getReviewInstructor", async (req, res) => {
+  const reviews = await review.find({StudentMadeReview_InstructorID: req.body.InstructorID});
+  res.send(reviews);
+});
+
+
+
+
 
 //to be changed later
 
@@ -842,6 +874,9 @@ router.post("/viewCourse/:id", async (req, res) => {
     //instructor = instructor[0];
 
     //console.log(instructor);
+    
+    console.log(await course.updateOne({ Course_ID: courses[0].Course_ID } , {Course_Hours: Math.ceil(hours/60)}))
+
     const CourseT = {
       Course_ID: courses[0].Course_ID,
       Course_Title: courses[0].Course_Title,
@@ -865,7 +900,7 @@ router.post("/viewCourse/:id", async (req, res) => {
       Course_Exam: ExamObj,
       Course_Video_Preview: courses[0].Course_Video_Preview,
       Course_Views: courses[0].Course_Views,
-      Course_Hours: Math.floor(hours / 60)
+      Course_Hours: Math.ceil(hours/60)
     };
     //console.log(Course.Course_ID);
     //console.log(courses[0].Course_Trainee.length);
@@ -1958,7 +1993,7 @@ router.post('/getCoursePrice', async (req, res) => {
 })
 
 // 14 view the most viewed/ most popular courses
-router.post('/mostViewedCourses', async (req, res) => {
+router.get('/mostViewedCourses', async (req, res) => {
   var maxViews = 0;
   await (await course.find()).map((co) => {
     if (co.Course_Views >= maxViews) {
@@ -1969,7 +2004,7 @@ router.post('/mostViewedCourses', async (req, res) => {
   //get courseIDs
   var ArrayOfCIDS = [];
   var count = 0;
-  while (maxViews >= 0 && count < 5) {
+  while (maxViews >= 0 && count < 4) {
     await (await course.find()).map((co) => {
       if (co.Course_Views == maxViews) {
         ArrayOfCIDS.push(co.Course_ID)
