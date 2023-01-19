@@ -1993,7 +1993,7 @@ router.post('/getCoursePrice', async (req, res) => {
 })
 
 // 14 view the most viewed/ most popular courses
-router.get('/mostViewedCourses', async (req, res) => {
+router.post('/mostViewedCourses', async (req, res) => {
   var maxViews = 0;
   await (await course.find()).map((co) => {
     if (co.Course_Views >= maxViews) {
